@@ -1,31 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
-class MapScreen extends StatelessWidget {
+class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
+
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  MapController controller = MapController(
+    useExternalTracking: true,
+    initMapWithUserPosition: UserTrackingOption(
+      enableTracking: false,
+      unFollowUser: false,
+    ),
+  );
+
+  Future<void> resetToCurrentLocation() async {
+    await controller.disabledTracking();
+    await controller.currentLocation();
+  }
+
+  @override
+  void initState() {
+    resetToCurrentLocation();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    MapController controller = MapController(
-      initPosition: GeoPoint(latitude: 47.4358055, longitude: 8.4737324),
-      areaLimit: const BoundingBox(
-        east: 10.4922941,
-        north: 47.8084648,
-        south: 45.817995,
-        west: 5.9559113,
-      ),
-    );
-
-    return Scaffold(
-      appBar: AppBar(title: Text('MapScreen')),
-      body: OSMFlutter(
+    return Container(
+      child: OSMFlutter(
         controller: controller,
         osmOption: OSMOption(
-          userTrackingOption: const UserTrackingOption(
-            enableTracking: true,
-            unFollowUser: false,
-          ),
           zoomOption: const ZoomOption(
-            initZoom: 8,
+            initZoom: 3,
             minZoomLevel: 3,
             maxZoomLevel: 19,
             stepZoom: 1.0,
@@ -42,7 +58,7 @@ class MapScreen extends StatelessWidget {
               icon: Icon(Icons.double_arrow, size: 48),
             ),
           ),
-          roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
+          roadConfiguration: const RoadOption(roadColor: Colors.red),
         ),
       ),
     );
