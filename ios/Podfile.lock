@@ -1,5 +1,4 @@
 PODS:
-  - Alamofire (5.11.0)
   - background_location_tracker (0.0.1):
     - Flutter
   - Firebase/Auth (12.6.0):
@@ -36,12 +35,9 @@ PODS:
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_osm_plugin (0.0.1):
-    - Alamofire
+  - geolocator_apple (1.2.0):
     - Flutter
-    - OSMFlutterFramework
-    - Polyline
-    - Yams
+    - FlutterMacOS
   - GoogleUtilities/AppDelegateSwizzler (8.1.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -64,16 +60,17 @@ PODS:
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GTMSessionFetcher/Core (5.0.0)
-  - OSMFlutterFramework (0.8.4)
   - package_info_plus (0.4.5):
     - Flutter
   - permission_handler_apple (9.3.0):
     - Flutter
-  - Polyline (5.1.0)
   - RecaptchaInterop (101.0.0)
-  - url_launcher_ios (0.0.1):
+  - shared_preferences_foundation (0.0.1):
     - Flutter
-  - Yams (5.0.6)
+    - FlutterMacOS
+  - sqflite_darwin (0.0.4):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - background_location_tracker (from `.symlinks/plugins/background_location_tracker/ios`)
@@ -81,14 +78,14 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
-  - flutter_osm_plugin (from `.symlinks/plugins/flutter_osm_plugin/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
 
 SPEC REPOS:
   trunk:
-    - Alamofire
     - Firebase
     - FirebaseAppCheckInterop
     - FirebaseAuth
@@ -98,10 +95,7 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - GoogleUtilities
     - GTMSessionFetcher
-    - OSMFlutterFramework
-    - Polyline
     - RecaptchaInterop
-    - Yams
 
 EXTERNAL SOURCES:
   background_location_tracker:
@@ -114,17 +108,18 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
-  flutter_osm_plugin:
-    :path: ".symlinks/plugins/flutter_osm_plugin/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/darwin"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
-  url_launcher_ios:
-    :path: ".symlinks/plugins/url_launcher_ios/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sqflite_darwin:
+    :path: ".symlinks/plugins/sqflite_darwin/darwin"
 
 SPEC CHECKSUMS:
-  Alamofire: bd5e7b23a1a750975288482c1831d71e74415f86
   background_location_tracker: b8f5e416a4a2de95e6919f76e8b4e670c4086444
   Firebase: a451a7b61536298fd5cbfe3a746fd40443a50679
   firebase_auth: f547a06ed4933a1da2b9ac8d8c64ae09d113c8e1
@@ -137,17 +132,15 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 69bf1306a05b8ac43004f6cc1f804bb7b05b229e
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
-  flutter_osm_plugin: 3fb57665b32a81fcffa57c6206658d3a0d0d1a96
+  geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMSessionFetcher: 02d6e866e90bc236f48a703a041dfe43e6221a29
-  OSMFlutterFramework: 2f1260ac2854d3398b92403f2d5e012b4ca2c620
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  Polyline: 2a1f29f87f8d9b7de868940f4f76deb8c678a5b1
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
-  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
-  Yams: e10dae147f517ed57ecae37c5e8681bdf8fcab65
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
-PODFILE CHECKSUM: 53a6aebc29ccee84c41f92f409fc20cd4ca011f1
+PODFILE CHECKSUM: 90efc3542e3ce846118a19add807ffc0214bd21f
 
 COCOAPODS: 1.16.2

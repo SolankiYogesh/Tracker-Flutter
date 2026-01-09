@@ -1,19 +1,20 @@
+import 'dart:ui';
+
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tracker/screens/permission_screen.dart';
 import 'package:tracker/services/repo.dart';
 import 'package:tracker/services/notification.dart';
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 
 @pragma('vm:entry-point')
 void backgroundCallback() {
-  BackgroundLocationTrackerManager.handleBackgroundUpdated(
-    (data) async {
-      if (data.horizontalAccuracy < 50) {
-        await Repo().update(data);
-      }
-    },
-  );
+  BackgroundLocationTrackerManager.handleBackgroundUpdated((data) async {
+    if (data.horizontalAccuracy < 50) {
+      await Repo().update(data);
+    }
+  });
 }
 
 Future<void> main() async {
@@ -37,38 +38,28 @@ Future<void> main() async {
       ),
     ),
   );
-  runApp(const TrackerApp());
+  runApp(TrackerApp());
 }
 
-class TrackerApp extends StatefulWidget {
-  const TrackerApp({super.key});
-
-  @override
-  State<TrackerApp> createState() => _TrackerAppState();
-}
-
-class _TrackerAppState extends State<TrackerApp> {
-  final ValueNotifier<ThemeMode> _themeNotifier = ValueNotifier(ThemeMode.light);
-
+class TrackerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: _themeNotifier,
-      builder: (context, themeMode, child) {
+    final isPlatformDark =
+        PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+    final initTheme = isPlatformDark
+        ? ThemeData.dark(useMaterial3: true)
+        : ThemeData.light(useMaterial3: true);
+    return ThemeProvider(
+      initTheme: initTheme,
+      builder: (_, myTheme) {
         return MaterialApp(
           title: 'Tracker',
-          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-          darkTheme: ThemeData.dark(),
-          themeMode: themeMode,
-          home: PermissionScreen(themeNotifier: _themeNotifier),
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          ),
+          home: const PermissionScreen(),
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _themeNotifier.dispose();
-    super.dispose();
   }
 }

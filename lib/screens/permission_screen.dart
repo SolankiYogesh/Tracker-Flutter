@@ -1,18 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tracker/screens/main_navigation_screen.dart';
 import 'package:geolocator/geolocator.dart';
 
 class PermissionScreen extends StatefulWidget {
-  final ValueNotifier<ThemeMode> themeNotifier;
-
-  const PermissionScreen({super.key, required this.themeNotifier});
+  const PermissionScreen({super.key});
 
   @override
   State<PermissionScreen> createState() => _PermissionScreenState();
 }
 
-class _PermissionScreenState extends State<PermissionScreen> with WidgetsBindingObserver {
+class _PermissionScreenState extends State<PermissionScreen>
+    with WidgetsBindingObserver {
   bool _isLoading = false;
 
   // Track status of each required permission
@@ -70,7 +71,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     if (!_locationStatus.isGranted) {
       await _requestPermission(Permission.location);
     }
-    
+
     // 2. Background Location (Only if location is granted)
     // We need to re-check location status because _requestPermission updates it
     if (_locationStatus.isGranted && !_backgroundLocationStatus.isGranted) {
@@ -78,7 +79,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     }
 
     // 3. Activity
-    if (!_activityStatus.isGranted) {
+    if (!_activityStatus.isGranted && Platform.isAndroid) {
       await _requestPermission(Permission.activityRecognition);
     }
 
@@ -90,7 +91,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
 
   void _checkAllGranted() {
     // Note: Background location might be "denied" if "whileInUse" is granted on some Android versions until upgraded.
-    // Logic: 
+    // Logic:
     // - Foreground: Must be granted.
     // - Background: Must be granted for "perfect track".
     // - Activity: Must be granted.
@@ -98,20 +99,21 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
 
     // On iOS, background location logic is different, usually handled by "Always" request.
     // Simplification for this task: Check if all are "granted".
-    
+
     // PermissionStatus.granted or PermissionStatus.limited (iOS) are usually acceptable.
-    bool allGranted = 
+    bool allGranted =
         (_locationStatus.isGranted || _locationStatus.isLimited) &&
-        (_backgroundLocationStatus.isGranted || _backgroundLocationStatus.isLimited) &&
-        (_activityStatus.isGranted || _activityStatus.isLimited) &&
+        (_backgroundLocationStatus.isGranted ||
+            _backgroundLocationStatus.isLimited) &&
+        (Platform.isIOS
+            ? true
+            : _activityStatus.isGranted || _activityStatus.isLimited) &&
         (_notificationStatus.isGranted || _notificationStatus.isLimited) &&
         _isLocationServiceEnabled;
 
     if (allGranted && mounted) {
-       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => MainNavigationScreen(themeNotifier: widget.themeNotifier),
-        ),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
       );
     }
   }
@@ -121,8 +123,10 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     if (permission == Permission.locationAlways) {
       if (!_locationStatus.isGranted) {
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please grant "Location Access" first.')),
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please grant "Location Access" first.'),
+            ),
           );
         }
         return;
@@ -130,7 +134,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     }
 
     final status = await permission.request();
-    
+
     // If permanently denied, open settings
     if (status.isPermanentlyDenied) {
       await openAppSettings();
@@ -155,7 +159,10 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -166,7 +173,9 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: accentColor.withValues(alpha: 0.2), // Light circle bg
+                          color: accentColor.withValues(
+                            alpha: 0.2,
+                          ), // Light circle bg
                         ),
                         child: const Icon(
                           Icons.location_on,
@@ -198,13 +207,15 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                       ),
                     ),
                     const SizedBox(height: 40),
-                    
+
                     // Location Service (GPS) Card
                     _buildPermissionCard(
                       icon: Icons.gps_fixed,
                       title: 'Location Services',
-                      subtitle: 'Enable GPS on your device for accurate tracking',
-                      status: PermissionStatus.granted, // Ignored if isDone is provided
+                      subtitle:
+                          'Enable GPS on your device for accurate tracking',
+                      status: PermissionStatus
+                          .granted, // Ignored if isDone is provided
                       isDone: _isLocationServiceEnabled,
                       onGrant: () => Geolocator.openLocationSettings(),
                       cardColor: cardColor,
@@ -227,26 +238,14 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                       subTextColor: subTextColor,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     _buildPermissionCard(
                       icon: Icons.location_searching,
                       title: 'Background Location',
                       subtitle: 'Required to track when app is in\nbackground',
                       status: _backgroundLocationStatus,
-                      onGrant: () => _requestPermission(Permission.locationAlways),
-                      cardColor: cardColor,
-                      accentColor: accentColor,
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    _buildPermissionCard(
-                      icon: Icons.directions_walk,
-                      title: 'Physical Activity',
-                      subtitle: 'Required to count steps and detect\nactivity',
-                      status: _activityStatus,
-                      onGrant: () => _requestPermission(Permission.activityRecognition),
+                      onGrant: () =>
+                          _requestPermission(Permission.locationAlways),
                       cardColor: cardColor,
                       accentColor: accentColor,
                       textColor: textColor,
@@ -255,17 +254,35 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                     const SizedBox(height: 16),
 
                     _buildPermissionCard(
-                      icon: Icons.notifications_active_outlined,
-                      title: 'Notifications',
-                      subtitle: 'Required to show tracking status',
-                      status: _notificationStatus,
-                      onGrant: () => _requestPermission(Permission.notification),
+                      icon: Icons.directions_walk,
+                      title: 'Physical Activity',
+                      subtitle: 'Required to count steps and detect\nactivity',
+                      status: Platform.isAndroid
+                          ? _activityStatus
+                          : PermissionStatus.granted,
+                      onGrant: () =>
+                          _requestPermission(Permission.activityRecognition),
                       cardColor: cardColor,
                       accentColor: accentColor,
                       textColor: textColor,
                       subTextColor: subTextColor,
                     ),
-                     const SizedBox(height: 40),
+
+                    const SizedBox(height: 16),
+
+                    _buildPermissionCard(
+                      icon: Icons.notifications_active_outlined,
+                      title: 'Notifications',
+                      subtitle: 'Required to show tracking status',
+                      status: _notificationStatus,
+                      onGrant: () =>
+                          _requestPermission(Permission.notification),
+                      cardColor: cardColor,
+                      accentColor: accentColor,
+                      textColor: textColor,
+                      subTextColor: subTextColor,
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -312,10 +329,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: subTextColor,
-                  ),
+                  style: TextStyle(fontSize: 12, color: subTextColor),
                 ),
               ],
             ),
@@ -331,7 +345,10 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     elevation: 0,
                   ),
                   child: const Text('Grant'),

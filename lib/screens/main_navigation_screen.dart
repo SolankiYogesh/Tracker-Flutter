@@ -5,9 +5,7 @@ import 'package:tracker/screens/settings_screen.dart';
 import 'package:background_location_tracker/background_location_tracker.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  final ValueNotifier<ThemeMode> themeNotifier;
-
-  const MainNavigationScreen({super.key, required this.themeNotifier});
+  const MainNavigationScreen({super.key});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -22,11 +20,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _startTracking();
-    _screens = [
-      const MapScreen(),
-      const StatsScreen(),
-      SettingsScreen(themeNotifier: widget.themeNotifier),
-    ];
+    _screens = [const MapScreen(), const StatsScreen(), const SettingsScreen()];
   }
 
   Future<void> _startTracking() async {
@@ -41,14 +35,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
