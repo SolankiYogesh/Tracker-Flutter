@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tracker/screens/main_navigation_screen.dart';
+import 'package:geolocator/geolocator.dart';
 
 class PermissionScreen extends StatefulWidget {
   final ValueNotifier<ThemeMode> themeNotifier;
@@ -19,6 +20,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   PermissionStatus _backgroundLocationStatus = PermissionStatus.denied;
   PermissionStatus _activityStatus = PermissionStatus.denied;
   PermissionStatus _notificationStatus = PermissionStatus.denied;
+  bool _isLocationServiceEnabled = false;
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   Future<void> _checkPermissions() async {
     setState(() => _isLoading = true);
 
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     final loc = await Permission.location.status;
     final bgLoc = await Permission.locationAlways.status;
     final activity = await Permission.activityRecognition.status;
@@ -55,6 +58,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
       _activityStatus = activity;
       _notificationStatus = notif;
       _isLoading = false;
+      _isLocationServiceEnabled = serviceEnabled;
     });
 
     _checkAllGranted();
@@ -100,7 +104,8 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
         (_locationStatus.isGranted || _locationStatus.isLimited) &&
         (_backgroundLocationStatus.isGranted || _backgroundLocationStatus.isLimited) &&
         (_activityStatus.isGranted || _activityStatus.isLimited) &&
-        (_notificationStatus.isGranted || _notificationStatus.isLimited);
+        (_notificationStatus.isGranted || _notificationStatus.isLimited) &&
+        _isLocationServiceEnabled;
 
     if (allGranted && mounted) {
        Navigator.of(context).pushReplacement(
@@ -194,6 +199,21 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                     ),
                     const SizedBox(height: 40),
                     
+                    // Location Service (GPS) Card
+                    _buildPermissionCard(
+                      icon: Icons.gps_fixed,
+                      title: 'Location Services',
+                      subtitle: 'Enable GPS on your device for accurate tracking',
+                      status: PermissionStatus.granted, // Ignored if isDone is provided
+                      isDone: _isLocationServiceEnabled,
+                      onGrant: () => Geolocator.openLocationSettings(),
+                      cardColor: cardColor,
+                      accentColor: accentColor,
+                      textColor: textColor,
+                      subTextColor: subTextColor,
+                    ),
+                    const SizedBox(height: 16),
+
                     // Permission Cards
                     _buildPermissionCard(
                       icon: Icons.location_on_outlined,
@@ -263,8 +283,9 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     required Color accentColor,
     required Color textColor,
     required Color subTextColor,
+    bool? isDone,
   }) {
-    final isGranted = status.isGranted || status.isLimited;
+    final isGranted = isDone ?? (status.isGranted || status.isLimited);
 
     return Container(
       padding: const EdgeInsets.all(16),
