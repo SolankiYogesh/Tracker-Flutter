@@ -1,4 +1,5 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationDao {
   static const _locationsKey = 'background_updated_locations';

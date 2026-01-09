@@ -1,4 +1,5 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:tracker/services/notification.dart';
 
 class Repo {
@@ -10,7 +11,9 @@ class Repo {
 
   Future<void> update(BackgroundLocationUpdateData data) async {
     final text = 'Lat: ${data.lat} Lon: ${data.lon}';
-    print(text);
+    if (kDebugMode) {
+      print(text);
+    }
     sendNotification(text);
   }
 }

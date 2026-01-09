@@ -36,31 +36,41 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: OSMFlutter(
-        controller: controller,
-        osmOption: OSMOption(
-          zoomOption: const ZoomOption(
-            initZoom: 3,
-            minZoomLevel: 3,
-            maxZoomLevel: 19,
-            stepZoom: 1.0,
-          ),
-          userLocationMarker: UserLocationMaker(
-            personMarker: const MarkerIcon(
-              icon: Icon(
-                Icons.location_history_rounded,
-                color: Colors.red,
-                size: 48,
+    return Stack(
+      children: [
+        OSMFlutter(
+          controller: controller,
+          osmOption: OSMOption(
+            zoomOption: const ZoomOption(
+              initZoom: 3,
+              minZoomLevel: 3,
+              maxZoomLevel: 19,
+              stepZoom: 1.0,
+            ),
+            userLocationMarker: UserLocationMaker(
+              personMarker: const MarkerIcon(
+                icon: Icon(
+                  Icons.location_history_rounded,
+                  color: Colors.red,
+                  size: 48,
+                ),
+              ),
+              directionArrowMarker: const MarkerIcon(
+                icon: Icon(Icons.album_outlined, size: 48),
               ),
             ),
-            directionArrowMarker: const MarkerIcon(
-              icon: Icon(Icons.double_arrow, size: 48),
-            ),
+            roadConfiguration: const RoadOption(roadColor: Colors.red),
           ),
-          roadConfiguration: const RoadOption(roadColor: Colors.red),
         ),
-      ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: resetToCurrentLocation,
+            child: const Icon(Icons.my_location),
+          ),
+        ),
+      ],
     );
   }
 }

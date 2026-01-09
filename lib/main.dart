@@ -1,7 +1,7 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tracker/screens/map_screen.dart';
+import 'package:tracker/screens/main_navigation_screen.dart';
 import 'package:tracker/services/repo.dart';
 
 @pragma('vm:entry-point')
@@ -33,15 +33,35 @@ Future<void> main() async {
   runApp(const TrackerApp());
 }
 
-class TrackerApp extends StatelessWidget {
+class TrackerApp extends StatefulWidget {
   const TrackerApp({super.key});
 
   @override
+  State<TrackerApp> createState() => _TrackerAppState();
+}
+
+class _TrackerAppState extends State<TrackerApp> {
+  final ValueNotifier<ThemeMode> _themeNotifier = ValueNotifier(ThemeMode.light);
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MapScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeNotifier,
+      builder: (context, themeMode, child) {
+        return MaterialApp(
+          title: 'Tracker',
+          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+          darkTheme: ThemeData.dark(),
+          themeMode: themeMode,
+          home: MainNavigationScreen(themeNotifier: _themeNotifier),
+        );
+      },
     );
+  }
+
+  @override
+  void dispose() {
+    _themeNotifier.dispose();
+    super.dispose();
   }
 }
