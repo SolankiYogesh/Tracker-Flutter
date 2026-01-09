@@ -8,7 +8,11 @@ import 'package:tracker/services/notification.dart';
 @pragma('vm:entry-point')
 void backgroundCallback() {
   BackgroundLocationTrackerManager.handleBackgroundUpdated(
-    (data) async => Repo().update(data),
+    (data) async {
+      if (data.horizontalAccuracy < 50) {
+        await Repo().update(data);
+      }
+    },
   );
 }
 
