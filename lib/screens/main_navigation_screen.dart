@@ -14,13 +14,16 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  late final List<Widget> _screens;
+  final List<Widget> _screens = [
+    const MapScreen(),
+    const StatsScreen(),
+    const SettingsScreen(),
+  ];
 
   @override
   void initState() {
     super.initState();
     _startTracking();
-    _screens = [const MapScreen(), const StatsScreen(), const SettingsScreen()];
   }
 
   Future<void> _startTracking() async {

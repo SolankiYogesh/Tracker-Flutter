@@ -6,18 +6,40 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        children: [
-          SwitchListTile(
-            title: const Text('Dark Theme'),
-            value:
-                ThemeModelInheritedNotifier.of(context).theme.brightness ==
-                Brightness.dark,
-            onChanged: (bool value) {},
-          ),
-        ],
+    var isDarkTheme =
+        ThemeModelInheritedNotifier.of(context).theme.brightness ==
+        Brightness.dark;
+    return ThemeSwitchingArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Settings')),
+        body: ListView(
+          children: [
+            ThemeSwitcher(
+              clipper: const ThemeSwitcherCircleClipper(),
+              builder: (context) {
+                return GestureDetector(
+                  onTapDown: (details) {
+                    ThemeSwitcher.of(context).changeTheme(
+                      theme: isDarkTheme
+                          ? ThemeData.light(useMaterial3: true)
+                          : ThemeData.dark(useMaterial3: true),
+                      offset: details.localPosition,
+                      isReversed: isDarkTheme,
+                    );
+                  },
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    child: SwitchListTile(
+                      title: const Text('Dark Theme'),
+                      value: isDarkTheme,
+                      onChanged: (val) {},
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
