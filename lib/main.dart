@@ -20,12 +20,13 @@ Future<void> main() async {
       loggingEnabled: true,
       androidConfig: AndroidConfig(
         notificationIcon: 'explore',
-        trackingInterval: Duration(seconds: 4),
-        distanceFilterMeters: null,
+        trackingInterval: Duration(seconds: 5), // updateIntervalMs
+        distanceFilterMeters: 5, // smallestDisplacementMeters
+        // fastestTrackingInterval: Duration(seconds: 3), // fastestIntervalMs - Not supported by current plugin
       ),
       iOSConfig: IOSConfig(
         activityType: ActivityType.FITNESS,
-        distanceFilterMeters: null,
+        distanceFilterMeters: 5, // smallestDisplacementMeters
         restartAfterKill: true,
       ),
     ),

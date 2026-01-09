@@ -161,7 +161,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: accentColor.withOpacity(0.2), // Light circle bg
+                          color: accentColor.withValues(alpha: 0.2), // Light circle bg
                         ),
                         child: const Icon(
                           Icons.location_on,

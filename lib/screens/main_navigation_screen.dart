@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker/screens/map_screen.dart';
 import 'package:tracker/screens/stats_screen.dart';
 import 'package:tracker/screens/settings_screen.dart';
+import 'package:background_location_tracker/background_location_tracker.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final ValueNotifier<ThemeMode> themeNotifier;
@@ -20,11 +21,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
+    _startTracking();
     _screens = [
       const MapScreen(),
       const StatsScreen(),
       SettingsScreen(themeNotifier: widget.themeNotifier),
     ];
+  }
+
+  Future<void> _startTracking() async {
+    await BackgroundLocationTrackerManager.startTracking();
   }
 
   @override
