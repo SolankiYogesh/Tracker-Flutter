@@ -1,8 +1,9 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tracker/screens/map_screen.dart';
+import 'package:tracker/screens/permission_screen.dart';
 import 'package:tracker/services/repo.dart';
+import 'package:tracker/services/notification.dart';
 
 @pragma('vm:entry-point')
 void backgroundCallback() {
@@ -14,18 +15,20 @@ void backgroundCallback() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Firebase.initializeApp();
+  await initNotifications();
   await BackgroundLocationTrackerManager.initialize(
     backgroundCallback,
     config: const BackgroundLocationTrackerConfig(
       loggingEnabled: true,
       androidConfig: AndroidConfig(
         notificationIcon: 'explore',
-        trackingInterval: Duration(seconds: 4),
-        distanceFilterMeters: null,
+        notificationBody: 'Tracking your location in background',
+        trackingInterval: Duration(seconds: 5), // updateIntervalMs
+        distanceFilterMeters: 5, // smallestDisplacementMeters
       ),
       iOSConfig: IOSConfig(
         activityType: ActivityType.FITNESS,
-        distanceFilterMeters: null,
+        distanceFilterMeters: 5, // smallestDisplacementMeters
         restartAfterKill: true,
       ),
     ),
@@ -33,15 +36,35 @@ Future<void> main() async {
   runApp(const TrackerApp());
 }
 
-class TrackerApp extends StatelessWidget {
+class TrackerApp extends StatefulWidget {
   const TrackerApp({super.key});
 
   @override
+  State<TrackerApp> createState() => _TrackerAppState();
+}
+
+class _TrackerAppState extends State<TrackerApp> {
+  final ValueNotifier<ThemeMode> _themeNotifier = ValueNotifier(ThemeMode.light);
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MapScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeNotifier,
+      builder: (context, themeMode, child) {
+        return MaterialApp(
+          title: 'Tracker',
+          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+          darkTheme: ThemeData.dark(),
+          themeMode: themeMode,
+          home: PermissionScreen(themeNotifier: _themeNotifier),
+        );
+      },
     );
+  }
+
+  @override
+  void dispose() {
+    _themeNotifier.dispose();
+    super.dispose();
   }
 }

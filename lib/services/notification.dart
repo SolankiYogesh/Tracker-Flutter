@@ -1,23 +1,70 @@
-import 'dart:math';
-
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:background_location_tracker/background_location_tracker.dart';
 
-void sendNotification(String text) {
+// Top-level function for background action handling
+@pragma('vm:entry-point')
+Future<void> notificationTapBackground(NotificationResponse notificationResponse) async {
+  // Needed for plugins to work in background isolate
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  if (notificationResponse.actionId == 'stop_tracking') {
+    try {
+      await BackgroundLocationTrackerManager.stopTracking();
+      await FlutterLocalNotificationsPlugin().cancel(777);
+    } catch (e) {
+    }
+  }
+}
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+Future<void> initNotifications() async {
   const settings = InitializationSettings(
-    android: AndroidInitializationSettings('app_icon'),
+    android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     iOS: DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     ),
   );
-  FlutterLocalNotificationsPlugin().initialize(settings);
-  FlutterLocalNotificationsPlugin().show(
-    Random().nextInt(9999),
-    'Title',
+  
+  await flutterLocalNotificationsPlugin.initialize(
+    settings,
+    onDidReceiveNotificationResponse: (details) async {
+      if (details.actionId == 'stop_tracking') {
+        await BackgroundLocationTrackerManager.stopTracking();
+        await flutterLocalNotificationsPlugin.cancel(777);
+      }
+    },
+    onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+  );
+}
+
+void sendNotification(String text, {String title = 'Tracking Active'}) {
+  // Ensure we don't spam initialization, only show
+  // (Assuming initNotifications is called in main)
+  
+  flutterLocalNotificationsPlugin.show(
+    777, // Fixed ID
+    title,
     text,
     const NotificationDetails(
-      android: AndroidNotificationDetails('test_notification', 'Test'),
+      android: AndroidNotificationDetails(
+        'tracking_channel',
+        'Tracking Updates',
+        importance: Importance.low,
+        priority: Priority.low,
+        ongoing: true,
+        actions: [
+          AndroidNotificationAction(
+            'stop_tracking',
+            'Stop Tracking',
+            showsUserInterface: false, // Don't open app
+            cancelNotification: true, // Dismisses the notification immediately on tap
+          ),
+        ],
+      ),
       iOS: DarwinNotificationDetails(),
     ),
   );
