@@ -10,6 +10,7 @@ import 'package:tracker/services/auth/auth_service.dart';
 import 'package:tracker/services/repo.dart';
 import 'package:tracker/services/notification.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'firebase_options.dart';
 
 @pragma('vm:entry-point')
 void backgroundCallback() {
@@ -22,7 +23,7 @@ void backgroundCallback() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initNotifications();
   await BackgroundLocationTrackerManager.initialize(
     backgroundCallback,

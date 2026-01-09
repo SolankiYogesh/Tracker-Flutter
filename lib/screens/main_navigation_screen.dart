@@ -34,16 +34,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        indicatorColor: const Color.fromARGB(255, 22, 147, 230),
+        selectedIndex: _currentIndex,
+        destinations: const <Widget>[
+          NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
+          NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
+          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );

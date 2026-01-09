@@ -12,7 +12,7 @@ class AuthService {
     if (googleUser == null) {
       throw Exception('Google sign-in aborted');
     }
-    final GoogleSignInAuthentication googleAuth = googleUser!.authentication;
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
     );

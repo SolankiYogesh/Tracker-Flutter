@@ -26,6 +26,19 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>GIDClientID</key>
+	<string>5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Your description why you should use NSLocationAlwaysAndWhenInUseUsageDescription</string>
 	<key>NSLocationAlwaysUsageDescription</key>
