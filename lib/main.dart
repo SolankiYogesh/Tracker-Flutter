@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tracker/screens/permission_screen.dart';
 import 'package:tracker/services/repo.dart';
+import 'package:tracker/services/notification.dart';
 
 @pragma('vm:entry-point')
 void backgroundCallback() {
@@ -14,15 +15,16 @@ void backgroundCallback() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Firebase.initializeApp();
+  await initNotifications();
   await BackgroundLocationTrackerManager.initialize(
     backgroundCallback,
     config: const BackgroundLocationTrackerConfig(
       loggingEnabled: true,
       androidConfig: AndroidConfig(
         notificationIcon: 'explore',
+        notificationBody: 'Tracking your location in background',
         trackingInterval: Duration(seconds: 5), // updateIntervalMs
         distanceFilterMeters: 5, // smallestDisplacementMeters
-        // fastestTrackingInterval: Duration(seconds: 3), // fastestIntervalMs - Not supported by current plugin
       ),
       iOSConfig: IOSConfig(
         activityType: ActivityType.FITNESS,
