@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"tracktor-firebase","appId":"1:5299793812:android:7bf2b0eb91a2479334a981","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"tracktor-firebase","configurations":{"android":"1:5299793812:android:7bf2b0eb91a2479334a981","ios":"1:5299793812:ios:63dd7a5a23ae700e34a981"}}}}}}

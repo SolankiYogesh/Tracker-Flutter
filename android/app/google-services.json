@@ -37,6 +37,13 @@
             {
               "client_id": "5299793812-gilhk7gkjb0rn0ra5e4cma3l9iaes81m.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.baazinfotech.tracktor"
+              }
             }
           ]
         }
