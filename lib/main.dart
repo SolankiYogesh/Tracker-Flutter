@@ -1,7 +1,7 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tracker/screens/main_navigation_screen.dart';
+import 'package:tracker/screens/permission_screen.dart';
 import 'package:tracker/services/repo.dart';
 
 @pragma('vm:entry-point')
@@ -53,7 +53,7 @@ class _TrackerAppState extends State<TrackerApp> {
           theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
           darkTheme: ThemeData.dark(),
           themeMode: themeMode,
-          home: MainNavigationScreen(themeNotifier: _themeNotifier),
+          home: PermissionScreen(themeNotifier: _themeNotifier),
         );
       },
     );
