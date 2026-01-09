@@ -11,7 +11,7 @@ class Repo {
   factory Repo() => _instance ??= Repo._();
 
   Future<void> update(BackgroundLocationUpdateData data) async {
-    final text = 'Lat: ${data.lat} Lon: ${data.lon}';
+    final text = 'Location: ${data.lat.toStringAsFixed(5)}, ${data.lon.toStringAsFixed(5)}';
     if (kDebugMode) {
       print(text);
     }
