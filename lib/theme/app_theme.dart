@@ -9,8 +9,7 @@ class AppTheme {
     colorScheme: ColorScheme.light(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
-      background: AppColors.lightBackground,
-      surface: AppColors.lightSurface,
+      surface: AppColors.lightBackground,
       error: AppColors.error,
     ),
 
@@ -40,12 +39,15 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.lightSurface,
-      indicatorColor: AppColors.primary.withOpacity(0.15),
-      labelTextStyle: MaterialStateProperty.all(
-        const TextStyle(
-          color: AppColors.lightTextPrimary,
-          fontWeight: FontWeight.w600,
-        ),
+      indicatorColor: AppColors.primary.withValues(alpha: .15),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: AppColors.primary);
+        }
+        return const IconThemeData(color: AppColors.lightTextSecondary);
+      }),
+      labelTextStyle: WidgetStateProperty.all(
+        const TextStyle(fontWeight: FontWeight.w600),
       ),
     ),
   );
@@ -57,8 +59,7 @@ class AppTheme {
     colorScheme: ColorScheme.dark(
       primary: AppColors.primary,
       secondary: AppColors.secondary,
-      background: AppColors.darkBackground,
-      surface: AppColors.darkSurface,
+      surface: AppColors.darkBackground,
       error: AppColors.error,
     ),
 
@@ -88,12 +89,15 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.darkSurface,
-      indicatorColor: AppColors.primary.withValues(alpha: .25),
+      indicatorColor: AppColors.primary.withOpacity(0.25),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: AppColors.primary);
+        }
+        return const IconThemeData(color: AppColors.darkTextSecondary);
+      }),
       labelTextStyle: WidgetStateProperty.all(
-        const TextStyle(
-          color: AppColors.darkTextPrimary,
-          fontWeight: FontWeight.w600,
-        ),
+        const TextStyle(fontWeight: FontWeight.w600),
       ),
     ),
   );

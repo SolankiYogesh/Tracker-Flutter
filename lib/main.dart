@@ -4,12 +4,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:tracker/network/repositories/auth_repository.dart';
 import 'package:tracker/network/repositories/user_repository.dart';
+import 'package:tracker/providers/theme_provider.dart';
 import 'package:tracker/services/auth/auth_gate.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/repo.dart';
 import 'package:tracker/services/notification.dart';
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:tracker/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -50,11 +50,16 @@ Future<void> main() async {
   );
   final isDarkTheme = await DatabaseHelper().getIsDarkTheme();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthServiceProvider(
-        auth: AuthRepository(),
-        userRepo: UserRepository(),
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthServiceProvider>(
+          create: (_) => AuthServiceProvider(
+            auth: AuthRepository(),
+            userRepo: UserRepository(),
+          ),
+        ),
+        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+      ],
       child: TrackerApp(isDarkTheme: isDarkTheme),
     ),
   );
@@ -67,20 +72,14 @@ class TrackerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initTheme = isDarkTheme ? AppTheme.darkTheme : AppTheme.lightTheme;
-    return ThemeProvider(
-      duration: Duration(milliseconds: 700),
-      initTheme: initTheme,
-      builder: (_, myTheme) {
-        return MaterialApp(
-          theme: initTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          debugShowCheckedModeBanner: false,
-          title: 'Tracker',
-          home: const AuthGate(),
-        );
-      },
+    final themeProvider = context.watch<ThemeProvider>();
+    return MaterialApp(
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeProvider.themeMode,
+      debugShowCheckedModeBanner: false,
+      title: 'Tracker',
+      home: const AuthGate(),
     );
   }
 }

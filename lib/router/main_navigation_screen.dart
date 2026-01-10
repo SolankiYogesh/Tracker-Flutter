@@ -40,7 +40,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             _currentIndex = index;
           });
         },
-        indicatorColor: const Color.fromARGB(255, 22, 147, 230),
         selectedIndex: _currentIndex,
         destinations: const <Widget>[
           NavigationDestination(icon: Icon(Icons.map), label: 'Map'),

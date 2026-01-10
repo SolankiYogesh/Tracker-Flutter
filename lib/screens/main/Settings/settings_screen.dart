@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:provider/provider.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
-import 'package:tracker/services/database_helper.dart';
-import 'package:tracker/theme/app_theme.dart';
-import 'package:tracker/utils/app_logger.dart';
+import 'package:tracker/providers/theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,20 +11,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool isDarkTheme = false;
-
-  Future<void> initStates() async {
-    final theme = await DatabaseHelper().getIsDarkTheme();
-
-    AppLogger.log("theme ${theme}");
-    setState(() {
-      isDarkTheme = theme;
-    });
-  }
-
   @override
   void initState() {
-    initStates();
     super.initState();
   }
 
@@ -41,18 +26,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> changeTheme(TapDownDetails details, BuildContext context) async {
+  Future<void> changeTheme(BuildContext context) async {
     try {
-      final currentState = isDarkTheme;
-      ThemeSwitcher.of(context).changeTheme(
-        theme: currentState ? AppTheme.lightTheme : AppTheme.darkTheme,
-        offset: details.localPosition,
-        isReversed: isDarkTheme,
-      );
-      setState(() {
-        isDarkTheme = !currentState;
-      });
-      await DatabaseHelper().setIsDarkTheme(!currentState);
+      context.read<ThemeProvider>().toggleTheme();
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -62,63 +38,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ThemeSwitchingArea(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Settings')),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    ThemeSwitcher(
-                      clipper: const ThemeSwitcherCircleClipper(),
-                      builder: (context) {
-                        return GestureDetector(
-                          onTapDown: (details) {
-                            changeTheme(details, context);
-                          },
-                          child: AbsorbPointer(
-                            absorbing: true,
-                            child: SwitchListTile(
-                              title: const Text('Dark Theme'),
-                              value: isDarkTheme,
-                              onChanged: (val) {},
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+    final isDarkTheme = context.watch<ThemeProvider>().isDark;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings')),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  SwitchListTile(
+                    title: const Text('Dark Theme'),
+                    value: isDarkTheme,
+                    onChanged: (val) {
+                      changeTheme(context);
+                    },
+                  ),
+                ],
               ),
+            ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  logOut(context);
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text(
+                  'Logout',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    logOut(context);
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: const Text(
-                    'Logout',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
+                  elevation: 0,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

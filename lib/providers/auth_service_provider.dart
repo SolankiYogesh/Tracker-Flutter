@@ -10,7 +10,7 @@ class AuthServiceProvider extends ChangeNotifier {
   final AuthRepository auth;
   final UserRepository userRepo;
 
-  User? firebaseUser;
+  User? firebaseUser = FirebaseAuth.instance.currentUser;
   UserResponse? appUser;
 
   AuthServiceProvider({required this.auth, required this.userRepo}) {
