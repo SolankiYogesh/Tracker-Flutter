@@ -43,9 +43,8 @@ class _MapScreenState extends State<MapScreen> {
     List<List<LatLng>> segments = [];
     List<LatLng> currentSegment = [];
 
-    // 1. Segment based on 100m gap
     for (int i = 0; i < points.length; i++) {
-      final p = LatLng(points[i].lat, points[i].lon);
+      final p = LatLng(points[i].latitude, points[i].longitude);
 
       if (currentSegment.isEmpty) {
         currentSegment.add(p);
@@ -74,7 +73,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _polylines = smoothedSegments;
       if (points.isNotEmpty) {
-        _currentLocation = LatLng(points.last.lat, points.last.lon);
+        _currentLocation = LatLng(points.last.latitude, points.last.longitude);
 
         // Center map on the user on the very first load
         if (!_hasInitiallyCentered && _currentLocation != null) {
@@ -146,7 +145,7 @@ class _MapScreenState extends State<MapScreen> {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.tracker',
+                userAgentPackageName: 'com.baazinfotech.tracktor',
               ),
               PolylineLayer(
                 polylines: _polylines

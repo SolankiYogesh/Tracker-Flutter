@@ -27,4 +27,16 @@ class UserResponse {
           : null,
     );
   }
+
+  @override
+  String toString() {
+    return 'UserResponse('
+        'id: $id, '
+        'email: $email, '
+        'name: $name, '
+        'picture: $picture, '
+        'createdAt: $createdAt, '
+        'updatedAt: $updatedAt'
+        ')';
+  }
 }

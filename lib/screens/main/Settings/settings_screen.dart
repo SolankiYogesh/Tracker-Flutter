@@ -1,27 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:provider/provider.dart';
-import 'package:tracker/providers/auth_provider.dart';
+import 'package:tracker/providers/auth_service_provider.dart';
+import 'package:tracker/services/database_helper.dart';
+import 'package:tracker/theme/app_theme.dart';
+import 'package:tracker/utils/app_logger.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    var isDarkTheme =
-        ThemeModelInheritedNotifier.of(context).theme.brightness ==
-        Brightness.dark;
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
 
-    Future<void> logOut() async {
-      try {
-        await context.read<AuthProvider>().logout();
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
-      }
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool isDarkTheme = false;
+
+  Future<void> initStates() async {
+    final theme = await DatabaseHelper().getIsDarkTheme();
+
+    AppLogger.log("theme ${theme}");
+    setState(() {
+      isDarkTheme = theme;
+    });
+  }
+
+  @override
+  void initState() {
+    initStates();
+    super.initState();
+  }
+
+  Future<void> logOut(BuildContext context) async {
+    try {
+      await context.read<AuthServiceProvider>().logout();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
+  }
 
+  Future<void> changeTheme(TapDownDetails details, BuildContext context) async {
+    try {
+      final currentState = isDarkTheme;
+      ThemeSwitcher.of(context).changeTheme(
+        theme: currentState ? AppTheme.lightTheme : AppTheme.darkTheme,
+        offset: details.localPosition,
+        isReversed: isDarkTheme,
+      );
+      setState(() {
+        isDarkTheme = !currentState;
+      });
+      await DatabaseHelper().setIsDarkTheme(!currentState);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return ThemeSwitchingArea(
       child: Scaffold(
         appBar: AppBar(title: const Text('Settings')),
@@ -37,13 +77,7 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context) {
                         return GestureDetector(
                           onTapDown: (details) {
-                            ThemeSwitcher.of(context).changeTheme(
-                              theme: isDarkTheme
-                                  ? ThemeData.light(useMaterial3: true)
-                                  : ThemeData.dark(useMaterial3: true),
-                              offset: details.localPosition,
-                              isReversed: isDarkTheme,
-                            );
+                            changeTheme(details, context);
                           },
                           child: AbsorbPointer(
                             absorbing: true,
@@ -67,7 +101,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    logOut();
+                    logOut(context);
                   },
                   icon: const Icon(Icons.logout),
                   label: const Text(

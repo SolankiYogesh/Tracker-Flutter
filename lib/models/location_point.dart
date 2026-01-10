@@ -29,4 +29,29 @@ class LocationPoint {
     if (speed != null) 'speed': speed,
     if (bearing != null) 'bearing': bearing,
   };
+  Map<String, dynamic> toMap() {
+    return {
+      'user_id': userId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'recorded_at': recordedAt.millisecondsSinceEpoch,
+      'accuracy': accuracy,
+      'altitude': altitude,
+      'speed': speed,
+      'bearing': bearing,
+    };
+  }
+
+  factory LocationPoint.fromMap(Map<String, dynamic> map) {
+    return LocationPoint(
+      userId: map['user_id'],
+      latitude: map['latitude'],
+      longitude: map['longitude'],
+      recordedAt: DateTime.fromMillisecondsSinceEpoch(map['recorded_at']),
+      accuracy: map['accuracy'],
+      altitude: map['altitude'],
+      speed: map['speed'],
+      bearing: map['bearing'],
+    );
+  }
 }

@@ -8,7 +8,7 @@ import 'package:tracker/network/dio_client.dart';
 class UserRepository {
   final Dio _dio = DioClient().dio;
 
-  Future<UserResponse> upsertUser(UserCreate user) async {
+  Future<UserResponse> createUser(UserCreate user) async {
     try {
       final res = await _dio.post('/api/v1/users', data: user.toJson());
       return UserResponse.fromJson(res.data);

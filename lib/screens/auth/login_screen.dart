@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sign_button/sign_button.dart';
-import 'package:tracker/providers/auth_provider.dart';
+import 'package:tracker/providers/auth_service_provider.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -10,9 +10,8 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Future<void> loginWithGoogle() async {
       try {
-        await context.read<AuthProvider>().signInWithGoogle();
+        await context.read<AuthServiceProvider>().signInWithGoogle();
       } catch (e) {
-        print(e.toString());
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -20,7 +19,7 @@ class LoginScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('LoginScreen')),
+      appBar: AppBar(title: Text('Login')),
       body: Center(
         child: SignInButton(
           buttonType: ButtonType.google,

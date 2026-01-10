@@ -1,7 +1,9 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:tracker/models/location_point.dart';
 import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/notification.dart';
+import 'package:tracker/utils/app_logger.dart';
 
 class Repo {
   static Repo? _instance;
@@ -11,26 +13,38 @@ class Repo {
   factory Repo() => _instance ??= Repo._();
 
   Future<void> update(BackgroundLocationUpdateData data) async {
-    final text = 'Location: ${data.lat.toStringAsFixed(5)}, ${data.lon.toStringAsFixed(5)}';
+    final user = await DatabaseHelper().getCurrentUser();
+    final text =
+        'Location: ${data.lat.toStringAsFixed(5)}, ${data.lon.toStringAsFixed(5)}';
+    final locationPoint = LocationPoint(
+      latitude: data.lat,
+      longitude: data.lon,
+      recordedAt: DateTime.now(),
+      accuracy: data.horizontalAccuracy,
+      altitude: data.alt,
+      bearing: data.course,
+      speed: data.speed,
+      userId: user!.id,
+    );
     if (kDebugMode) {
-      print(text);
+      AppLogger.log(
+        'New LocationPoint: ${_locationPointToString(locationPoint)}',
+      );
     }
-    
-    // We treat the current time as the session ID for now, or use a fixed one.
-    // Ideally, we'd want a way to distinguish sessions. 
-    // For this requirements, let's just use a single session or day-based session?
-    // User said "Same color for session". 
-    // Let's use 0 as default session for now, or maybe day-start timestamp.
-    // Actually, let's just use 1 for now as the "continuously running" session.
-    // The visualization will handle the 100m gaps.
-    
-    await DatabaseHelper().insertLocation(LocationPoint(
-      lat: data.lat,
-      lon: data.lon,
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-      sessionId: 1, // Default session
-    ));
-    
+
     sendNotification(text);
   }
+}
+
+String _locationPointToString(LocationPoint point) {
+  return '''
+  userId: ${point.userId},
+  lat: ${point.latitude.toStringAsFixed(5)},
+  lon: ${point.longitude.toStringAsFixed(5)},
+  accuracy: ${point.accuracy},
+  altitude: ${point.altitude},
+  speed: ${point.speed},
+  bearing: ${point.bearing},
+  recordedAt: ${point.recordedAt.toIso8601String()}
+  ''';
 }
