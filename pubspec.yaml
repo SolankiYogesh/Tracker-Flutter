@@ -51,6 +51,8 @@ dependencies:
   provider: ^6.1.5+1
   flutter_dotenv: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  dio: ^5.9.0
+  pretty_dio_logger: ^1.4.0
 
 dev_dependencies:
   flutter_test:

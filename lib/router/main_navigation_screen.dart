@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/screens/map_screen.dart';
-import 'package:tracker/screens/stats_screen.dart';
-import 'package:tracker/screens/settings_screen.dart';
+import 'package:tracker/screens/main/Maps/map_screen.dart';
+import 'package:tracker/screens/main/Stats/stats_screen.dart';
+import 'package:tracker/screens/main/Settings/settings_screen.dart';
 import 'package:background_location_tracker/background_location_tracker.dart';
 
 class MainNavigationScreen extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tracker/screens/main_navigation_screen.dart';
+import 'package:tracker/router/main_navigation_screen.dart';
 import 'package:geolocator/geolocator.dart';
 
 class PermissionScreen extends StatefulWidget {

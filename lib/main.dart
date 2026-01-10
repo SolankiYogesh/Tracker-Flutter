@@ -4,9 +4,9 @@ import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:tracker/network/repositories/auth_repository.dart';
 import 'package:tracker/services/auth/auth_gate.dart';
-import 'package:tracker/services/auth/auth_provider.dart';
-import 'package:tracker/services/auth/auth_service.dart';
+import 'package:tracker/providers/auth_provider.dart';
 import 'package:tracker/services/repo.dart';
 import 'package:tracker/services/notification.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
@@ -46,7 +46,7 @@ Future<void> main() async {
   );
   runApp(
     ChangeNotifierProvider(
-      create: (_) => AuthProvider(AuthService()),
+      create: (_) => AuthProvider(AuthRepository()),
       child: TrackerApp(),
     ),
   );

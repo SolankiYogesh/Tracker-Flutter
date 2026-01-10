@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'auth_service.dart';
+import 'package:tracker/network/repositories/auth_repository.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService;
+  final AuthRepository auth;
   User? user;
 
-  AuthProvider(this._authService) {
-    _authService.authStateChanges.listen((user) {
+  AuthProvider(this.auth) {
+    auth.authStateChanges.listen((user) {
       this.user = user;
       notifyListeners();
     });
@@ -16,10 +16,10 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => user != null;
 
   Future<void> signInWithGoogle() async {
-    await _authService.signInWithGoogle();
+    await auth.signInWithGoogle();
   }
 
   Future<void> logout() async {
-    await _authService.signOut();
+    await auth.signOut();
   }
 }
