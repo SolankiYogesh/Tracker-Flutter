@@ -11,6 +11,7 @@ import 'package:tracker/services/repo.dart';
 import 'package:tracker/services/notification.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 @pragma('vm:entry-point')
 void backgroundCallback() {
@@ -23,6 +24,7 @@ void backgroundCallback() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initNotifications();
   await BackgroundLocationTrackerManager.initialize(
