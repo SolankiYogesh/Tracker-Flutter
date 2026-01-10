@@ -39,12 +39,17 @@ class DatabaseHelper {
         accuracy REAL,
         altitude REAL,
         speed REAL,
-        bearing REAL
+        bearing REAL,
+        is_synced INTEGER DEFAULT 0
       )
     ''');
 
     await db.execute('''
       CREATE INDEX idx_locations_user_time ON $LOCATION_TABLE(user_id, recorded_at)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_locations_synced ON $LOCATION_TABLE(is_synced)
     ''');
 
     await db.execute('''
@@ -127,6 +132,33 @@ class DatabaseHelper {
   Future<int> insertLocation(LocationPoint location) async {
     final db = await database;
     return await db.insert(LOCATION_TABLE, location.toMap());
+  }
+
+  Future<List<LocationPoint>> getUnsyncedLocations() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      LOCATION_TABLE,
+      where: 'is_synced = ?',
+      whereArgs: [0],
+      orderBy: 'recorded_at ASC',
+    );
+    return List.generate(maps.length, (i) => LocationPoint.fromMap(maps[i]));
+  }
+
+  Future<void> markLocationsAsSynced(List<int> ids) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      for (final id in ids) {
+        batch.update(
+          LOCATION_TABLE,
+          {'is_synced': 1},
+          where: 'recorded_at = ?', // Using recorded_at as unique identifier since we don't have ID in model
+          whereArgs: [id],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
   }
 
   Future<List<LocationPoint>> getLocations({String? userId}) async {

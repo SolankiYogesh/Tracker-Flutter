@@ -19,6 +19,7 @@ final repo = Repo();
 @pragma('vm:entry-point')
 void backgroundCallback() {
   BackgroundLocationTrackerManager.handleBackgroundUpdated((data) async {
+    await dotenv.load(); // Initialize for background isolate
     if (data.horizontalAccuracy < 50) {
       await repo.update(data);
     }
