@@ -15,6 +15,7 @@ import 'package:tracker/theme/app_theme.dart';
 import 'package:tracker/utils/talker.dart';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tracker/router/app_router.dart';
 
 final repo = Repo();
 
@@ -83,7 +84,8 @@ class TrackerApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       title: 'Tracker',
-      home: const AuthGate(),
+      initialRoute: AppRouter.root,
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
 import 'package:tracker/screens/main/Settings/widgets/setting_profile_card.dart';
 import 'package:tracker/screens/main/Settings/widgets/setting_section.dart';
 import 'package:tracker/theme/app_colors.dart';
+import 'package:tracker/router/app_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -140,11 +141,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
 
-                    // Privacy & Security Section
                     SettingSection(
                       title: 'Privacy & Security',
                       icon: Icons.security,
                       children: [
+                        SettingItem(
+                          title: 'Privacy & Security Settings',
+                          subtitle: 'Manage your account security',
+                          trailing: Icon(
+                            Icons.chevron_right,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .color!
+                                .withValues(alpha: .5),
+                          ),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.privacySecurity,
+                            );
+                          },
+                          leadingIcon: Icons.security_outlined,
+                        ),
+                        Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: .3),
+                          indent: 64,
+                        ),
                         SettingItem(
                           title: 'Privacy Mode',
                           subtitle: 'Hide sensitive information',
@@ -211,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 .withValues(alpha: .5),
                           ),
                           onTap: () {
-                            // Navigate to data management screen
+                            Navigator.pushNamed(context, AppRouter.dataStorage);
                           },
                           leadingIcon: Icons.storage,
                         ),
@@ -235,7 +262,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 .withValues(alpha: .5),
                           ),
                           onTap: () {
-                            // Navigate to help screen
+                            Navigator.pushNamed(context, AppRouter.helpSupport);
                           },
                           leadingIcon: Icons.help_center,
                         ),
@@ -259,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 .withValues(alpha: .5),
                           ),
                           onTap: () {
-                            // Navigate to about screen
+                            Navigator.pushNamed(context, AppRouter.about);
                           },
                           leadingIcon: Icons.info,
                         ),

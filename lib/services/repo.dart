@@ -87,16 +87,13 @@ class Repo {
       }
 
       if (lastUpdateRecord != null) {
-        final LocationPoint lastSyncItem = unsyncedLocations.elementAt(
-          unsyncedLocations.length - 1,
-        );
-
-        final distance = const Distance().as(
+        final lastSyncItem = unsyncedLocations.last;
+        final distance = Distance().as(
           LengthUnit.Meter,
           LatLng(lastUpdateRecord!.lat, lastUpdateRecord!.lon),
           LatLng(lastSyncItem.latitude, lastSyncItem.longitude),
         );
-
+    AppLogger.log('Distance: $distance');
         if (distance < 7) {
           _isSyncing = false;
           return;

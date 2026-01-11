@@ -11,10 +11,10 @@ class PermissionCard extends StatelessWidget {
   final Color textColor;
   final IconData icon;
   final Color subTextColor;
-  final bool? isDone = false;
-  PermissionCard({
+  final bool? isDone;
+  const PermissionCard({
     super.key,
-    bool? isDone,
+    this.isDone,
     required this.title,
     required this.subtitle,
     required this.status,

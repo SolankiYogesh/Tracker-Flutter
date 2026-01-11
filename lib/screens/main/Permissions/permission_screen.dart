@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tracker/router/main_navigation_screen.dart';
+import 'package:tracker/router/app_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tracker/screens/main/Permissions/widgets/permission_card.dart';
 
@@ -27,7 +28,7 @@ class _PermissionScreenState extends State<PermissionScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkPermissions().then((_) => _initialRequestFlow());
+    _checkPermissions(showLoader: true).then((_) => _initialRequestFlow());
   }
 
   @override
@@ -43,25 +44,30 @@ class _PermissionScreenState extends State<PermissionScreen>
     }
   }
 
-  Future<void> _checkPermissions() async {
-    setState(() => _isLoading = true);
+  Future<void> _checkPermissions({bool showLoader = false}) async {
+    if (showLoader && mounted) setState(() => _isLoading = true);
 
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    final loc = await Permission.location.status;
-    final bgLoc = await Permission.locationAlways.status;
-    final activity = await Permission.activityRecognition.status;
-    final notif = await Permission.notification.status;
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final loc = await Permission.location.status;
+      final bgLoc = await Permission.locationAlways.status;
+      final activity = await Permission.activityRecognition.status;
+      final notif = await Permission.notification.status;
 
-    setState(() {
-      _locationStatus = loc;
-      _backgroundLocationStatus = bgLoc;
-      _activityStatus = activity;
-      _notificationStatus = notif;
-      _isLoading = false;
-      _isLocationServiceEnabled = serviceEnabled;
-    });
-
-    _checkAllGranted();
+      if (mounted) {
+        setState(() {
+          _locationStatus = loc;
+          _backgroundLocationStatus = bgLoc;
+          _activityStatus = activity;
+          _notificationStatus = notif;
+          _isLocationServiceEnabled = serviceEnabled;
+          if (showLoader) _isLoading = false;
+        });
+        _checkAllGranted();
+      }
+    } catch (e) {
+      if (showLoader && mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _initialRequestFlow() async {
@@ -94,9 +100,7 @@ class _PermissionScreenState extends State<PermissionScreen>
         _isLocationServiceEnabled;
 
     if (allGranted && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
+      Navigator.of(context).pushReplacementNamed(AppRouter.main);
     }
   }
 
