@@ -14,11 +14,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "5299793812-m5ur7q2t6rolo2b3v7erdb9vpdgeq0jc.apps.googleusercontent.com",
+          "client_id": "5299793812-8akh7c9mhmp9t1fjer0t7nh9i42efvv5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.baazinfotech.tracktor",
-            "certificate_hash": "605464122e624121eb4c8d64afd1d5515751e043"
+            "certificate_hash": "7c834bfcf05d3d50a894a0a66b49f0d9dc707ba1"
+          }
+        },
+        {
+          "client_id": "5299793812-8kp00q39lgth4rj1vm39gd83rsn08rk4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.baazinfotech.tracktor",
+            "certificate_hash": "f05133d62d04258185cdbece2149d6692bc7cc7b"
           }
         },
         {
