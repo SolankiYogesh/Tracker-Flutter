@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tracker/router/main_navigation_screen.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tracker/screens/main/Permissions/widgets/permission_card.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -16,7 +17,6 @@ class _PermissionScreenState extends State<PermissionScreen>
     with WidgetsBindingObserver {
   bool _isLoading = false;
 
-  // Track status of each required permission
   PermissionStatus _locationStatus = PermissionStatus.denied;
   PermissionStatus _backgroundLocationStatus = PermissionStatus.denied;
   PermissionStatus _activityStatus = PermissionStatus.denied;
@@ -27,7 +27,6 @@ class _PermissionScreenState extends State<PermissionScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Start by checking, then auto-requesting
     _checkPermissions().then((_) => _initialRequestFlow());
   }
 
@@ -66,41 +65,24 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _initialRequestFlow() async {
-    // Sequentially request permissions that are not yet granted.
-    // 1. Location
     if (!_locationStatus.isGranted) {
       await _requestPermission(Permission.location);
     }
 
-    // 2. Background Location (Only if location is granted)
-    // We need to re-check location status because _requestPermission updates it
     if (_locationStatus.isGranted && !_backgroundLocationStatus.isGranted) {
       await _requestPermission(Permission.locationAlways);
     }
 
-    // 3. Activity
     if (!_activityStatus.isGranted && Platform.isAndroid) {
       await _requestPermission(Permission.activityRecognition);
     }
 
-    // 4. Notifications
     if (!_notificationStatus.isGranted) {
       await _requestPermission(Permission.notification);
     }
   }
 
   void _checkAllGranted() {
-    // Note: Background location might be "denied" if "whileInUse" is granted on some Android versions until upgraded.
-    // Logic:
-    // - Foreground: Must be granted.
-    // - Background: Must be granted for "perfect track".
-    // - Activity: Must be granted.
-    // - Notification: Must be granted.
-
-    // On iOS, background location logic is different, usually handled by "Always" request.
-    // Simplification for this task: Check if all are "granted".
-
-    // PermissionStatus.granted or PermissionStatus.limited (iOS) are usually acceptable.
     bool allGranted =
         (_locationStatus.isGranted || _locationStatus.isLimited) &&
         (_backgroundLocationStatus.isGranted ||
@@ -119,7 +101,6 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _requestPermission(Permission permission) async {
-    // Special handling for background location on Android 11+
     if (permission == Permission.locationAlways) {
       if (!_locationStatus.isGranted) {
         if (mounted) {
@@ -135,21 +116,18 @@ class _PermissionScreenState extends State<PermissionScreen>
 
     final status = await permission.request();
 
-    // If permanently denied, open settings
     if (status.isPermanentlyDenied) {
       await openAppSettings();
     }
 
-    // Re-check all
     await _checkPermissions();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Dark theme colors based on screenshot
-    const backgroundColor = Color(0xFF141416); // Very dark/black
-    const cardColor = Color(0xFF2C2C2E); // Dark Grey
-    const accentColor = Color(0xFF9FA8DA); // Light Indigo
+    const backgroundColor = Color(0xFF141416);
+    const cardColor = Color(0xFF2C2C2E);
+    const accentColor = Color(0xFF9FA8DA);
     const textColor = Colors.white;
     const subTextColor = Colors.grey;
 
@@ -167,15 +145,13 @@ class _PermissionScreenState extends State<PermissionScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 40),
-                    // Header Icon
+
                     Center(
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: accentColor.withValues(
-                            alpha: 0.2,
-                          ), // Light circle bg
+                          color: accentColor.withValues(alpha: 0.2),
                         ),
                         child: const Icon(
                           Icons.location_on,
@@ -185,7 +161,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                       ),
                     ),
                     const SizedBox(height: 32),
-                    // Title
+
                     const Text(
                       'Location Permissions\nRequired',
                       textAlign: TextAlign.center,
@@ -196,7 +172,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Subtitle
+
                     const Text(
                       'Tracktor needs location permissions to track\nyour movement and draw your path on the map.',
                       textAlign: TextAlign.center,
@@ -208,8 +184,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                     ),
                     const SizedBox(height: 40),
 
-                    // Location Service (GPS) Card
-                    _buildPermissionCard(
+                    PermissionCard(
                       icon: Icons.gps_fixed,
                       title: 'Location Services',
                       subtitle:
@@ -225,8 +200,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    // Permission Cards
-                    _buildPermissionCard(
+                    PermissionCard(
                       icon: Icons.location_on_outlined,
                       title: 'Location Access',
                       subtitle: 'Required to track your GPS position',
@@ -239,7 +213,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    _buildPermissionCard(
+                    PermissionCard(
                       icon: Icons.location_searching,
                       title: 'Background Location',
                       subtitle: 'Required to track when app is in\nbackground',
@@ -253,7 +227,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    _buildPermissionCard(
+                    PermissionCard(
                       icon: Icons.directions_walk,
                       title: 'Physical Activity',
                       subtitle: 'Required to count steps and detect\nactivity',
@@ -270,7 +244,7 @@ class _PermissionScreenState extends State<PermissionScreen>
 
                     const SizedBox(height: 16),
 
-                    _buildPermissionCard(
+                    PermissionCard(
                       icon: Icons.notifications_active_outlined,
                       title: 'Notifications',
                       subtitle: 'Required to show tracking status',
@@ -286,74 +260,6 @@ class _PermissionScreenState extends State<PermissionScreen>
                   ],
                 ),
               ),
-      ),
-    );
-  }
-
-  Widget _buildPermissionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required PermissionStatus status,
-    required VoidCallback onGrant,
-    required Color cardColor,
-    required Color accentColor,
-    required Color textColor,
-    required Color subTextColor,
-    bool? isDone,
-  }) {
-    final isGranted = isDone ?? (status.isGranted || status.isLimited);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: subTextColor, size: 28),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(fontSize: 12, color: subTextColor),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          isGranted
-              ? const Icon(Icons.check_circle, color: Colors.green, size: 28)
-              : ElevatedButton(
-                  onPressed: onGrant,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentColor,
-                    foregroundColor: Colors.black, // Text color on button
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text('Grant'),
-                ),
-        ],
       ),
     );
   }

@@ -9,10 +9,7 @@ class AuthRepository {
 
   Future<UserCredential> signInWithGoogle() async {
     await _googleSignIn.initialize();
-    final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
-    if (googleUser == null) {
-      throw Exception('Google sign-in aborted');
-    }
+    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
