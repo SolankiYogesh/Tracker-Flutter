@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:tracker/constants/env.dart';
+import 'package:tracker/utils/talker.dart';
 import 'interceptors/api_key_interceptor.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class DioClient {
   static final DioClient _instance = DioClient._internal();
-  late Dio dio;
+  late final Dio dio;
 
   factory DioClient() => _instance;
 
@@ -20,20 +21,28 @@ class DioClient {
       ),
     );
 
-    if (kDebugMode) {
+    if (!kReleaseMode) {
       dio.interceptors.add(
-        PrettyDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          responseHeader: false,
-          responseBody: true,
-          error: true,
-          compact: true,
-          maxWidth: 90,
+        TalkerDioLogger(
+          talker: talker,
+          settings: const TalkerDioLoggerSettings(
+            printErrorMessage: true,
+            printErrorHeaders: true,
+            printRequestExtra: true,
+            printResponseData: true,
+            printResponseMessage: true,
+            printResponseRedirects: true,
+            printResponseTime: true,
+
+            printRequestHeaders: true,
+            printRequestData: true,
+            printResponseHeaders: false,
+            printErrorData: true,
+          ),
         ),
       );
     }
 
-    dio.interceptors.addAll([ApiKeyInterceptor()]);
+    dio.interceptors.add(ApiKeyInterceptor());
   }
 }

@@ -2,6 +2,7 @@ import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'package:tracker/network/repositories/auth_repository.dart';
 import 'package:tracker/network/repositories/user_repository.dart';
 import 'package:tracker/providers/theme_provider.dart';
@@ -11,6 +12,7 @@ import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/repo.dart';
 import 'package:tracker/services/notification.dart';
 import 'package:tracker/theme/app_theme.dart';
+import 'package:tracker/utils/talker.dart';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -75,6 +77,7 @@ class TrackerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     return MaterialApp(
+      navigatorObservers: [TalkerRouteObserver(talker)],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,

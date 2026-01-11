@@ -54,6 +54,8 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   logger: ^2.6.2
   flutter_native_splash: ^2.4.7
+  talker_flutter: ^5.1.9
+  talker_dio_logger: ^5.1.9
 
 dev_dependencies:
   flutter_test:

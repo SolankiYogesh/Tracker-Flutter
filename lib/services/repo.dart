@@ -34,13 +34,13 @@ class Repo {
       latitude: data.lat,
       longitude: data.lon,
       recordedAt: DateTime.now().toUtc(),
-      accuracy: data.horizontalAccuracy,
-      altitude: data.alt,
-      bearing: data.course,
-      speed: data.speed,
+      accuracy: data.horizontalAccuracy < 0 ? 0 : data.horizontalAccuracy,
+      altitude: data.alt < 0 ? 0 : data.alt,
+      bearing: data.course < 0 ? 0 : data.course,
+      speed: data.speed < 0 ? 0 : data.speed,
       userId: user.id,
     );
-    
+
     // 1. Save to Local DB (isSynced = false by default)
     await DatabaseHelper().insertLocation(locationPoint);
 
@@ -89,7 +89,7 @@ class Repo {
 
       // Create batch
       final batch = LocationBatch(unsyncedLocations);
-      
+
       // Upload
       final response = await _locationRepository.uploadBatch(batch);
 
