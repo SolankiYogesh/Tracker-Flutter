@@ -4,6 +4,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:tracker/services/database_helper.dart';
 
+import 'package:tracker/models/nearby_user.dart';
+import 'package:tracker/network/repositories/location_repository.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -13,27 +16,55 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
+  final LocationRepository _locationRepo = LocationRepository();
   List<List<LatLng>> _polylines = [];
+  List<NearbyUser> _nearbyUsers = [];
   LatLng? _currentLocation;
   Timer? _timer;
+  Timer? _nearbyTimer;
   bool _hasInitiallyCentered = false;
 
   @override
   void initState() {
     super.initState();
     _refreshLocations();
-    // Refresh map every 5 seconds to show new points
+    _fetchNearbyUsers();
+    
+    // Refresh local path every 5 seconds
     _timer = Timer.periodic(
       const Duration(seconds: 5),
       (_) => _refreshLocations(),
+    );
+
+    // Refresh nearby users every 30 seconds
+    _nearbyTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _fetchNearbyUsers(),
     );
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _nearbyTimer?.cancel();
     _mapController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchNearbyUsers() async {
+    final user = await DatabaseHelper().getCurrentUser();
+    if (user == null) return;
+
+    try {
+      final users = await _locationRepo.getNearbyUsers(user.id);
+      if (mounted) {
+        setState(() {
+          _nearbyUsers = users;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching nearby users: $e');
+    }
   }
 
   Future<void> _refreshLocations() async {
@@ -130,6 +161,66 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _showUserInfo(NearbyUser user) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundImage: user.picture != null 
+                ? NetworkImage(user.picture!) 
+                : null,
+              child: user.picture == null 
+                ? const Icon(Icons.person, size: 40)
+                : null,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              user.name ?? 'Unknown User',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.place, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  '${user.distanceMeters.toStringAsFixed(0)}m away',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(width: 16),
+                const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  'Active ${_timeAgo(user.lastUpdated)}',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _timeAgo(DateTime d) {
+    final diff = DateTime.now().difference(d);
+    if (diff.inDays > 365) return "${(diff.inDays / 365).floor()}y ago";
+    if (diff.inDays > 30) return "${(diff.inDays / 30).floor()}mo ago";
+    if (diff.inDays > 0) return "${diff.inDays}d ago";
+    if (diff.inHours > 0) return "${diff.inHours}h ago";
+    if (diff.inMinutes > 0) return "${diff.inMinutes}m ago";
+    return "just now";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,8 +230,7 @@ class _MapScreenState extends State<MapScreen> {
             mapController: _mapController,
             options: MapOptions(
               initialCenter: const LatLng(0, 0),
-              initialZoom:
-                  2.0, // Start bumped out to see the world, avoids "blank screen" panic
+              initialZoom: 2.0,
             ),
             children: [
               TileLayer(
@@ -158,6 +248,7 @@ class _MapScreenState extends State<MapScreen> {
                     )
                     .toList(),
               ),
+              // Current User Marker
               if (_currentLocation != null)
                 MarkerLayer(
                   markers: [
@@ -173,6 +264,37 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ],
                 ),
+              // Nearby Users Markers
+              MarkerLayer(
+                markers: _nearbyUsers.map((user) => Marker(
+                  point: LatLng(user.latitude, user.longitude),
+                  width: 40,
+                  height: 40,
+                  child: GestureDetector(
+                    onTap: () => _showUserInfo(user),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        backgroundImage: user.picture != null 
+                          ? NetworkImage(user.picture!) 
+                          : null,
+                        child: user.picture == null 
+                          ? const Icon(Icons.person, size: 24)
+                          : null,
+                      ),
+                    ),
+                  ),
+                )).toList(),
+              ),
             ],
           ),
           Positioned(
