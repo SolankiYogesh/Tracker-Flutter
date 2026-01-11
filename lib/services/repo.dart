@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:tracker/models/location_batch.dart';
 import 'package:tracker/models/location_point.dart';
 import 'package:tracker/network/repositories/location_repository.dart';
@@ -14,12 +15,14 @@ class Repo {
   final _locationRepository = LocationRepository();
   bool _isSyncing = false;
   Timer? _syncTimer;
+  BackgroundLocationUpdateData? lastUpdateRecord;
 
   Repo._();
 
   factory Repo() => _instance ??= Repo._();
 
   Future<void> update(BackgroundLocationUpdateData data) async {
+    lastUpdateRecord = data;
     final user = await DatabaseHelper().getCurrentUser();
     if (user == null) {
       if (kDebugMode) {
@@ -81,6 +84,23 @@ class Repo {
       if (unsyncedLocations.isEmpty) {
         _isSyncing = false;
         return;
+      }
+
+      if (lastUpdateRecord != null) {
+        final LocationPoint lastSyncItem = unsyncedLocations.elementAt(
+          unsyncedLocations.length - 1,
+        );
+
+        final distance = const Distance().as(
+          LengthUnit.Meter,
+          LatLng(lastUpdateRecord!.lat, lastUpdateRecord!.lon),
+          LatLng(lastSyncItem.latitude, lastSyncItem.longitude),
+        );
+
+        if (distance < 7) {
+          _isSyncing = false;
+          return;
+        }
       }
 
       if (kDebugMode) {
