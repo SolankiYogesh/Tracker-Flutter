@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker/screens/main/Settings/help_support/widgets/faq_item.dart';
 import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
-import 'package:tracker/theme/app_colors.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
@@ -9,10 +8,7 @@ class HelpSupportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Help & Support'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Help & Support'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -22,27 +18,28 @@ class HelpSupportScreen extends StatelessWidget {
             const SizedBox(height: 32),
             const Text(
               'Frequently Asked Questions',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const FaqItem(
               question: 'How do I start tracking my location?',
-              answer: 'Go to the Map screen and ensure location tracking is enabled in Settings. The app will automatically track your location in the background.',
+              answer:
+                  'Go to the Map screen and ensure location tracking is enabled in Settings. The app will automatically track your location in the background.',
             ),
             const FaqItem(
               question: 'Is my data secure?',
-              answer: 'Yes, your data is stored securely on our servers and is only accessible by you. We use industry-standard encryption to protect your privacy.',
+              answer:
+                  'Yes, your data is stored securely on our servers and is only accessible by you. We use industry-standard encryption to protect your privacy.',
             ),
             const FaqItem(
               question: 'How can I export my data?',
-              answer: 'You can export your tracking data from the Data & Storage section in Settings. Data is exported in CSV format.',
+              answer:
+                  'You can export your tracking data from the Data & Storage section in Settings. Data is exported in CSV format.',
             ),
             const FaqItem(
               question: 'The app is not tracking in background.',
-              answer: 'Please ensure you have granted "Always" location permission in your device settings. Also check if battery optimization is disabled for Tracker.',
+              answer:
+                  'Please ensure you have granted "Always" location permission in your device settings. Also check if battery optimization is disabled for Tracker.',
             ),
           ],
         ),
@@ -56,10 +53,7 @@ class HelpSupportScreen extends StatelessWidget {
       children: [
         const Text(
           'Contact Us',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         SettingItem(

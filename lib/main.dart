@@ -6,7 +6,6 @@ import 'package:talker_flutter/talker_flutter.dart';
 import 'package:tracker/network/repositories/auth_repository.dart';
 import 'package:tracker/network/repositories/user_repository.dart';
 import 'package:tracker/providers/theme_provider.dart';
-import 'package:tracker/services/auth/auth_gate.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/repo.dart';
