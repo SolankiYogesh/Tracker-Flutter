@@ -33,7 +33,6 @@ class DioClient {
             printResponseMessage: true,
             printResponseRedirects: true,
             printResponseTime: true,
-
             printRequestHeaders: true,
             printRequestData: true,
             printResponseHeaders: false,

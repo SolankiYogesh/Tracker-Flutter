@@ -25,7 +25,7 @@ class LocationPoint {
     'user_id': userId,
     'latitude': latitude,
     'longitude': longitude,
-    'recorded_at': recordedAt.toUtc(),
+    'recorded_at': recordedAt.toUtc().toIso8601String(),
     if (accuracy != null) 'accuracy': accuracy,
     if (altitude != null) 'altitude': altitude,
     if (speed != null) 'speed': speed,
