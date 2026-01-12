@@ -23,13 +23,14 @@ class _MapScreenState extends State<MapScreen> {
   Timer? _timer;
   Timer? _nearbyTimer;
   bool _hasInitiallyCentered = false;
+  bool _shouldFollowUser = true;
 
   @override
   void initState() {
     super.initState();
     _refreshLocations();
     _fetchNearbyUsers();
-    
+
     // Refresh local path every 5 seconds
     _timer = Timer.periodic(
       const Duration(seconds: 5),
@@ -106,8 +107,9 @@ class _MapScreenState extends State<MapScreen> {
       if (points.isNotEmpty) {
         _currentLocation = LatLng(points.last.latitude, points.last.longitude);
 
-        // Center map on the user on the very first load
-        if (!_hasInitiallyCentered && _currentLocation != null) {
+        if (_shouldFollowUser && _currentLocation != null) {
+          _mapController.move(_currentLocation!, _mapController.camera.zoom);
+        } else if (!_hasInitiallyCentered && _currentLocation != null) {
           _mapController.move(_currentLocation!, 15.0);
           _hasInitiallyCentered = true;
         }
@@ -157,6 +159,9 @@ class _MapScreenState extends State<MapScreen> {
 
   void _recenter() {
     if (_currentLocation != null) {
+      setState(() {
+        _shouldFollowUser = true;
+      });
       _mapController.move(_currentLocation!, 15.0);
     }
   }
@@ -174,12 +179,12 @@ class _MapScreenState extends State<MapScreen> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundImage: user.picture != null 
-                ? NetworkImage(user.picture!) 
-                : null,
-              child: user.picture == null 
-                ? const Icon(Icons.person, size: 40)
-                : null,
+              backgroundImage: user.picture != null
+                  ? NetworkImage(user.picture!)
+                  : null,
+              child: user.picture == null
+                  ? const Icon(Icons.person, size: 40)
+                  : null,
             ),
             const SizedBox(height: 16),
             Text(
@@ -230,7 +235,14 @@ class _MapScreenState extends State<MapScreen> {
             mapController: _mapController,
             options: MapOptions(
               initialCenter: const LatLng(0, 0),
-              initialZoom: 2.0,
+              initialZoom: 15.0,
+              onPositionChanged: (position, hasGesture) {
+                if (hasGesture) {
+                  setState(() {
+                    _shouldFollowUser = false;
+                  });
+                }
+              },
             ),
             children: [
               TileLayer(
