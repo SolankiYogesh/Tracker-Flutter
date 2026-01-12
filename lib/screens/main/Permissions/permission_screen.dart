@@ -79,7 +79,7 @@ class _PermissionScreenState extends State<PermissionScreen>
       await _requestPermission(Permission.locationAlways);
     }
 
-    if (!_activityStatus.isGranted && Platform.isAndroid) {
+    if (!_activityStatus.isGranted) {
       await _requestPermission(Permission.activityRecognition);
     }
 
@@ -93,9 +93,7 @@ class _PermissionScreenState extends State<PermissionScreen>
         (_locationStatus.isGranted || _locationStatus.isLimited) &&
         (_backgroundLocationStatus.isGranted ||
             _backgroundLocationStatus.isLimited) &&
-        (Platform.isIOS
-            ? true
-            : _activityStatus.isGranted || _activityStatus.isLimited) &&
+        (_activityStatus.isGranted || _activityStatus.isLimited) &&
         (_notificationStatus.isGranted || _notificationStatus.isLimited) &&
         _isLocationServiceEnabled;
 
@@ -235,9 +233,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                       icon: Icons.directions_walk,
                       title: 'Physical Activity',
                       subtitle: 'Required to count steps and detect\nactivity',
-                      status: Platform.isAndroid
-                          ? _activityStatus
-                          : PermissionStatus.granted,
+                      status: _activityStatus,
                       onGrant: () =>
                           _requestPermission(Permission.activityRecognition),
                       cardColor: cardColor,

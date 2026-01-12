@@ -17,6 +17,7 @@
     <!-- Internet for map tiles -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     
     <!-- OSMDroid cache -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
