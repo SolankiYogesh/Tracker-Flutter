@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tracker/router/main_navigation_screen.dart';
 import 'package:tracker/router/app_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tracker/screens/main/Permissions/widgets/permission_card.dart';
@@ -79,7 +78,7 @@ class _PermissionScreenState extends State<PermissionScreen>
       await _requestPermission(Permission.locationAlways);
     }
 
-    if (!_activityStatus.isGranted) {
+    if (!_activityStatus.isGranted && Platform.isAndroid) {
       await _requestPermission(Permission.activityRecognition);
     }
 
@@ -93,7 +92,9 @@ class _PermissionScreenState extends State<PermissionScreen>
         (_locationStatus.isGranted || _locationStatus.isLimited) &&
         (_backgroundLocationStatus.isGranted ||
             _backgroundLocationStatus.isLimited) &&
-        (_activityStatus.isGranted || _activityStatus.isLimited) &&
+        (Platform.isAndroid
+            ? (_activityStatus.isGranted || _activityStatus.isLimited)
+            : true) &&
         (_notificationStatus.isGranted || _notificationStatus.isLimited) &&
         _isLocationServiceEnabled;
 

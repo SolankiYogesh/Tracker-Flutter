@@ -86,19 +86,19 @@ class Repo {
         return;
       }
 
-      if (lastUpdateRecord != null) {
-        final lastSyncItem = unsyncedLocations.last;
-        final distance = Distance().as(
-          LengthUnit.Meter,
-          LatLng(lastUpdateRecord!.lat, lastUpdateRecord!.lon),
-          LatLng(lastSyncItem.latitude, lastSyncItem.longitude),
-        );
-    AppLogger.log('Distance: $distance');
-        if (distance < 7) {
-          _isSyncing = false;
-          return;
-        }
-      }
+      //   if (lastUpdateRecord != null) {
+      //     final lastSyncItem = unsyncedLocations.last;
+      //     final distance = Distance().as(
+      //       LengthUnit.Meter,
+      //       LatLng(lastUpdateRecord!.lat, lastUpdateRecord!.lon),
+      //       LatLng(lastSyncItem.latitude, lastSyncItem.longitude),
+      //     );
+      // AppLogger.log('Distance: $distance');
+      //     if (distance < 7) {
+      //       _isSyncing = false;
+      //       return;
+      //     }
+      //   }
 
       if (kDebugMode) {
         AppLogger.log('Syncing ${unsyncedLocations.length} locations...');
