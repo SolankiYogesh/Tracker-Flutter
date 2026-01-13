@@ -4,20 +4,22 @@ import 'package:background_location_tracker/background_location_tracker.dart';
 
 // Top-level function for background action handling
 @pragma('vm:entry-point')
-Future<void> notificationTapBackground(NotificationResponse notificationResponse) async {
+Future<void> notificationTapBackground(
+  NotificationResponse notificationResponse,
+) async {
   // Needed for plugins to work in background isolate
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   if (notificationResponse.actionId == 'stop_tracking') {
     try {
       await BackgroundLocationTrackerManager.stopTracking();
       await FlutterLocalNotificationsPlugin().cancel(777);
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 }
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() async {
   const settings = InitializationSettings(
@@ -28,7 +30,7 @@ Future<void> initNotifications() async {
       requestSoundPermission: false,
     ),
   );
-  
+
   await flutterLocalNotificationsPlugin.initialize(
     settings,
     onDidReceiveNotificationResponse: (details) async {
@@ -44,7 +46,7 @@ Future<void> initNotifications() async {
 void sendNotification(String text, {String title = 'Tracking Active'}) {
   // Ensure we don't spam initialization, only show
   // (Assuming initNotifications is called in main)
-  
+
   flutterLocalNotificationsPlugin.show(
     777, // Fixed ID
     title,
@@ -61,11 +63,18 @@ void sendNotification(String text, {String title = 'Tracking Active'}) {
             'stop_tracking',
             'Stop Tracking',
             showsUserInterface: false, // Don't open app
-            cancelNotification: true, // Dismisses the notification immediately on tap
+            cancelNotification:
+                true, // Dismisses the notification immediately on tap
           ),
         ],
       ),
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: false,
+        presentSound: false,
+        sound: null,
+        threadIdentifier: 'LIVE_UPDATE_NOTIFICATION',
+      ),
     ),
   );
 }

@@ -9,8 +9,6 @@ import 'package:tracker/network/repositories/location_repository.dart';
 import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/notification.dart';
 import 'package:tracker/utils/app_logger.dart';
-
-import 'package:tracker/models/entity_model.dart';
 import 'package:tracker/network/repositories/entity_repository.dart';
 
 class Repo {
@@ -21,7 +19,7 @@ class Repo {
   bool _isSyncing = false;
   Timer? _syncTimer;
   BackgroundLocationUpdateData? lastUpdateRecord;
-  
+
   final _collectionController = StreamController<Collection>.broadcast();
   Stream<Collection> get onCollection => _collectionController.stream;
 
@@ -71,47 +69,57 @@ class Repo {
       _startSyncTimer();
     }
   }
-  
-  Future<void> _checkEntityCollection(BackgroundLocationUpdateData data, String userId) async {
+
+  Future<void> _checkEntityCollection(
+    BackgroundLocationUpdateData data,
+    String userId,
+  ) async {
     try {
       final db = DatabaseHelper();
       final entitiesMap = await db.getUncollectedEntities();
       final entities = entitiesMap.map((e) => Entity.fromMap(e)).toList();
-      
+
       if (entities.isEmpty) return;
-      
+
       final currentPos = LatLng(data.lat, data.lon);
       final distanceCalc = const Distance();
-      
+
       for (var entity in entities) {
         final entityPos = LatLng(entity.latitude, entity.longitude);
         final dist = distanceCalc.as(LengthUnit.Meter, currentPos, entityPos);
-        
+
         if (dist <= entity.spawnRadius) {
           // Attempt collection
           try {
-             if (kDebugMode) {
-              AppLogger.log('Attempting to collect entity: ${entity.entityType?.name} at $dist meters');
+            if (kDebugMode) {
+              AppLogger.log(
+                'Attempting to collect entity: ${entity.entityType?.name} at $dist meters',
+              );
             }
-            
+
             final collection = await _entityRepository.collectEntity(
-              entity.id, 
-              data.lat, 
-              data.lon, 
-              userId
+              entity.id,
+              data.lat,
+              data.lon,
+              userId,
             );
-            
+
             // Notification
-            final name = collection.entityType?.name ?? entity.entityType?.name ?? 'Item';
+            final name =
+                collection.entityType?.name ??
+                entity.entityType?.name ??
+                'Item';
             sendCollectionNotification(
-              'Collected $name!', 
-              'You earned ${collection.xpEarned} XP'
+              'Collected $name!',
+              'You earned ${collection.xpEarned} XP',
             );
-            
+
             _collectionController.add(collection);
-            
           } catch (e) {
-             AppLogger.error('Failed to collect entity ${entity.id}', e.toString());
+            AppLogger.error(
+              'Failed to collect entity ${entity.id}',
+              e.toString(),
+            );
           }
         }
       }
