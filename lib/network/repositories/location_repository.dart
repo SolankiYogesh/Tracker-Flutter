@@ -34,7 +34,7 @@ class LocationRepository {
     try {
       final res = await _dio.get(
         '/api/v1/locations/nearby/$userId',
-        queryParameters: {'limit': 10, 'radius': 5000},
+        queryParameters: {'limit': 100, 'radius': 5000000},
       );
       final List users = res.data['nearby_users'] ?? [];
       return users.map((e) => NearbyUser.fromJson(e)).toList();
