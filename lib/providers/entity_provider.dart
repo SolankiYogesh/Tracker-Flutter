@@ -202,4 +202,21 @@ class EntityProvider extends ChangeNotifier {
         debugPrint("Error checking new collections: $e");
     }
   }
+
+  // Leaderboard State
+  LeaderboardResponse? _leaderboard;
+  LeaderboardResponse? get leaderboard => _leaderboard;
+
+  Future<void> fetchLeaderboard() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _leaderboard = await _repo.fetchLeaderboard(limit: 50);
+    } catch (e) {
+      debugPrint('Error fetching leaderboard: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

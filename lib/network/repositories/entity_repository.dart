@@ -108,4 +108,19 @@ class EntityRepository {
       throw ApiException.fromDio(e);
     }
   }
+  /// Get leaderboard
+  Future<LeaderboardResponse> fetchLeaderboard({int limit = 50, int offset = 0}) async {
+     try {
+      final res = await _dio.get(
+        '/api/v1/leaderboard',
+        queryParameters: {
+          'limit': limit,
+          'offset': offset,
+        },
+      );
+      return LeaderboardResponse.fromJson(res.data);
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
 }

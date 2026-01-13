@@ -206,3 +206,59 @@ class UserCollectionsResponse {
     );
   }
 }
+
+class LeaderboardEntry {
+  final String userId;
+  final String? name;
+  final String? picture;
+  final int totalXp;
+  final int currentLevel;
+  final int entitiesCollected;
+  final DateTime? lastCollectionAt;
+  final int rank;
+
+  LeaderboardEntry({
+    required this.userId,
+    this.name,
+    this.picture,
+    required this.totalXp,
+    required this.currentLevel,
+    required this.entitiesCollected,
+    this.lastCollectionAt,
+    required this.rank,
+  });
+
+  factory LeaderboardEntry.fromJson(Map<String, dynamic> json) {
+    return LeaderboardEntry(
+      userId: json['user_id'],
+      name: json['name'],
+      picture: json['picture'],
+      totalXp: json['total_xp'],
+      currentLevel: json['current_level'],
+      entitiesCollected: json['entities_collected'],
+      lastCollectionAt: json['last_collection_at'] != null
+          ? DateTime.parse(json['last_collection_at'])
+          : null,
+      rank: json['rank'],
+    );
+  }
+}
+
+class LeaderboardResponse {
+  final List<LeaderboardEntry> leaderboard;
+  final int totalCount;
+
+  LeaderboardResponse({
+    required this.leaderboard,
+    required this.totalCount,
+  });
+
+  factory LeaderboardResponse.fromJson(Map<String, dynamic> json) {
+    return LeaderboardResponse(
+      leaderboard: (json['leaderboard'] as List)
+          .map((e) => LeaderboardEntry.fromJson(e))
+          .toList(),
+      totalCount: json['total_count'],
+    );
+  }
+}
