@@ -8,6 +8,7 @@ final LOCATION_TABLE = "locations";
 final USER_TABLE = "app_user";
 
 final ENTITY_TABLE = "entities";
+final USER_STATS_TABLE = "user_stats";
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -29,7 +30,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -78,6 +79,7 @@ class DatabaseHelper {
   ''');
     
     await _createEntityTable(db);
+    await _createUserStatsTable(db);
     
     await db.insert(SETTING_TABLE, {'id': 1, 'isDark': 1});
   }
@@ -86,6 +88,27 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       await _createEntityTable(db);
     }
+    if (oldVersion < 3) {
+      await _createUserStatsTable(db);
+    }
+  }
+
+  Future<void> _createUserStatsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $USER_STATS_TABLE (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        total_steps INTEGER DEFAULT 0,
+        last_boot_step_count INTEGER DEFAULT 0,
+        last_updated_at INTEGER
+      )
+    ''');
+    // Initialize with default row
+    await db.insert(USER_STATS_TABLE, {
+      'id': 1,
+      'total_steps': 0,
+       'last_boot_step_count': 0,
+      'last_updated_at': DateTime.now().millisecondsSinceEpoch
+    });
   }
 
   Future<void> _createEntityTable(Database db) async {
@@ -273,5 +296,50 @@ class DatabaseHelper {
   Future<void> clearEntities() async {
     final db = await database;
     await db.delete(ENTITY_TABLE);
+  }
+
+  // --- Stats Methods ---
+
+  Future<Map<String, dynamic>> getUserStats() async {
+    final db = await database;
+    final res = await db.query(USER_STATS_TABLE, where: 'id = ?', whereArgs: [1]);
+    if (res.isNotEmpty) {
+      return res.first;
+    }
+    return {'total_steps': 0};
+  }
+
+  Future<void> updateUserSteps(int currentSensorSteps) async {
+    final db = await database;
+    final stats = await getUserStats();
+    
+    int totalSteps = stats['total_steps'] as int? ?? 0;
+    int lastBootSteps = stats['last_boot_step_count'] as int? ?? 0;
+    
+    // If the sensor steps are LESS than the last boot steps, 
+    // it implies a device reboot happened (sensor reset to 0).
+    if (currentSensorSteps < lastBootSteps) {
+      lastBootSteps = 0;
+    }
+
+    // Calculate the difference since the last check
+    int diff = currentSensorSteps - lastBootSteps;
+    
+    // We expect diff to be positive as steps increase. 
+    // If it's negative (and not caught by the reboot check above, though unlikely given logic), ignore or handle.
+    if (diff < 0) diff = 0;
+
+    totalSteps += diff;
+
+    await db.update(
+      USER_STATS_TABLE,
+      {
+        'total_steps': totalSteps,
+        'last_boot_step_count': currentSensorSteps,
+        'last_updated_at': DateTime.now().millisecondsSinceEpoch
+      },
+      where: 'id = ?',
+      whereArgs: [1],
+    );
   }
 }

@@ -14,25 +14,39 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   late Stream<StepCount> _stepCountStream;
-  late Stream<PedestrianStatus> _pedestrianStatusStream;
-  String _status = '?', _steps = '?';
-  String _km = '?';
-  Timer? _distanceTimer;
+  String _steps = '0';
+  String _km = '0.00';
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
-    _calculateDistance();
-    _distanceTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      _calculateDistance();
+    _refreshStats();
+    // Refresh stats periodically
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _refreshStats();
     });
   }
 
   @override
   void dispose() {
-    _distanceTimer?.cancel();
+    _refreshTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _refreshStats() async {
+    await _calculateDistance();
+    await _loadSteps();
+  }
+  
+  Future<void> _loadSteps() async {
+    final stats = await DatabaseHelper().getUserStats();
+    if (mounted) {
+      setState(() {
+        _steps = (stats['total_steps'] ?? 0).toString();
+      });
+    }
   }
 
   Future<void> _calculateDistance() async {
@@ -48,55 +62,62 @@ class _StatsScreenState extends State<StatsScreen> {
 
     double totalDistance = 0.0;
     const distanceCalculator = Distance();
+    
+    // Minimum accuracy required to consider a point (in meters).
+    // If accuracy is worse (higher number) than this, we skip it.
+    const double minAccuracyThreshold = 30.0; 
+    
+    // Max reasonable speed in m/s (approx 100 km/h) to filter out jumps.
+    const double maxSpeedMps = 28.0; 
 
     for (int i = 0; i < points.length - 1; i++) {
-      final p1 = LatLng(points[i].latitude, points[i].longitude);
-      final p2 = LatLng(points[i + 1].latitude, points[i + 1].longitude);
-      totalDistance += distanceCalculator.as(LengthUnit.Kilometer, p1, p2);
+        final p1 = points[i];
+        final p2 = points[i + 1];
+
+        // 1. Filter by Accuracy (if available)
+        if (p1.accuracy != null && p1.accuracy! > minAccuracyThreshold) continue;
+        if (p2.accuracy != null && p2.accuracy! > minAccuracyThreshold) continue;
+
+        final dist = distanceCalculator.as(LengthUnit.Meter, 
+            LatLng(p1.latitude, p1.longitude), 
+            LatLng(p2.latitude, p2.longitude));
+
+        // 2. Filter by plausible speed (teleportation check)
+        final timeDiffSeconds = p2.recordedAt.difference(p1.recordedAt).inSeconds;
+        
+        // If points are extremely close in time but far in distance, it's likely a jump.
+        // Allow for some gap: if timeDiff is 0 (same second), we skip unless distance is negligible.
+        if (timeDiffSeconds <= 0) {
+            if (dist > 5) continue; // Skip if > 5m movement in 0 seconds
+        } else {
+            final calculatedSpeed = dist / timeDiffSeconds;
+            if (calculatedSpeed > maxSpeedMps) continue;
+        }
+
+        totalDistance += dist;
     }
 
     if (mounted) {
       setState(() {
-        _km = totalDistance.toStringAsFixed(2);
+        _km = (totalDistance / 1000).toStringAsFixed(2);
       });
     }
   }
 
-  void onStepCount(StepCount event) {
-    print(event);
-    setState(() {
-      _steps = event.steps.toString();
-    });
-  }
-
-  void onPedestrianStatusChanged(PedestrianStatus event) {
-    print(event);
-    setState(() {
-      _status = event.status;
-    });
-  }
-
-  void onPedestrianStatusError(dynamic error) {
-    print('onPedestrianStatusError: $error');
-    setState(() {
-      _status = 'Pedestrian Status not available';
-    });
-    print(_status);
+  void onStepCount(StepCount event) async {
+    // Save to DB
+    await DatabaseHelper().updateUserSteps(event.steps);
+    // Refresh UI from DB to keep it consistent
+    _loadSteps();
   }
 
   void onStepCountError(dynamic error) {
     print('onStepCountError: $error');
-    setState(() {
-      _steps = 'Step Count not available';
-    });
+    // We don't necessarily need to show an error on screen, 
+    // just fail gracefully and keep showing stored steps.
   }
 
   Future<void> initPlatformState() async {
-    _pedestrianStatusStream = Pedometer.pedestrianStatusStream;
-    _pedestrianStatusStream
-        .listen(onPedestrianStatusChanged)
-        .onError(onPedestrianStatusError);
-
     _stepCountStream = Pedometer.stepCountStream;
     _stepCountStream.listen(onStepCount).onError(onStepCountError);
 
@@ -111,29 +132,11 @@ class _StatsScreenState extends State<StatsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Steps Taken', style: TextStyle(fontSize: 30)),
-            Text(_steps, style: TextStyle(fontSize: 60)),
-            const SizedBox(height: 20),
-            Text('Distance (km)', style: TextStyle(fontSize: 30)),
-            Text(_km, style: TextStyle(fontSize: 60)),
-            Divider(height: 100, thickness: 0, color: Colors.white),
-            Text('Pedestrian Status', style: TextStyle(fontSize: 30)),
-            Icon(
-              _status == 'walking'
-                  ? Icons.directions_walk
-                  : _status == 'stopped'
-                  ? Icons.accessibility_new
-                  : Icons.error,
-              size: 100,
-            ),
-            Center(
-              child: Text(
-                _status,
-                style: _status == 'walking' || _status == 'stopped'
-                    ? TextStyle(fontSize: 30)
-                    : TextStyle(fontSize: 20, color: Colors.red),
-              ),
-            ),
+            const Text('Total Steps', style: TextStyle(fontSize: 30)),
+            Text(_steps, style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 40),
+            const Text('Total Distance', style: TextStyle(fontSize: 30)),
+            Text('$_km km', style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
