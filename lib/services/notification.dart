@@ -69,3 +69,20 @@ void sendNotification(String text, {String title = 'Tracking Active'}) {
     ),
   );
 }
+
+void sendCollectionNotification(String title, String body) {
+  flutterLocalNotificationsPlugin.show(
+    DateTime.now().millisecondsSinceEpoch % 100000, // Unique ID
+    title,
+    body,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'collection_channel',
+        'Collection Updates',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    ),
+  );
+}

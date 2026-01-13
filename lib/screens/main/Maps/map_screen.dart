@@ -2,10 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:tracker/services/database_helper.dart';
 
 import 'package:tracker/models/nearby_user.dart';
 import 'package:tracker/network/repositories/location_repository.dart';
+import 'package:tracker/providers/auth_service_provider.dart';
+import 'package:tracker/providers/entity_provider.dart';
+import 'package:tracker/models/entity_model.dart' as model;
+import 'package:tracker/services/repo.dart'; // Add Repo import
+import 'collection_animation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -24,6 +30,10 @@ class _MapScreenState extends State<MapScreen> {
   Timer? _nearbyTimer;
   bool _hasInitiallyCentered = false;
   bool _shouldFollowUser = true;
+  model.Collection? _currentCollection;
+  StreamSubscription? _collectionSubscription;
+
+  bool _isInit = false;
 
   @override
   void initState() {
@@ -42,12 +52,38 @@ class _MapScreenState extends State<MapScreen> {
       const Duration(seconds: 30),
       (_) => _fetchNearbyUsers(),
     );
+    
+    // Listen for collection events from Provider (Foreground)
+    _collectionSubscription = context.read<EntityProvider>().onCollectionComplete.listen((collection) {
+        if (mounted) {
+            setState(() {
+                _currentCollection = collection;
+            });
+            // Show snackbar after a delay or let animation handle it
+        }
+    });
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInit) {
+      final userId = context.watch<AuthServiceProvider>().userId;
+      if (userId != null) {
+        _isInit = true;
+        debugPrint("MapScreen: Initializing EntityProvider for user $userId");
+        context.read<EntityProvider>().init(userId);
+      } else {
+        debugPrint("MapScreen: Waiting for userId...");
+      }
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     _nearbyTimer?.cancel();
+    _collectionSubscription?.cancel();
     _mapController.dispose();
     super.dispose();
   }
@@ -70,6 +106,26 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _refreshLocations() async {
     final points = await DatabaseHelper().getLocations();
+    // Also refresh entities from DB as the background service might have collected some
+    if (mounted) {
+         final provider = context.read<EntityProvider>();
+         // 1. Refresh from DB (sync with background)
+         await provider.refreshEntitiesFromDb();
+         
+         // 2. Check for foreground collection if we have a location
+         final user = await DatabaseHelper().getCurrentUser();
+         if (points.isNotEmpty && user != null) {
+             // 2. Check for foreground collection
+             await provider.checkProximityAndCollect(
+                 points.last.latitude, 
+                 points.last.longitude, 
+                 user.id
+             );
+             // 3. Poll for any collections (bg or fg) to trigger animation
+             await provider.checkForNewCollections(user.id);
+         }
+    }
+    
     if (points.isEmpty) return;
 
     List<List<LatLng>> segments = [];
@@ -215,6 +271,46 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
+  
+  void _showEntityInfo(model.Entity entity) {
+      showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.transparent,
+              backgroundImage: entity.entityType?.iconUrl != null
+                  ? NetworkImage(entity.entityType!.iconUrl!)
+                  : null,
+              child: entity.entityType?.iconUrl == null
+                  ? const Icon(Icons.extension, size: 40)
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              entity.entityType?.name ?? 'Unknown Item',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+             const SizedBox(height: 8),
+            Text(
+              entity.entityType?.description ?? '',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            Chip(label: Text('${entity.xpValue} XP'), backgroundColor: Colors.amber.withOpacity(0.2),),
+          ],
+        ),
+      ),
+    );
+  }
 
   String _timeAgo(DateTime d) {
     final diff = DateTime.now().difference(d);
@@ -228,6 +324,8 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final entities = context.watch<EntityProvider>().nearbyEntities;
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -260,6 +358,29 @@ class _MapScreenState extends State<MapScreen> {
                     )
                     .toList(),
               ),
+              // Nearby Entities Markers (drawn before users so users are on top)
+              MarkerLayer(
+                markers: entities.map((entity) => Marker(
+                  point: LatLng(entity.latitude, entity.longitude),
+                  width: 50,
+                  height: 50,
+                  child: GestureDetector(
+                    onTap: () => _showEntityInfo(entity),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            entity.entityType?.iconUrl != null 
+                              ? Image.network(entity.entityType!.iconUrl!, 
+                                  width: 50, 
+                                  height: 50,
+                                  errorBuilder: (c,e,s) => const Icon(Icons.extension, color: Colors.purple, size: 40))
+                              : const Icon(Icons.extension, color: Colors.purple, size: 40),
+                        ],
+                    ),
+                  ),
+                )).toList(),
+              ),
+              
               // Current User Marker
               if (_currentLocation != null)
                 MarkerLayer(
@@ -317,6 +438,20 @@ class _MapScreenState extends State<MapScreen> {
               child: const Icon(Icons.my_location),
             ),
           ),
+          
+          if (_currentCollection != null)
+            CollectionAnimationOverlay(
+                collection: _currentCollection!,
+                onAnimationComplete: () {
+                    setState(() {
+                         _currentCollection = null;
+                    });
+                     // Show snackbar after animation
+                     ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Collected ${_currentCollection?.entityType?.name ?? 'Item'}!"))
+                     );
+                },
+            ),
         ],
       ),
     );

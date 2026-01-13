@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tracker/screens/main/Achievements/achievements_screen.dart';
 import 'package:tracker/screens/main/Maps/map_screen.dart';
 import 'package:tracker/screens/main/Stats/stats_screen.dart';
 import 'package:tracker/screens/main/Settings/settings_screen.dart';
@@ -17,6 +18,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = [
     const MapScreen(),
     const StatsScreen(),
+    const AchievementsScreen(),
     const SettingsScreen(),
   ];
 
@@ -44,6 +46,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         destinations: const <Widget>[
           NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
           NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
+          NavigationDestination(icon: Icon(Icons.emoji_events), label: 'Achievements'),
           NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),

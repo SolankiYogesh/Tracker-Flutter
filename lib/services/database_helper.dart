@@ -7,6 +7,8 @@ final SETTING_TABLE = "app_settings";
 final LOCATION_TABLE = "locations";
 final USER_TABLE = "app_user";
 
+final ENTITY_TABLE = "entities";
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
@@ -25,7 +27,12 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -69,7 +76,33 @@ class DatabaseHelper {
       updated_at INTEGER
     )
   ''');
+    
+    await _createEntityTable(db);
+    
     await db.insert(SETTING_TABLE, {'id': 1, 'isDark': 1});
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createEntityTable(db);
+    }
+  }
+
+  Future<void> _createEntityTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $ENTITY_TABLE (
+        id TEXT PRIMARY KEY,
+        entity_type_id TEXT NOT NULL,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL,
+        spawn_radius REAL NOT NULL,
+        xp_value INTEGER NOT NULL,
+        is_collected INTEGER DEFAULT 0,
+        type_name TEXT,
+        type_icon_url TEXT,
+        type_rarity TEXT
+      )
+    ''');
   }
 
   Future<void> saveUser(UserResponse user) async {
@@ -199,5 +232,46 @@ class DatabaseHelper {
   Future<void> clearUser() async {
     final db = await database;
     await db.delete(USER_TABLE);
+  }
+
+  // --- Entity Methods ---
+
+  Future<void> saveEntities(List<dynamic> entities) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      for (var entity in entities) {
+        // We use dynamic here but expect Entity objects or compatible Maps
+        // Assuming Entity objects, using .toMap()
+        await txn.insert(
+          ENTITY_TABLE, 
+          entity.toMap(), 
+          conflictAlgorithm: ConflictAlgorithm.replace
+        );
+      }
+    });
+  }
+  
+  Future<List<Map<String, dynamic>>> getUncollectedEntities() async {
+    final db = await database;
+    return await db.query(
+      ENTITY_TABLE,
+      where: 'is_collected = ?',
+      whereArgs: [0],
+    );
+  }
+  
+  Future<void> markEntityAsCollected(String id) async {
+    final db = await database;
+    await db.update(
+      ENTITY_TABLE,
+      {'is_collected': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+  
+  Future<void> clearEntities() async {
+    final db = await database;
+    await db.delete(ENTITY_TABLE);
   }
 }
