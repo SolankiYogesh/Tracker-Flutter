@@ -24,8 +24,8 @@ String _formatDate(DateTime? date) {
 }
 
 class SettingProfileCard extends StatelessWidget {
-  final UserResponse user;
   const SettingProfileCard({super.key, required this.user});
+  final UserResponse user;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +70,7 @@ class SettingProfileCard extends StatelessWidget {
                   : null,
             ),
             child: user.picture == null
-                ? Icon(Icons.person, size: 36, color: AppColors.primary)
+                ? const Icon(Icons.person, size: 36, color: AppColors.primary)
                 : null,
           ),
           const SizedBox(width: 16),
@@ -124,7 +124,7 @@ class SettingProfileCard extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.edit, color: AppColors.primary, size: 20),
+          const Icon(Icons.edit, color: AppColors.primary, size: 20),
         ],
       ),
     );

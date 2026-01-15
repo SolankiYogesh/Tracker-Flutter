@@ -2,16 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final PermissionStatus status;
-  final VoidCallback onGrant;
-  final Color cardColor;
-  final Color accentColor;
-  final Color textColor;
-  final IconData icon;
-  final Color subTextColor;
-  final bool? isDone;
   const PermissionCard({
     super.key,
     this.isDone,
@@ -25,6 +15,16 @@ class PermissionCard extends StatelessWidget {
     required this.icon,
     required this.subTextColor,
   });
+  final String title;
+  final String subtitle;
+  final PermissionStatus status;
+  final VoidCallback onGrant;
+  final Color cardColor;
+  final Color accentColor;
+  final Color textColor;
+  final IconData icon;
+  final Color subTextColor;
+  final bool? isDone;
 
   @override
   Widget build(BuildContext context) {

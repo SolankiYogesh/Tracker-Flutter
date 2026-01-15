@@ -1,10 +1,4 @@
 class UserResponse {
-  final String id;
-  final String email;
-  final String? name;
-  final String? picture;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
 
   const UserResponse({
     required this.id,
@@ -21,12 +15,18 @@ class UserResponse {
       email: json['email'] as String,
       name: json['name'] as String?,
       picture: json['picture'] as String?,
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
+          ? DateTime.parse(json['updated_at'] as String)
           : null,
     );
   }
+  final String id;
+  final String email;
+  final String? name;
+  final String? picture;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
   @override
   String toString() {

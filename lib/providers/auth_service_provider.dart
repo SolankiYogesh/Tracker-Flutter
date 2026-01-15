@@ -7,12 +7,6 @@ import 'package:tracker/network/repositories/user_repository.dart';
 import 'package:tracker/services/database_helper.dart';
 
 class AuthServiceProvider extends ChangeNotifier {
-  final AuthRepository auth;
-  final UserRepository userRepo;
-
-  User? firebaseUser = FirebaseAuth.instance.currentUser;
-  UserResponse? appUser;
-
   AuthServiceProvider({required this.auth, required this.userRepo}) {
     auth.authStateChanges.listen((user) async {
       firebaseUser = FirebaseAuth.instance.currentUser;
@@ -27,6 +21,12 @@ class AuthServiceProvider extends ChangeNotifier {
       }
     });
   }
+
+  final AuthRepository auth;
+  final UserRepository userRepo;
+
+  User? firebaseUser = FirebaseAuth.instance.currentUser;
+  UserResponse? appUser;
   bool get isAuthenticated => firebaseUser != null;
   String? get userId => appUser?.id;
 

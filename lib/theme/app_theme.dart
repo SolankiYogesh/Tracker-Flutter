@@ -112,7 +112,7 @@ class AppTheme {
 
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.lightSurface,
-      indicatorColor: AppColors.primary.withOpacity(0.1),
+      indicatorColor: AppColors.primary.withValues(alpha: 0.1),
       elevation: 10,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -246,7 +246,7 @@ class AppTheme {
 
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.darkBackground,
-      indicatorColor: AppColors.primary.withOpacity(0.15),
+      indicatorColor: AppColors.primary.withValues(alpha: 0.15),
       elevation: 10,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {

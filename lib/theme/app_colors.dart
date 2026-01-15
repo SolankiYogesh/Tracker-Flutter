@@ -38,6 +38,6 @@ class AppColors {
   static const Color info = Color(0xFF3B82F6);
 
   // Glassmorphism Helpers
-  static Color lightGlass(double opacity) => Colors.white.withOpacity(opacity);
-  static Color darkGlass(double opacity) => const Color(0xFF0F172A).withOpacity(opacity);
+  static Color lightGlass(double opacity) => Colors.white.withValues(alpha: opacity);
+  static Color darkGlass(double opacity) => const Color(0xFF0F172A).withValues(alpha: opacity);
 }

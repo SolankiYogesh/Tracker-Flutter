@@ -16,7 +16,7 @@ class EntityRepository {
     String? userId,
   }) async {
     try {
-      final res = await _dio.get(
+      final res = await _dio.get<Map<String, dynamic>>(
         '/api/v1/entities/nearby',
         queryParameters: {
           'latitude': lat,
@@ -28,8 +28,8 @@ class EntityRepository {
             : null,
       );
       
-      final list = (res.data['entities'] as List)
-          .map((e) => Entity.fromJson(e))
+      final list = ((res.data as Map<String, dynamic>)['entities'] as List<dynamic>)
+          .map((e) => Entity.fromJson(e as Map<String, dynamic>))
           .toList();
       return list;
     } on DioException catch (e) {
@@ -64,7 +64,7 @@ class EntityRepository {
     String userId,
   ) async {
     try {
-      final res = await _dio.post(
+      final res = await _dio.post<Map<String, dynamic>>(
         '/api/v1/entities/collect',
         data: {
           'entity_id': entityId,
@@ -77,7 +77,7 @@ class EntityRepository {
       // Mark as collected locally immediately
       await _db.markEntityAsCollected(entityId);
       
-      return Collection.fromJson(res.data);
+      return Collection.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -86,8 +86,8 @@ class EntityRepository {
   /// Get user experience
   Future<UserExperience> getUserExperience(String userId) async {
      try {
-      final res = await _dio.get('/api/v1/users/$userId/experience');
-      return UserExperience.fromJson(res.data);
+      final res = await _dio.get<Map<String, dynamic>>('/api/v1/users/$userId/experience');
+      return UserExperience.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -96,14 +96,14 @@ class EntityRepository {
   /// Get user collections
   Future<UserCollectionsResponse> getUserCollections(String userId, {int limit = 50, int offset = 0}) async {
      try {
-      final res = await _dio.get(
+      final res = await _dio.get<Map<String, dynamic>>(
         '/api/v1/users/$userId/collections',
         queryParameters: {
           'limit': limit,
           'offset': offset,
         },
       );
-      return UserCollectionsResponse.fromJson(res.data);
+      return UserCollectionsResponse.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -111,14 +111,14 @@ class EntityRepository {
   /// Get leaderboard
   Future<LeaderboardResponse> fetchLeaderboard({int limit = 50, int offset = 0}) async {
      try {
-      final res = await _dio.get(
+      final res = await _dio.get<Map<String, dynamic>>(
         '/api/v1/leaderboard',
         queryParameters: {
           'limit': limit,
           'offset': offset,
         },
       );
-      return LeaderboardResponse.fromJson(res.data);
+      return LeaderboardResponse.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

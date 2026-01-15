@@ -1,8 +1,4 @@
 class BatchUploadResponse {
-  final bool success;
-  final int insertedCount;
-  final int failedCount;
-  final List<String>? errors;
 
   BatchUploadResponse({
     required this.success,
@@ -13,10 +9,14 @@ class BatchUploadResponse {
 
   factory BatchUploadResponse.fromJson(Map<String, dynamic> json) {
     return BatchUploadResponse(
-      success: json['success'],
-      insertedCount: json['inserted_count'],
-      failedCount: json['failed_count'],
-      errors: json['errors']?.cast<String>(),
+      success: json['success'] as bool,
+      insertedCount: json['inserted_count'] as int,
+      failedCount: json['failed_count'] as int,
+      errors: (json['errors'] as List<dynamic>?)?.cast<String>(),
     );
   }
+  final bool success;
+  final int insertedCount;
+  final int failedCount;
+  final List<String>? errors;
 }

@@ -1,8 +1,4 @@
 class UserCreate {
-  final String id;
-  final String email;
-  final String? name;
-  final String? picture;
 
   const UserCreate({
     required this.id,
@@ -10,6 +6,10 @@ class UserCreate {
     this.name,
     this.picture,
   });
+  final String id;
+  final String email;
+  final String? name;
+  final String? picture;
 
   Map<String, dynamic> toJson() {
     return {

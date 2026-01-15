@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class FaqItem extends StatelessWidget {
-  final String question;
-  final String answer;
 
   const FaqItem({super.key, required this.question, required this.answer});
+  final String question;
+  final String answer;
 
   @override
   Widget build(BuildContext context) {

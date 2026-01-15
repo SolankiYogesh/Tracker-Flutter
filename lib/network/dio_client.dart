@@ -7,8 +7,6 @@ import 'package:tracker/constants/app_constants.dart';
 import 'interceptors/api_key_interceptor.dart';
 
 class DioClient {
-  static final DioClient _instance = DioClient._internal();
-  late final Dio dio;
 
   factory DioClient() => _instance;
 
@@ -45,4 +43,6 @@ class DioClient {
 
     dio.interceptors.add(ApiKeyInterceptor());
   }
+  static final DioClient _instance = DioClient._internal();
+  late final Dio dio;
 }

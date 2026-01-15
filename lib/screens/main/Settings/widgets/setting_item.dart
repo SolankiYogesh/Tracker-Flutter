@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:tracker/theme/app_colors.dart';
 
 class SettingItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget trailing;
-  final VoidCallback onTap;
-  final IconData? leadingIcon;
   const SettingItem({
     super.key,
     required this.title,
@@ -15,6 +10,11 @@ class SettingItem extends StatelessWidget {
     required this.onTap,
     this.leadingIcon,
   });
+  final String title;
+  final String subtitle;
+  final Widget trailing;
+  final VoidCallback onTap;
+  final IconData? leadingIcon;
 
   @override
   Widget build(BuildContext context) {

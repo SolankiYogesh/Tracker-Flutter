@@ -47,7 +47,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           }
 
           if (leaderboard == null || leaderboard.leaderboard.isEmpty) {
-            return const Center(child: Text("No data available yet."));
+            return const Center(child: Text('No data available yet.'));
           }
 
           final entries = leaderboard.leaderboard;
@@ -64,7 +64,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 if (rest.isNotEmpty) 
                   const Padding(
                       padding: EdgeInsets.only(bottom: 10),
-                      child: Text("Runners Up", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      child: Text('Runners Up', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   ),
                 ...rest.map((e) => _buildRankItem(e, currentUserId)),
               ],
@@ -125,12 +125,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
                Text(
-                 "$place", 
+                 '$place', 
                  style: TextStyle(
                      fontSize: 32, 
                      fontWeight: FontWeight.bold, 
-                     color: color.withValues(alpha: 1.0) // Stronger color for number
-                 )
+                     color: color.withValues(alpha: 1.0), // Stronger color for number
+                 ),
                ),
             ],
           ),
@@ -148,14 +148,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       child: ListTile(
         leading: CircleAvatar(
             backgroundColor: Colors.transparent,
-            child: Text("#${entry.rank}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text('#${entry.rank}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         ),
         title: Text(
             entry.name ?? 'Unknown',
             style: TextStyle(fontWeight: isMe ? FontWeight.bold : FontWeight.normal),
         ),
-        subtitle: Text("Level ${entry.currentLevel} • ${entry.entitiesCollected} Items"),
-        trailing: Text("${entry.totalXp} XP", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+        subtitle: Text('Level ${entry.currentLevel} • ${entry.entitiesCollected} Items'),
+        trailing: Text('${entry.totalXp} XP', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
       ),
     );
   }

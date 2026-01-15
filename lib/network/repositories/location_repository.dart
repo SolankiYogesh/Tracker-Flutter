@@ -10,12 +10,12 @@ class LocationRepository {
 
   Future<BatchUploadResponse> uploadBatch(LocationBatch batch) async {
     try {
-      final res = await _dio.post(
+      final res = await _dio.post<Map<String, dynamic>>(
         '/api/v1/locations/batch',
         data: batch.toJson(),
       );
 
-      return BatchUploadResponse.fromJson(res.data);
+      return BatchUploadResponse.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -23,8 +23,8 @@ class LocationRepository {
 
   Future<Map<String, dynamic>> getRealtimeLocation(String userId) async {
     try {
-      final res = await _dio.get('/api/v1/locations/realtime/$userId');
-      return res.data;
+      final res = await _dio.get<Map<String, dynamic>>('/api/v1/locations/realtime/$userId');
+      return res.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -32,12 +32,12 @@ class LocationRepository {
 
   Future<List<NearbyUser>> getNearbyUsers(String userId) async {
     try {
-      final res = await _dio.get(
+      final res = await _dio.get<Map<String, dynamic>>(
         '/api/v1/locations/nearby/$userId',
         queryParameters: {'limit': 100, 'radius': 5000000},
       );
-      final List users = res.data['nearby_users'] ?? [];
-      return users.map((e) => NearbyUser.fromJson(e)).toList();
+      final List<dynamic> users = (res.data as Map<String, dynamic>)['nearby_users'] as List<dynamic>? ?? [];
+      return users.map((e) => NearbyUser.fromJson(e as Map<String, dynamic>)).toList();
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:tracker/theme/app_colors.dart';
 
 class SettingSection extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
   const SettingSection({
     super.key,
     required this.title,
     required this.icon,
     required this.children,
   });
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {

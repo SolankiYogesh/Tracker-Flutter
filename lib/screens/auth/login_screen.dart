@@ -14,14 +14,16 @@ class LoginScreen extends StatelessWidget {
         await context.read<AuthServiceProvider>().signInWithGoogle();
       } catch (e) {
         AppLogger.log(e);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
       }
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: const Text('Login')),
       body: Center(
         child: SignInButton(
           buttonType: ButtonType.google,

@@ -13,6 +13,10 @@ import 'package:tracker/utils/app_logger.dart';
 import 'package:tracker/network/repositories/entity_repository.dart';
 
 class Repo {
+  factory Repo() => _instance ??= Repo._();
+
+  Repo._();
+
   static Repo? _instance;
 
   final _locationRepository = LocationRepository();
@@ -23,10 +27,6 @@ class Repo {
 
   final _collectionController = StreamController<Collection>.broadcast();
   Stream<Collection> get onCollection => _collectionController.stream;
-
-  Repo._();
-
-  factory Repo() => _instance ??= Repo._();
 
   Future<void> update(BackgroundLocationUpdateData data) async {
     lastUpdateRecord = data;

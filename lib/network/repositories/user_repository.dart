@@ -10,8 +10,8 @@ class UserRepository {
 
   Future<UserResponse> createUser(UserCreate user) async {
     try {
-      final res = await _dio.post('/api/v1/users', data: user.toJson());
-      return UserResponse.fromJson(res.data);
+      final res = await _dio.post<Map<String, dynamic>>('/api/v1/users', data: user.toJson());
+      return UserResponse.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -19,8 +19,8 @@ class UserRepository {
 
   Future<UserResponse> getUser(String userId) async {
     try {
-      final res = await _dio.get('/api/v1/users/$userId');
-      return UserResponse.fromJson(res.data);
+      final res = await _dio.get<Map<String, dynamic>>('/api/v1/users/$userId');
+      return UserResponse.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -28,8 +28,8 @@ class UserRepository {
 
   Future<UserResponse> updateUser(String userId, UserUpdate user) async {
     try {
-      final res = await _dio.put('/api/v1/users/$userId', data: user.toJson());
-      return UserResponse.fromJson(res.data);
+      final res = await _dio.put<Map<String, dynamic>>('/api/v1/users/$userId', data: user.toJson());
+      return UserResponse.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

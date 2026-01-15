@@ -1,13 +1,4 @@
 class LocationPoint {
-  final String userId;
-  final double latitude;
-  final double longitude;
-  final DateTime recordedAt;
-  final double? accuracy;
-  final double? altitude;
-  final double? speed;
-  final double? bearing;
-  final bool isSynced;
 
   LocationPoint({
     required this.userId,
@@ -20,6 +11,29 @@ class LocationPoint {
     this.bearing,
     this.isSynced = false,
   });
+
+  factory LocationPoint.fromMap(Map<String, dynamic> map) {
+    return LocationPoint(
+      userId: map['user_id'] as String,
+      latitude: (map['latitude'] as num).toDouble(),
+      longitude: (map['longitude'] as num).toDouble(),
+      recordedAt: DateTime.fromMillisecondsSinceEpoch(map['recorded_at'] as int),
+      accuracy: (map['accuracy'] as num?)?.toDouble(),
+      altitude: (map['altitude'] as num?)?.toDouble(),
+      speed: (map['speed'] as num?)?.toDouble(),
+      bearing: (map['bearing'] as num?)?.toDouble(),
+      isSynced: map['is_synced'] == 1,
+    );
+  }
+  final String userId;
+  final double latitude;
+  final double longitude;
+  final DateTime recordedAt;
+  final double? accuracy;
+  final double? altitude;
+  final double? speed;
+  final double? bearing;
+  final bool isSynced;
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,
@@ -44,19 +58,5 @@ class LocationPoint {
       'bearing': bearing,
       'is_synced': isSynced ? 1 : 0,
     };
-  }
-
-  factory LocationPoint.fromMap(Map<String, dynamic> map) {
-    return LocationPoint(
-      userId: map['user_id'],
-      latitude: map['latitude'],
-      longitude: map['longitude'],
-      recordedAt: DateTime.fromMillisecondsSinceEpoch(map['recorded_at']),
-      accuracy: map['accuracy'],
-      altitude: map['altitude'],
-      speed: map['speed'],
-      bearing: map['bearing'],
-      isSynced: map['is_synced'] == 1,
-    );
   }
 }

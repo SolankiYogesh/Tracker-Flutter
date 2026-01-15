@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:tracker/models/entity_model.dart' as model; // Prefix if conflict
 
 class CollectionAnimationOverlay extends StatefulWidget {
-  final model.Collection collection;
-  final VoidCallback onAnimationComplete;
 
   const CollectionAnimationOverlay({
     super.key,
     required this.collection,
     required this.onAnimationComplete,
   });
+  final model.Collection collection;
+  final VoidCallback onAnimationComplete;
 
   @override
   State<CollectionAnimationOverlay> createState() => _CollectionAnimationOverlayState();

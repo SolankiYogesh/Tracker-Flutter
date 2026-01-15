@@ -3,22 +3,22 @@ import 'package:path/path.dart';
 import 'package:tracker/models/location_point.dart';
 import 'package:tracker/models/user_response.dart';
 
-final settingTable = "app_settings";
-final locationTable = "locations";
-final userTable = "app_user";
+const settingTable = 'app_settings';
+const locationTable = 'locations';
+const userTable = 'app_user';
 
-final entityTable = "entities";
-final userStatsTable = "user_stats";
+const entityTable = 'entities';
+const userStatsTable = 'user_stats';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  static Database? _database;
-
   factory DatabaseHelper() {
     return _instance;
   }
 
   DatabaseHelper._internal();
+
+  static final DatabaseHelper _instance = DatabaseHelper._internal();
+  static Database? _database;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -262,13 +262,13 @@ class DatabaseHelper {
   Future<void> saveEntities(List<dynamic> entities) async {
     final db = await database;
     await db.transaction((txn) async {
-      for (var entity in entities) {
+      for (final dynamic entity in entities) {
         // We use dynamic here but expect Entity objects or compatible Maps
         // Assuming Entity objects, using .toMap()
         await txn.insert(
-          entityTable, 
-          entity.toMap(), 
-          conflictAlgorithm: ConflictAlgorithm.replace
+          entityTable,
+          (entity as dynamic).toMap() as Map<String, Object?>,
+          conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
     });

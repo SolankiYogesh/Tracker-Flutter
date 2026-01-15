@@ -180,11 +180,11 @@ class EntityProvider extends ChangeNotifier {
 
           // Send notification
           sendCollectionNotification(
-            "Entity Collected!",
+            'Entity Collected!',
             "You found a ${entity.entityType?.name ?? 'Item'}! +${entity.xpValue} XP",
           );
         } catch (e) {
-          AppLogger.log("Error collecting entity in foreground: $e");
+          AppLogger.log('Error collecting entity in foreground: $e');
         }
       }
     }
@@ -218,7 +218,7 @@ class EntityProvider extends ChangeNotifier {
           // Ideally background service shows it. But user said no notification.
           // Let's show it here to be safe (might duplicate if BG works, but better than none)
           sendCollectionNotification(
-            "Entity Collected!",
+            'Entity Collected!',
             "You found a ${latest.entityType?.name ?? 'Item'}! +${latest.xpEarned} XP",
           );
 
@@ -227,7 +227,7 @@ class EntityProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      AppLogger.log("Error checking new collections: $e");
+      AppLogger.log('Error checking new collections: $e');
     }
   }
 

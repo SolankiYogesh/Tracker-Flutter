@@ -78,9 +78,9 @@ Future<void> main() async {
 }
 
 class TrackerApp extends StatelessWidget {
-  final bool isDarkTheme;
 
   const TrackerApp({super.key, required this.isDarkTheme});
+  final bool isDarkTheme;
 
   @override
   Widget build(BuildContext context) {
