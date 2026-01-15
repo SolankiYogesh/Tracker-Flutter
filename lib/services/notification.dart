@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:background_location_tracker/background_location_tracker.dart';
+import 'package:tracker/utils/app_logger.dart';
 
 // Top-level function for background action handling
 @pragma('vm:entry-point')
@@ -14,7 +15,9 @@ Future<void> notificationTapBackground(
     try {
       await BackgroundLocationTrackerManager.stopTracking();
       await FlutterLocalNotificationsPlugin().cancel(777);
-    } catch (e) {}
+    } catch (e) {
+      AppLogger.error('Error stopping tracking from notification', e);
+    }
   }
 }
 

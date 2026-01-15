@@ -89,7 +89,7 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.darkSurface,
-      indicatorColor: AppColors.primary.withOpacity(0.25),
+      indicatorColor: AppColors.primary.withValues(alpha: 0.25),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
           return const IconThemeData(color: AppColors.primary);

@@ -3,12 +3,12 @@ import 'package:path/path.dart';
 import 'package:tracker/models/location_point.dart';
 import 'package:tracker/models/user_response.dart';
 
-final SETTING_TABLE = "app_settings";
-final LOCATION_TABLE = "locations";
-final USER_TABLE = "app_user";
+final settingTable = "app_settings";
+final locationTable = "locations";
+final userTable = "app_user";
 
-final ENTITY_TABLE = "entities";
-final USER_STATS_TABLE = "user_stats";
+final entityTable = "entities";
+final userStatsTable = "user_stats";
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -38,7 +38,7 @@ class DatabaseHelper {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE $LOCATION_TABLE (
+      CREATE TABLE $locationTable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT NOT NULL,
         latitude REAL NOT NULL,
@@ -53,22 +53,22 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE INDEX idx_locations_user_time ON $LOCATION_TABLE(user_id, recorded_at)
+      CREATE INDEX idx_locations_user_time ON $locationTable(user_id, recorded_at)
     ''');
 
     await db.execute('''
-      CREATE INDEX idx_locations_synced ON $LOCATION_TABLE(is_synced)
+      CREATE INDEX idx_locations_synced ON $locationTable(is_synced)
     ''');
 
     await db.execute('''
-      CREATE TABLE $SETTING_TABLE(
+      CREATE TABLE $settingTable(
         id INTEGER PRIMARY KEY,
         isDark INTEGER
       )
     ''');
 
     await db.execute('''
-    CREATE TABLE $USER_TABLE (
+    CREATE TABLE $userTable (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL,
       name TEXT,
@@ -81,7 +81,7 @@ class DatabaseHelper {
     await _createEntityTable(db);
     await _createUserStatsTable(db);
     
-    await db.insert(SETTING_TABLE, {'id': 1, 'isDark': 1});
+    await db.insert(settingTable, {'id': 1, 'isDark': 1});
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -95,7 +95,7 @@ class DatabaseHelper {
 
   Future<void> _createUserStatsTable(Database db) async {
     await db.execute('''
-      CREATE TABLE $USER_STATS_TABLE (
+      CREATE TABLE $userStatsTable (
         id INTEGER PRIMARY KEY DEFAULT 1,
         total_steps INTEGER DEFAULT 0,
         last_boot_step_count INTEGER DEFAULT 0,
@@ -103,7 +103,7 @@ class DatabaseHelper {
       )
     ''');
     // Initialize with default row
-    await db.insert(USER_STATS_TABLE, {
+    await db.insert(userStatsTable, {
       'id': 1,
       'total_steps': 0,
        'last_boot_step_count': 0,
@@ -113,7 +113,7 @@ class DatabaseHelper {
 
   Future<void> _createEntityTable(Database db) async {
     await db.execute('''
-      CREATE TABLE $ENTITY_TABLE (
+      CREATE TABLE $entityTable (
         id TEXT PRIMARY KEY,
         entity_type_id TEXT NOT NULL,
         latitude REAL NOT NULL,
@@ -131,7 +131,7 @@ class DatabaseHelper {
   Future<void> saveUser(UserResponse user) async {
     final db = await database;
 
-    await db.insert(USER_TABLE, {
+    await db.insert(userTable, {
       'id': user.id,
       'email': user.email,
       'name': user.name,
@@ -143,7 +143,7 @@ class DatabaseHelper {
 
   Future<UserResponse?> getCurrentUser() async {
     final db = await database;
-    final res = await db.query(USER_TABLE, limit: 1);
+    final res = await db.query(userTable, limit: 1);
 
     if (res.isEmpty) return null;
 
@@ -163,7 +163,7 @@ class DatabaseHelper {
   Future<bool> getIsDarkTheme() async {
     final db = await database;
     final result = await db.query(
-      SETTING_TABLE,
+      settingTable,
       where: 'id = ?',
       whereArgs: [1],
       limit: 1,
@@ -178,7 +178,7 @@ class DatabaseHelper {
   Future<void> setIsDarkTheme(bool isDark) async {
     final db = await database;
     await db.update(
-      SETTING_TABLE,
+      settingTable,
       {'isDark': isDark ? 1 : 0},
       where: 'id = ?',
       whereArgs: [1],
@@ -187,13 +187,13 @@ class DatabaseHelper {
 
   Future<int> insertLocation(LocationPoint location) async {
     final db = await database;
-    return await db.insert(LOCATION_TABLE, location.toMap());
+    return await db.insert(locationTable, location.toMap());
   }
 
   Future<List<LocationPoint>> getUnsyncedLocations() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
-      LOCATION_TABLE,
+      locationTable,
       where: 'is_synced = ?',
       whereArgs: [0],
       orderBy: 'recorded_at ASC',
@@ -207,7 +207,7 @@ class DatabaseHelper {
       final batch = txn.batch();
       for (final id in ids) {
         batch.update(
-          LOCATION_TABLE,
+          locationTable,
           {'is_synced': 1},
           where: 'recorded_at = ?', // Using recorded_at as unique identifier since we don't have ID in model
           whereArgs: [id],
@@ -229,7 +229,7 @@ class DatabaseHelper {
     }
 
     final List<Map<String, dynamic>> maps = await db.query(
-      LOCATION_TABLE,
+      locationTable,
       where: whereClause,
       whereArgs: whereArgs,
       orderBy: 'recorded_at ASC',
@@ -254,7 +254,7 @@ class DatabaseHelper {
 
   Future<void> clearUser() async {
     final db = await database;
-    await db.delete(USER_TABLE);
+    await db.delete(userTable);
   }
 
   // --- Entity Methods ---
@@ -266,7 +266,7 @@ class DatabaseHelper {
         // We use dynamic here but expect Entity objects or compatible Maps
         // Assuming Entity objects, using .toMap()
         await txn.insert(
-          ENTITY_TABLE, 
+          entityTable, 
           entity.toMap(), 
           conflictAlgorithm: ConflictAlgorithm.replace
         );
@@ -277,16 +277,31 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getUncollectedEntities() async {
     final db = await database;
     return await db.query(
-      ENTITY_TABLE,
+      entityTable,
       where: 'is_collected = ?',
       whereArgs: [0],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getUncollectedEntitiesInBounds({
+    required double minLat,
+    required double maxLat,
+    required double minLon,
+    required double maxLon,
+  }) async {
+    final db = await database;
+    return await db.query(
+      entityTable,
+      where:
+          'is_collected = ? AND latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?',
+      whereArgs: [0, minLat, maxLat, minLon, maxLon],
     );
   }
   
   Future<void> markEntityAsCollected(String id) async {
     final db = await database;
     await db.update(
-      ENTITY_TABLE,
+      entityTable,
       {'is_collected': 1},
       where: 'id = ?',
       whereArgs: [id],
@@ -295,14 +310,14 @@ class DatabaseHelper {
   
   Future<void> clearEntities() async {
     final db = await database;
-    await db.delete(ENTITY_TABLE);
+    await db.delete(entityTable);
   }
 
   // --- Stats Methods ---
 
   Future<Map<String, dynamic>> getUserStats() async {
     final db = await database;
-    final res = await db.query(USER_STATS_TABLE, where: 'id = ?', whereArgs: [1]);
+    final res = await db.query(userStatsTable, where: 'id = ?', whereArgs: [1]);
     if (res.isNotEmpty) {
       return res.first;
     }
@@ -332,7 +347,7 @@ class DatabaseHelper {
     totalSteps += diff;
 
     await db.update(
-      USER_STATS_TABLE,
+      userStatsTable,
       {
         'total_steps': totalSteps,
         'last_boot_step_count': currentSensorSteps,

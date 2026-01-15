@@ -76,7 +76,15 @@ class Repo {
   ) async {
     try {
       final db = DatabaseHelper();
-      final entitiesMap = await db.getUncollectedEntities();
+      
+      // Optimization: Only fetch entities within ~500m
+      const double range = 0.005;
+      final entitiesMap = await db.getUncollectedEntitiesInBounds(
+        minLat: data.lat - range,
+        maxLat: data.lat + range,
+        minLon: data.lon - range,
+        maxLon: data.lon + range,
+      );
       final entities = entitiesMap.map((e) => Entity.fromMap(e)).toList();
 
       if (entities.isEmpty) return;

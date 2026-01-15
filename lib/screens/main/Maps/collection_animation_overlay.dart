@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/models/entity_model.dart';
+
 import 'package:tracker/models/entity_model.dart' as model; // Prefix if conflict
 
 class CollectionAnimationOverlay extends StatefulWidget {
@@ -83,7 +83,7 @@ class _CollectionAnimationOverlayState extends State<CollectionAnimationOverlay>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.amber.withOpacity(0.5),
+                              color: Colors.amber.withValues(alpha: 0.5),
                               blurRadius: 20,
                               spreadRadius: 5,
                             )

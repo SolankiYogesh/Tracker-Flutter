@@ -19,10 +19,15 @@ import 'package:tracker/router/app_router.dart';
 
 final repo = Repo();
 
+bool _isEnvLoaded = false;
+
 @pragma('vm:entry-point')
 void backgroundCallback() {
   BackgroundLocationTrackerManager.handleBackgroundUpdated((data) async {
-    await dotenv.load(); // Initialize for background isolate
+    if (!_isEnvLoaded) {
+      await dotenv.load(); // Initialize for background isolate
+      _isEnvLoaded = true;
+    }
     if (data.horizontalAccuracy < 50) {
       await repo.update(data);
     }

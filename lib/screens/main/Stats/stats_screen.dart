@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:tracker/utils/app_logger.dart';
 
 import 'package:latlong2/latlong.dart';
 import 'package:pedometer/pedometer.dart';
@@ -112,7 +113,7 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   void onStepCountError(dynamic error) {
-    print('onStepCountError: $error');
+    AppLogger.error('onStepCountError', error);
     // We don't necessarily need to show an error on screen, 
     // just fail gracefully and keep showing stored steps.
   }

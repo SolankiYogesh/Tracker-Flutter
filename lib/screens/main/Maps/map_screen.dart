@@ -10,7 +10,7 @@ import 'package:tracker/network/repositories/location_repository.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/providers/entity_provider.dart';
 import 'package:tracker/models/entity_model.dart' as model;
-import 'package:tracker/services/repo.dart'; // Add Repo import
+
 import 'collection_animation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
@@ -305,7 +305,7 @@ class _MapScreenState extends State<MapScreen> {
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 16),
-            Chip(label: Text('${entity.xpValue} XP'), backgroundColor: Colors.amber.withOpacity(0.2),),
+            Chip(label: Text('${entity.xpValue} XP'), backgroundColor: Colors.amber.withValues(alpha: 0.2),),
           ],
         ),
       ),
@@ -411,7 +411,7 @@ class _MapScreenState extends State<MapScreen> {
                         border: Border.all(color: Colors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 4,
                           ),
                         ],

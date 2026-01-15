@@ -117,9 +117,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           height: height,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.4),
+            color: color.withValues(alpha: 0.4),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            border: Border.all(color: color.withOpacity(0.6), width: 1),
+            border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -129,7 +129,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                  style: TextStyle(
                      fontSize: 32, 
                      fontWeight: FontWeight.bold, 
-                     color: color.withOpacity(1.0) // Stronger color for number
+                     color: color.withValues(alpha: 1.0) // Stronger color for number
                  )
                ),
             ],
@@ -143,7 +143,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     final isMe = entry.userId == currentUserId;
     return Card(
       elevation: isMe ? 4 : 1,
-      color: isMe ? Colors.blue.withOpacity(0.1) : null,
+      color: isMe ? Colors.blue.withValues(alpha: 0.1) : null,
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
