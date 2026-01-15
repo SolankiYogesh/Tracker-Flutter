@@ -67,6 +67,9 @@ class Repo {
     // 2. Ensure sync timer is running (Lazy Start)
     if (_syncTimer == null || !_syncTimer!.isActive) {
       _startSyncTimer();
+      // Overwrite the default plugin notification (ID 879848645) with our custom one
+      // that includes the "Stop" button. We only need to do this once.
+      sendNotification('Tracker is running');
     }
   }
 

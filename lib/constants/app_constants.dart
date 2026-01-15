@@ -94,7 +94,7 @@ class AppConstants {
   ///
   /// Usage: Used in `notification.dart` (init and send).
   /// Effect: Must be unique to avoid conflict with other notifications.
-  static const int notificationIdTracking = 777;
+  static const int notificationIdTracking = 879848645;
 
   /// Channel ID for the tracking notification (Android-specific).
   ///
