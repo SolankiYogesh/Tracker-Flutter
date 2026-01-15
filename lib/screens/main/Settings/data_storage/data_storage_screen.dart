@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/screens/main/Settings/data_storage/widgets/storage_usage_card.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
+import 'package:tracker/screens/main/settings/data_storage/widgets/storage_usage_card.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 import 'package:tracker/theme/app_colors.dart';
 
 class DataStorageScreen extends StatefulWidget {

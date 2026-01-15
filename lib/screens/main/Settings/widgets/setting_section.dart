@@ -16,8 +16,8 @@ class SettingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderColor = isDark
-        ? AppColors.darkGlassBorder
-        : AppColors.lightGlassBorder;
+        ? AppColors.darkBorder
+        : AppColors.lightBorder;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/screens/main/Settings/privacy_security/widgets/security_status_badge.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
+import 'package:tracker/screens/main/settings/privacy_security/widgets/security_status_badge.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 import 'package:tracker/theme/app_colors.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {

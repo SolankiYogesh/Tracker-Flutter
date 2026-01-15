@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/screens/main/Settings/help_support/widgets/faq_item.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
+import 'package:tracker/screens/main/settings/help_support/widgets/faq_item.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});

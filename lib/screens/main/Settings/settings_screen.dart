@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/providers/theme_provider.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_profile_card.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_section.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_profile_card.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_section.dart';
 import 'package:tracker/theme/app_colors.dart';
 import 'package:tracker/router/app_router.dart';
 

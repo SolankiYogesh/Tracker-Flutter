@@ -12,6 +12,7 @@ import 'package:tracker/providers/entity_provider.dart';
 import 'package:tracker/models/entity_model.dart' as model;
 
 import 'package:tracker/constants/app_constants.dart';
+import 'package:tracker/utils/app_logger.dart';
 import 'collection_animation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _hasInitiallyCentered = false;
   bool _shouldFollowUser = true;
   model.Collection? _currentCollection;
-  StreamSubscription? _collectionSubscription;
+  StreamSubscription<model.Collection>? _collectionSubscription;
 
   bool _isInit = false;
 
@@ -75,10 +76,12 @@ class _MapScreenState extends State<MapScreen> {
       final userId = context.watch<AuthServiceProvider>().userId;
       if (userId != null) {
         _isInit = true;
-        debugPrint("MapScreen: Initializing EntityProvider for user $userId");
+        AppLogger.log(
+          'MapScreen: Initializing EntityProvider for user $userId',
+        );
         context.read<EntityProvider>().init(userId);
       } else {
-        debugPrint("MapScreen: Waiting for userId...");
+        AppLogger.log('MapScreen: Waiting for userId...');
       }
     }
   }
@@ -104,7 +107,7 @@ class _MapScreenState extends State<MapScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error fetching nearby users: $e');
+      AppLogger.log('Error fetching nearby users: $e');
     }
   }
 
@@ -227,7 +230,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showUserInfo(NearbyUser user) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -277,7 +280,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showEntityInfo(model.Entity entity) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -321,12 +324,12 @@ class _MapScreenState extends State<MapScreen> {
 
   String _timeAgo(DateTime d) {
     final diff = DateTime.now().difference(d);
-    if (diff.inDays > 365) return "${(diff.inDays / 365).floor()}y ago";
-    if (diff.inDays > 30) return "${(diff.inDays / 30).floor()}mo ago";
-    if (diff.inDays > 0) return "${diff.inDays}d ago";
-    if (diff.inHours > 0) return "${diff.inHours}h ago";
-    if (diff.inMinutes > 0) return "${diff.inMinutes}m ago";
-    return "just now";
+    if (diff.inDays > 365) return '${(diff.inDays / 365).floor()}y ago';
+    if (diff.inDays > 30) return '${(diff.inDays / 30).floor()}mo ago';
+    if (diff.inDays > 0) return '${diff.inDays}d ago';
+    if (diff.inHours > 0) return '${diff.inHours}h ago';
+    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+    return 'just now';
   }
 
   @override

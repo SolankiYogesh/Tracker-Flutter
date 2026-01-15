@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tracker/router/app_router.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:tracker/screens/main/Permissions/widgets/permission_card.dart';
+import 'package:tracker/screens/main/permissions/widgets/permission_card.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/screens/main/Settings/help_support/help_support_screen.dart';
-import 'package:tracker/screens/main/Settings/about/about_screen.dart';
-import 'package:tracker/screens/main/Settings/data_storage/data_storage_screen.dart';
-import 'package:tracker/screens/main/Settings/privacy_security/privacy_security_screen.dart';
+import 'package:tracker/screens/main/settings/help_support/help_support_screen.dart';
+import 'package:tracker/screens/main/settings/about/about_screen.dart';
+import 'package:tracker/screens/main/settings/data_storage/data_storage_screen.dart';
+import 'package:tracker/screens/main/settings/privacy_security/privacy_security_screen.dart';
 import 'package:tracker/services/auth/auth_gate.dart';
-import 'package:tracker/screens/main/Permissions/permission_screen.dart';
+import 'package:tracker/screens/main/permissions/permission_screen.dart';
 import 'package:tracker/router/main_navigation_screen.dart';
 
 class AppRouter {

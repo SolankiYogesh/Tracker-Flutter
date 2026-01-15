@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracker/screens/main/Settings/about/widgets/about_app_card.dart';
-import 'package:tracker/screens/main/Settings/widgets/setting_item.dart';
+import 'package:tracker/screens/main/settings/about/widgets/about_app_card.dart';
+import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
