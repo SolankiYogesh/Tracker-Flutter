@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tracker/constants/app_constants.dart';
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tracker/models/entity_model.dart'; // Ensure Collection is imported
@@ -40,8 +41,6 @@ class Repo {
     // Check for nearby entities to collect
     _checkEntityCollection(data, user.id);
 
-    final text =
-        'Location: ${data.lat.toStringAsFixed(5)}, ${data.lon.toStringAsFixed(5)}';
     final locationPoint = LocationPoint(
       latitude: data.lat,
       longitude: data.lon,
@@ -62,11 +61,12 @@ class Repo {
       );
     }
 
-    sendNotification(text);
-
     // 2. Ensure sync timer is running (Lazy Start)
     if (_syncTimer == null || !_syncTimer!.isActive) {
       _startSyncTimer();
+      // Overwrite the default plugin notification (ID 879848645) with our custom one
+      // that includes the "Stop" button. We only need to do this once.
+      sendNotification('Tracker is running');
     }
   }
 
@@ -76,7 +76,7 @@ class Repo {
   ) async {
     try {
       final db = DatabaseHelper();
-      
+
       // Optimization: Only fetch entities within ~500m
       const double range = 0.005;
       final entitiesMap = await db.getUncollectedEntitiesInBounds(
@@ -141,7 +141,7 @@ class Repo {
       AppLogger.log('Starting periodic sync timer (30s)');
     }
     _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    _syncTimer = Timer.periodic(AppConstants.locationSyncInterval, (timer) {
       _syncLocations();
     });
     // Trigger immediately on start
@@ -208,8 +208,8 @@ class Repo {
 String _locationPointToString(LocationPoint point) {
   return '''
   userId: ${point.userId},
-  lat: ${point.latitude.toStringAsFixed(5)},
-  lon: ${point.longitude.toStringAsFixed(5)},
+  lat: ${point.latitude.toStringAsFixed(AppConstants.coordinatePrecision)},
+  lon: ${point.longitude.toStringAsFixed(AppConstants.coordinatePrecision)},
   accuracy: ${point.accuracy},
   altitude: ${point.altitude},
   speed: ${point.speed},

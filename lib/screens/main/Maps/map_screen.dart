@@ -11,6 +11,7 @@ import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/providers/entity_provider.dart';
 import 'package:tracker/models/entity_model.dart' as model;
 
+import 'package:tracker/constants/app_constants.dart';
 import 'collection_animation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
@@ -43,27 +44,30 @@ class _MapScreenState extends State<MapScreen> {
 
     // Refresh local path every 5 seconds
     _timer = Timer.periodic(
-      const Duration(seconds: 5),
+      AppConstants.mapRefreshInterval,
       (_) => _refreshLocations(),
     );
 
     // Refresh nearby users every 30 seconds
     _nearbyTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      AppConstants.nearbyUsersRefreshInterval,
       (_) => _fetchNearbyUsers(),
     );
-    
+
     // Listen for collection events from Provider (Foreground)
-    _collectionSubscription = context.read<EntityProvider>().onCollectionComplete.listen((collection) {
-        if (mounted) {
+    _collectionSubscription = context
+        .read<EntityProvider>()
+        .onCollectionComplete
+        .listen((collection) {
+          if (mounted) {
             setState(() {
-                _currentCollection = collection;
+              _currentCollection = collection;
             });
             // Show snackbar after a delay or let animation handle it
-        }
-    });
+          }
+        });
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -108,24 +112,24 @@ class _MapScreenState extends State<MapScreen> {
     final points = await DatabaseHelper().getLocations();
     // Also refresh entities from DB as the background service might have collected some
     if (mounted) {
-         final provider = context.read<EntityProvider>();
-         // 1. Refresh from DB (sync with background)
-         await provider.refreshEntitiesFromDb();
-         
-         // 2. Check for foreground collection if we have a location
-         final user = await DatabaseHelper().getCurrentUser();
-         if (points.isNotEmpty && user != null) {
-             // 2. Check for foreground collection
-             await provider.checkProximityAndCollect(
-                 points.last.latitude, 
-                 points.last.longitude, 
-                 user.id
-             );
-             // 3. Poll for any collections (bg or fg) to trigger animation
-             await provider.checkForNewCollections(user.id);
-         }
+      final provider = context.read<EntityProvider>();
+      // 1. Refresh from DB (sync with background)
+      await provider.refreshEntitiesFromDb();
+
+      // 2. Check for foreground collection if we have a location
+      final user = await DatabaseHelper().getCurrentUser();
+      if (points.isNotEmpty && user != null) {
+        // 2. Check for foreground collection
+        await provider.checkProximityAndCollect(
+          points.last.latitude,
+          points.last.longitude,
+          user.id,
+        );
+        // 3. Poll for any collections (bg or fg) to trigger animation
+        await provider.checkForNewCollections(user.id);
+      }
     }
-    
+
     if (points.isEmpty) return;
 
     List<List<LatLng>> segments = [];
@@ -140,7 +144,7 @@ class _MapScreenState extends State<MapScreen> {
         final lastPoint = currentSegment.last;
         final distance = const Distance().as(LengthUnit.Meter, lastPoint, p);
 
-        if (distance > 100) {
+        if (distance > AppConstants.polylineSegmentMaxDistance) {
           segments.add(currentSegment);
           currentSegment = [p];
         } else {
@@ -166,7 +170,7 @@ class _MapScreenState extends State<MapScreen> {
         if (_shouldFollowUser && _currentLocation != null) {
           _mapController.move(_currentLocation!, _mapController.camera.zoom);
         } else if (!_hasInitiallyCentered && _currentLocation != null) {
-          _mapController.move(_currentLocation!, 15.0);
+          _mapController.move(_currentLocation!, AppConstants.defaultMapZoom);
           _hasInitiallyCentered = true;
         }
       }
@@ -187,8 +191,8 @@ class _MapScreenState extends State<MapScreen> {
       LatLng p3 = padded[i + 3];
 
       // 10 points per segment for smoothness
-      for (int t = 0; t <= 10; t++) {
-        double tNorm = t / 10.0;
+      for (int t = 0; t <= AppConstants.splineSegmentSubdivisions; t++) {
+        double tNorm = t / AppConstants.splineSegmentSubdivisions.toDouble();
         double t2 = tNorm * tNorm;
         double t3 = t2 * tNorm;
 
@@ -218,7 +222,7 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _shouldFollowUser = true;
       });
-      _mapController.move(_currentLocation!, 15.0);
+      _mapController.move(_currentLocation!, AppConstants.defaultMapZoom);
     }
   }
 
@@ -271,9 +275,9 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-  
+
   void _showEntityInfo(model.Entity entity) {
-      showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -298,14 +302,17 @@ class _MapScreenState extends State<MapScreen> {
               entity.entityType?.name ?? 'Unknown Item',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-             const SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               entity.entityType?.description ?? '',
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 16),
-            Chip(label: Text('${entity.xpValue} XP'), backgroundColor: Colors.amber.withValues(alpha: 0.2),),
+            Chip(
+              label: Text('${entity.xpValue} XP'),
+              backgroundColor: Colors.amber.withValues(alpha: 0.2),
+            ),
           ],
         ),
       ),
@@ -325,7 +332,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final entities = context.watch<EntityProvider>().nearbyEntities;
-    
+
     return Scaffold(
       body: Stack(
         children: [
@@ -333,7 +340,7 @@ class _MapScreenState extends State<MapScreen> {
             mapController: _mapController,
             options: MapOptions(
               initialCenter: const LatLng(0, 0),
-              initialZoom: 15.0,
+              initialZoom: AppConstants.defaultMapZoom,
               onPositionChanged: (position, hasGesture) {
                 if (hasGesture) {
                   setState(() {
@@ -344,7 +351,12 @@ class _MapScreenState extends State<MapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: Theme.of(context).brightness == Brightness.dark
+                    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: Theme.of(context).brightness == Brightness.dark
+                    ? const ['a', 'b', 'c', 'd']
+                    : const ['a', 'b', 'c'],
                 userAgentPackageName: 'com.baazinfotech.tracktor',
               ),
               PolylineLayer(
@@ -360,27 +372,41 @@ class _MapScreenState extends State<MapScreen> {
               ),
               // Nearby Entities Markers (drawn before users so users are on top)
               MarkerLayer(
-                markers: entities.map((entity) => Marker(
-                  point: LatLng(entity.latitude, entity.longitude),
-                  width: 50,
-                  height: 50,
-                  child: GestureDetector(
-                    onTap: () => _showEntityInfo(entity),
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                            entity.entityType?.iconUrl != null 
-                              ? Image.network(entity.entityType!.iconUrl!, 
-                                  width: 50, 
-                                  height: 50,
-                                  errorBuilder: (c,e,s) => const Icon(Icons.extension, color: Colors.purple, size: 40))
-                              : const Icon(Icons.extension, color: Colors.purple, size: 40),
-                        ],
-                    ),
-                  ),
-                )).toList(),
+                markers: entities
+                    .map(
+                      (entity) => Marker(
+                        point: LatLng(entity.latitude, entity.longitude),
+                        width: 50,
+                        height: 50,
+                        child: GestureDetector(
+                          onTap: () => _showEntityInfo(entity),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              entity.entityType?.iconUrl != null
+                                  ? Image.network(
+                                      entity.entityType!.iconUrl!,
+                                      width: 50,
+                                      height: 50,
+                                      errorBuilder: (c, e, s) => const Icon(
+                                        Icons.extension,
+                                        color: Colors.purple,
+                                        size: 40,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.extension,
+                                      color: Colors.purple,
+                                      size: 40,
+                                    ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
-              
+
               // Current User Marker
               if (_currentLocation != null)
                 MarkerLayer(
@@ -399,34 +425,38 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               // Nearby Users Markers
               MarkerLayer(
-                markers: _nearbyUsers.map((user) => Marker(
-                  point: LatLng(user.latitude, user.longitude),
-                  width: 40,
-                  height: 40,
-                  child: GestureDetector(
-                    onTap: () => _showUserInfo(user),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 4,
+                markers: _nearbyUsers
+                    .map(
+                      (user) => Marker(
+                        point: LatLng(user.latitude, user.longitude),
+                        width: 40,
+                        height: 40,
+                        child: GestureDetector(
+                          onTap: () => _showUserInfo(user),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              backgroundImage: user.picture != null
+                                  ? NetworkImage(user.picture!)
+                                  : null,
+                              child: user.picture == null
+                                  ? const Icon(Icons.person, size: 24)
+                                  : null,
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                      child: CircleAvatar(
-                        backgroundImage: user.picture != null 
-                          ? NetworkImage(user.picture!) 
-                          : null,
-                        child: user.picture == null 
-                          ? const Icon(Icons.person, size: 24)
-                          : null,
-                      ),
-                    ),
-                  ),
-                )).toList(),
+                    )
+                    .toList(),
               ),
             ],
           ),
@@ -438,19 +468,23 @@ class _MapScreenState extends State<MapScreen> {
               child: const Icon(Icons.my_location),
             ),
           ),
-          
+
           if (_currentCollection != null)
             CollectionAnimationOverlay(
-                collection: _currentCollection!,
-                onAnimationComplete: () {
-                    setState(() {
-                         _currentCollection = null;
-                    });
-                     // Show snackbar after animation
-                     ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Collected ${_currentCollection?.entityType?.name ?? 'Item'}!"))
-                     );
-                },
+              collection: _currentCollection!,
+              onAnimationComplete: () {
+                setState(() {
+                  _currentCollection = null;
+                });
+                // Show snackbar after animation
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "Collected ${_currentCollection?.entityType?.name ?? 'Item'}!",
+                    ),
+                  ),
+                );
+              },
             ),
         ],
       ),

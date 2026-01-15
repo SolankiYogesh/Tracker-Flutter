@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:tracker/constants/env.dart';
 import 'package:tracker/utils/talker.dart';
+import 'package:tracker/constants/app_constants.dart';
 import 'interceptors/api_key_interceptor.dart';
 
 class DioClient {
@@ -15,8 +16,8 @@ class DioClient {
     dio = Dio(
       BaseOptions(
         baseUrl: Env.baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: AppConstants.apiConnectTimeout,
+        receiveTimeout: AppConstants.apiReceiveTimeout,
         responseType: ResponseType.json,
       ),
     );
