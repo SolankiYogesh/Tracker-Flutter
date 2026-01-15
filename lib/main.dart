@@ -62,7 +62,9 @@ Future<void> main() async {
             userRepo: UserRepository(),
           ),
         ),
-        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(initialIsDark: isDarkTheme),
+        ),
         ChangeNotifierProvider<EntityProvider>(create: (_) => EntityProvider()),
       ],
       child: TrackerApp(isDarkTheme: isDarkTheme),

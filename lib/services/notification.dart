@@ -58,6 +58,7 @@ void sendNotification(String text, {String title = 'Tracking Active'}) {
         importance: Importance.low,
         priority: Priority.low,
         ongoing: true,
+        onlyAlertOnce: true,
         actions: [
           AndroidNotificationAction(
             'stop_tracking',

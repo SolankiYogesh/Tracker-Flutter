@@ -4,6 +4,12 @@ import 'package:tracker/services/database_helper.dart';
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
 
+  ThemeProvider({bool? initialIsDark}) {
+    if (initialIsDark != null) {
+      _themeMode = initialIsDark ? ThemeMode.dark : ThemeMode.light;
+    }
+  }
+
   ThemeMode get themeMode => _themeMode;
 
   bool get isDark =>

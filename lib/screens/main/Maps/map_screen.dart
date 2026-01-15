@@ -344,7 +344,12 @@ class _MapScreenState extends State<MapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: Theme.of(context).brightness == Brightness.dark
+                    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: Theme.of(context).brightness == Brightness.dark
+                    ? const ['a', 'b', 'c', 'd']
+                    : const ['a', 'b', 'c'],
                 userAgentPackageName: 'com.baazinfotech.tracktor',
               ),
               PolylineLayer(

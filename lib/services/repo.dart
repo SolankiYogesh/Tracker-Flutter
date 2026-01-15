@@ -62,7 +62,6 @@ class Repo {
       );
     }
 
-    sendNotification(text);
 
     // 2. Ensure sync timer is running (Lazy Start)
     if (_syncTimer == null || !_syncTimer!.isActive) {
