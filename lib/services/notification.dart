@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:background_location_tracker/background_location_tracker.dart';
+import 'package:tracker/constants/app_constants.dart';
 
 // Top-level function for background action handling
 @pragma('vm:entry-point')
@@ -13,7 +14,7 @@ Future<void> notificationTapBackground(
   if (notificationResponse.actionId == 'stop_tracking') {
     try {
       await BackgroundLocationTrackerManager.stopTracking();
-      await FlutterLocalNotificationsPlugin().cancel(777);
+      await FlutterLocalNotificationsPlugin().cancel(AppConstants.notificationIdTracking);
     } catch (e) {}
   }
 }
@@ -36,7 +37,7 @@ Future<void> initNotifications() async {
     onDidReceiveNotificationResponse: (details) async {
       if (details.actionId == 'stop_tracking') {
         await BackgroundLocationTrackerManager.stopTracking();
-        await flutterLocalNotificationsPlugin.cancel(777);
+        await flutterLocalNotificationsPlugin.cancel(AppConstants.notificationIdTracking);
       }
     },
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -48,12 +49,12 @@ void sendNotification(String text, {String title = 'Tracking Active'}) {
   // (Assuming initNotifications is called in main)
 
   flutterLocalNotificationsPlugin.show(
-    777, // Fixed ID
+    AppConstants.notificationIdTracking, // Fixed ID
     title,
     text,
     const NotificationDetails(
       android: AndroidNotificationDetails(
-        'tracking_channel',
+        AppConstants.notificationChannelIdTracking,
         'Tracking Updates',
         importance: Importance.low,
         priority: Priority.low,

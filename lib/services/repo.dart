@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tracker/constants/app_constants.dart';
 import 'package:background_location_tracker/background_location_tracker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tracker/models/entity_model.dart'; // Ensure Collection is imported
@@ -41,7 +42,7 @@ class Repo {
     _checkEntityCollection(data, user.id);
 
     final text =
-        'Location: ${data.lat.toStringAsFixed(5)}, ${data.lon.toStringAsFixed(5)}';
+        'Location: ${data.lat.toStringAsFixed(AppConstants.coordinatePrecision)}, ${data.lon.toStringAsFixed(AppConstants.coordinatePrecision)}';
     final locationPoint = LocationPoint(
       latitude: data.lat,
       longitude: data.lon,
@@ -132,7 +133,7 @@ class Repo {
       AppLogger.log('Starting periodic sync timer (30s)');
     }
     _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    _syncTimer = Timer.periodic(AppConstants.locationSyncInterval, (timer) {
       _syncLocations();
     });
     // Trigger immediately on start
@@ -199,8 +200,8 @@ class Repo {
 String _locationPointToString(LocationPoint point) {
   return '''
   userId: ${point.userId},
-  lat: ${point.latitude.toStringAsFixed(5)},
-  lon: ${point.longitude.toStringAsFixed(5)},
+  lat: ${point.latitude.toStringAsFixed(AppConstants.coordinatePrecision)},
+  lon: ${point.longitude.toStringAsFixed(AppConstants.coordinatePrecision)},
   accuracy: ${point.accuracy},
   altitude: ${point.altitude},
   speed: ${point.speed},

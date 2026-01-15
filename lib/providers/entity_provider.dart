@@ -4,6 +4,7 @@ import 'package:tracker/models/entity_model.dart';
 import 'package:tracker/network/repositories/entity_repository.dart';
 import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/notification.dart';
+import 'package:tracker/constants/app_constants.dart';
 import 'package:latlong2/latlong.dart';
 
 class EntityProvider extends ChangeNotifier {
@@ -51,7 +52,7 @@ class EntityProvider extends ChangeNotifier {
 
   void startPeriodicFetch(String userId) {
     _fetchTimer?.cancel();
-    _fetchTimer = Timer.periodic(const Duration(seconds: 50), (timer) {
+    _fetchTimer = Timer.periodic(AppConstants.entityFetchInterval, (timer) {
       fetchNearbyEntities(userId);
     });
     // Trigger immediately
@@ -211,7 +212,7 @@ class EntityProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _leaderboard = await _repo.fetchLeaderboard(limit: 50);
+      _leaderboard = await _repo.fetchLeaderboard(limit: AppConstants.leaderboardLimit);
     } catch (e) {
       debugPrint('Error fetching leaderboard: $e');
     } finally {

@@ -11,6 +11,7 @@ import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/providers/entity_provider.dart';
 import 'package:tracker/models/entity_model.dart' as model;
 import 'package:tracker/services/repo.dart'; // Add Repo import
+import 'package:tracker/constants/app_constants.dart';
 import 'collection_animation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
@@ -43,13 +44,13 @@ class _MapScreenState extends State<MapScreen> {
 
     // Refresh local path every 5 seconds
     _timer = Timer.periodic(
-      const Duration(seconds: 5),
+      AppConstants.mapRefreshInterval,
       (_) => _refreshLocations(),
     );
 
     // Refresh nearby users every 30 seconds
     _nearbyTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      AppConstants.nearbyUsersRefreshInterval,
       (_) => _fetchNearbyUsers(),
     );
     
@@ -140,7 +141,7 @@ class _MapScreenState extends State<MapScreen> {
         final lastPoint = currentSegment.last;
         final distance = const Distance().as(LengthUnit.Meter, lastPoint, p);
 
-        if (distance > 100) {
+        if (distance > AppConstants.polylineSegmentMaxDistance) {
           segments.add(currentSegment);
           currentSegment = [p];
         } else {
@@ -166,7 +167,7 @@ class _MapScreenState extends State<MapScreen> {
         if (_shouldFollowUser && _currentLocation != null) {
           _mapController.move(_currentLocation!, _mapController.camera.zoom);
         } else if (!_hasInitiallyCentered && _currentLocation != null) {
-          _mapController.move(_currentLocation!, 15.0);
+          _mapController.move(_currentLocation!, AppConstants.defaultMapZoom);
           _hasInitiallyCentered = true;
         }
       }
@@ -187,8 +188,8 @@ class _MapScreenState extends State<MapScreen> {
       LatLng p3 = padded[i + 3];
 
       // 10 points per segment for smoothness
-      for (int t = 0; t <= 10; t++) {
-        double tNorm = t / 10.0;
+      for (int t = 0; t <= AppConstants.splineSegmentSubdivisions; t++) {
+        double tNorm = t / AppConstants.splineSegmentSubdivisions.toDouble();
         double t2 = tNorm * tNorm;
         double t3 = t2 * tNorm;
 
@@ -218,7 +219,7 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _shouldFollowUser = true;
       });
-      _mapController.move(_currentLocation!, 15.0);
+      _mapController.move(_currentLocation!, AppConstants.defaultMapZoom);
     }
   }
 
@@ -333,7 +334,7 @@ class _MapScreenState extends State<MapScreen> {
             mapController: _mapController,
             options: MapOptions(
               initialCenter: const LatLng(0, 0),
-              initialZoom: 15.0,
+              initialZoom: AppConstants.defaultMapZoom,
               onPositionChanged: (position, hasGesture) {
                 if (hasGesture) {
                   setState(() {

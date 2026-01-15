@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:latlong2/latlong.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:tracker/services/database_helper.dart';
+import 'package:tracker/constants/app_constants.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -24,7 +25,7 @@ class _StatsScreenState extends State<StatsScreen> {
     initPlatformState();
     _refreshStats();
     // Refresh stats periodically
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _refreshTimer = Timer.periodic(AppConstants.statsRefreshInterval, (timer) {
       _refreshStats();
     });
   }
@@ -65,10 +66,10 @@ class _StatsScreenState extends State<StatsScreen> {
     
     // Minimum accuracy required to consider a point (in meters).
     // If accuracy is worse (higher number) than this, we skip it.
-    const double minAccuracyThreshold = 30.0; 
+    const double minAccuracyThreshold = AppConstants.gpsMinAccuracyThreshold; 
     
     // Max reasonable speed in m/s (approx 100 km/h) to filter out jumps.
-    const double maxSpeedMps = 28.0; 
+    const double maxSpeedMps = AppConstants.gpsMaxSpeedMps; 
 
     for (int i = 0; i < points.length - 1; i++) {
         final p1 = points[i];
@@ -88,7 +89,7 @@ class _StatsScreenState extends State<StatsScreen> {
         // If points are extremely close in time but far in distance, it's likely a jump.
         // Allow for some gap: if timeDiff is 0 (same second), we skip unless distance is negligible.
         if (timeDiffSeconds <= 0) {
-            if (dist > 5) continue; // Skip if > 5m movement in 0 seconds
+            if (dist > AppConstants.gpsMaxInstantJump) continue; // Skip if > 5m movement in 0 seconds
         } else {
             final calculatedSpeed = dist / timeDiffSeconds;
             if (calculatedSpeed > maxSpeedMps) continue;
