@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tracker/services/database_helper.dart';
 
 import 'package:tracker/models/nearby_user.dart';
@@ -232,46 +233,123 @@ class _MapScreenState extends State<MapScreen> {
   void _showUserInfo(NearbyUser user) {
     showModalBottomSheet<void>(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
             CircleAvatar(
-              radius: 40,
-              backgroundImage: user.picture != null
-                  ? NetworkImage(user.picture!)
-                  : null,
-              child: user.picture == null
-                  ? const Icon(Icons.person, size: 40)
-                  : null,
+              radius: 45,
+              backgroundImage:
+                  user.picture != null ? NetworkImage(user.picture!) : null,
+              child:
+                  user.picture == null ? const Icon(Icons.person, size: 45) : null,
             ),
             const SizedBox(height: 16),
             Text(
               user.name ?? 'Unknown User',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.place, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  '${user.distanceMeters.toStringAsFixed(0)}m away',
-                  style: const TextStyle(color: Colors.grey),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.place, size: 16, color: Colors.blue),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${user.distanceMeters.toStringAsFixed(0)}m away',
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 16),
-                const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  'Active ${_timeAgo(user.lastUpdated)}',
-                  style: const TextStyle(color: Colors.grey),
+                const SizedBox(width: 12),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time,
+                        size: 16,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Active ${_timeAgo(user.lastUpdated)}',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: () => _openDirections(user.latitude, user.longitude),
+                icon: const Icon(Icons.directions_outlined),
+                label: const Text(
+                  'Get Directions',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -282,44 +360,138 @@ class _MapScreenState extends State<MapScreen> {
   void _showEntityInfo(model.Entity entity) {
     showModalBottomSheet<void>(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
             CircleAvatar(
-              radius: 40,
+              radius: 45,
               backgroundColor: Colors.transparent,
               backgroundImage: entity.entityType?.iconUrl != null
                   ? NetworkImage(entity.entityType!.iconUrl!)
                   : null,
               child: entity.entityType?.iconUrl == null
-                  ? const Icon(Icons.extension, size: 40)
+                  ? const Icon(Icons.extension, size: 45)
                   : null,
             ),
             const SizedBox(height: 16),
             Text(
               entity.entityType?.name ?? 'Unknown Item',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              entity.entityType?.description ?? '',
+              entity.entityType?.description ?? 'Discover this item on the map',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 16,
+                height: 1.4,
+              ),
             ),
-            const SizedBox(height: 16),
-            Chip(
-              label: Text('${entity.xpValue} XP'),
-              backgroundColor: Colors.amber.withValues(alpha: 0.2),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.bolt, color: Colors.amber, size: 20),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${entity.xpValue} XP',
+                    style: const TextStyle(
+                      color: Colors.amber,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: () =>
+                    _openDirections(entity.latitude, entity.longitude),
+                icon: const Icon(Icons.directions_outlined),
+                label: const Text(
+                  'Get Directions',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _openDirections(double lat, double lng) async {
+    final Uri googleMapsUrl = Uri.parse('google.navigation:q=$lat,$lng');
+    final Uri appleMapsUrl = Uri.parse(
+      'https://maps.apple.com/?daddr=$lat,$lng',
+    );
+    final Uri fallbackUrl = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+    );
+
+    try {
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl);
+      } else if (await canLaunchUrl(appleMapsUrl)) {
+        await launchUrl(appleMapsUrl);
+      } else {
+        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      AppLogger.log('Error launching maps: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open map directions')),
+        );
+      }
+    }
   }
 
   String _timeAgo(DateTime d) {

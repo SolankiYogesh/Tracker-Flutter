@@ -6,7 +6,7 @@ import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 import 'package:tracker/screens/main/settings/widgets/setting_profile_card.dart';
 import 'package:tracker/screens/main/settings/widgets/setting_section.dart';
 import 'package:tracker/theme/app_colors.dart';
-import 'package:tracker/router/app_router.dart';
+// import 'package:tracker/router/app_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,8 +18,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   bool _locationTracking = true;
-  bool _autoSync = true;
-  bool _privacyMode = false;
+  // bool _autoSync = true;
+  // bool _privacyMode = false;
 
   @override
   void initState() {
@@ -141,182 +141,181 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
 
-                    SettingSection(
-                      title: 'Privacy & Security',
-                      icon: Icons.security,
-                      children: [
-                        SettingItem(
-                          title: 'Privacy & Security Settings',
-                          subtitle: 'Manage your account security',
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .color!
-                                .withValues(alpha: .5),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRouter.privacySecurity,
-                            );
-                          },
-                          leadingIcon: Icons.security_outlined,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'Privacy Mode',
-                          subtitle: 'Hide sensitive information',
-                          trailing: Switch(
-                            value: _privacyMode,
-                            onChanged: (value) {
-                              setState(() {
-                                _privacyMode = value;
-                              });
-                            },
-                            activeThumbColor: AppColors.primary,
-                          ),
-                          onTap: () {
-                            setState(() {
-                              _privacyMode = !_privacyMode;
-                            });
-                          },
-                          leadingIcon: Icons.visibility_off,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'Auto Sync',
-                          subtitle: 'Automatically sync data',
-                          trailing: Switch(
-                            value: _autoSync,
-                            onChanged: (value) {
-                              setState(() {
-                                _autoSync = value;
-                              });
-                            },
-                            activeThumbColor: AppColors.primary,
-                          ),
-                          onTap: () {
-                            setState(() {
-                              _autoSync = !_autoSync;
-                            });
-                          },
-                          leadingIcon: Icons.sync,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'Data & Storage',
-                          subtitle: 'Manage storage and cache',
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .color!
-                                .withValues(alpha: .5),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRouter.dataStorage);
-                          },
-                          leadingIcon: Icons.storage,
-                        ),
-                      ],
-                    ),
+                    // SettingSection(
+                    //   title: 'Privacy & Security',
+                    //   icon: Icons.security,
+                    //   children: [
+                    //     SettingItem(
+                    //       title: 'Privacy & Security Settings',
+                    //       subtitle: 'Manage your account security',
+                    //       trailing: Icon(
+                    //         Icons.chevron_right,
+                    //         color: Theme.of(context)
+                    //             .textTheme
+                    //             .bodyMedium!
+                    //             .color!
+                    //             .withValues(alpha: .5),
+                    //       ),
+                    //       onTap: () {
+                    //         Navigator.pushNamed(
+                    //           context,
+                    //           AppRouter.privacySecurity,
+                    //         );
+                    //       },
+                    //       leadingIcon: Icons.security_outlined,
+                    //     ),
+                    //     Divider(
+                    //       height: 1,
+                    //       thickness: 0.5,
+                    //       color: Theme.of(
+                    //         context,
+                    //       ).dividerColor.withValues(alpha: .3),
+                    //       indent: 64,
+                    //     ),
+                    //     SettingItem(
+                    //       title: 'Privacy Mode',
+                    //       subtitle: 'Hide sensitive information',
+                    //       trailing: Switch(
+                    //         value: _privacyMode,
+                    //         onChanged: (value) {
+                    //           setState(() {
+                    //             _privacyMode = value;
+                    //           });
+                    //         },
+                    //         activeThumbColor: AppColors.primary,
+                    //       ),
+                    //       onTap: () {
+                    //         setState(() {
+                    //           _privacyMode = !_privacyMode;
+                    //         });
+                    //       },
+                    //       leadingIcon: Icons.visibility_off,
+                    //     ),
+                    //     Divider(
+                    //       height: 1,
+                    //       thickness: 0.5,
+                    //       color: Theme.of(
+                    //         context,
+                    //       ).dividerColor.withValues(alpha: .3),
+                    //       indent: 64,
+                    //     ),
+                    //     SettingItem(
+                    //       title: 'Auto Sync',
+                    //       subtitle: 'Automatically sync data',
+                    //       trailing: Switch(
+                    //         value: _autoSync,
+                    //         onChanged: (value) {
+                    //           setState(() {
+                    //             _autoSync = value;
+                    //           });
+                    //         },
+                    //         activeThumbColor: AppColors.primary,
+                    //       ),
+                    //       onTap: () {
+                    //         setState(() {
+                    //           _autoSync = !_autoSync;
+                    //         });
+                    //       },
+                    //       leadingIcon: Icons.sync,
+                    //     ),
+                    //     Divider(
+                    //       height: 1,
+                    //       thickness: 0.5,
+                    //       color: Theme.of(
+                    //         context,
+                    //       ).dividerColor.withValues(alpha: .3),
+                    //       indent: 64,
+                    //     ),
+                    //     SettingItem(
+                    //       title: 'Data & Storage',
+                    //       subtitle: 'Manage storage and cache',
+                    //       trailing: Icon(
+                    //         Icons.chevron_right,
+                    //         color: Theme.of(context)
+                    //             .textTheme
+                    //             .bodyMedium!
+                    //             .color!
+                    //             .withValues(alpha: .5),
+                    //       ),
+                    //       onTap: () {
+                    //         Navigator.pushNamed(context, AppRouter.dataStorage);
+                    //       },
+                    //       leadingIcon: Icons.storage,
+                    //     ),
+                    //   ],
+                    // ),
 
                     // Support Section
-                    SettingSection(
-                      title: 'Support',
-                      icon: Icons.help,
-                      children: [
-                        SettingItem(
-                          title: 'Help & Support',
-                          subtitle: 'Get help with the app',
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .color!
-                                .withValues(alpha: .5),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRouter.helpSupport);
-                          },
-                          leadingIcon: Icons.help_center,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'About',
-                          subtitle: 'App version and info',
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .color!
-                                .withValues(alpha: .5),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRouter.about);
-                          },
-                          leadingIcon: Icons.info,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'Rate App',
-                          subtitle: 'Share your feedback',
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .color!
-                                .withValues(alpha: .5),
-                          ),
-                          onTap: () {
-                            // Open app store for rating
-                          },
-                          leadingIcon: Icons.star,
-                        ),
-                      ],
-                    ),
-
+                    // SettingSection(
+                    //   title: 'Support',
+                    //   icon: Icons.help,
+                    //   children: [
+                    //     SettingItem(
+                    //       title: 'Help & Support',
+                    //       subtitle: 'Get help with the app',
+                    //       trailing: Icon(
+                    //         Icons.chevron_right,
+                    //         color: Theme.of(context)
+                    //             .textTheme
+                    //             .bodyMedium!
+                    //             .color!
+                    //             .withValues(alpha: .5),
+                    //       ),
+                    //       onTap: () {
+                    //         Navigator.pushNamed(context, AppRouter.helpSupport);
+                    //       },
+                    //       leadingIcon: Icons.help_center,
+                    //     ),
+                    //     Divider(
+                    //       height: 1,
+                    //       thickness: 0.5,
+                    //       color: Theme.of(
+                    //         context,
+                    //       ).dividerColor.withValues(alpha: .3),
+                    //       indent: 64,
+                    //     ),
+                    //     SettingItem(
+                    //       title: 'About',
+                    //       subtitle: 'App version and info',
+                    //       trailing: Icon(
+                    //         Icons.chevron_right,
+                    //         color: Theme.of(context)
+                    //             .textTheme
+                    //             .bodyMedium!
+                    //             .color!
+                    //             .withValues(alpha: .5),
+                    //       ),
+                    //       onTap: () {
+                    //         Navigator.pushNamed(context, AppRouter.about);
+                    //       },
+                    //       leadingIcon: Icons.info,
+                    //     ),
+                    //     Divider(
+                    //       height: 1,
+                    //       thickness: 0.5,
+                    //       color: Theme.of(
+                    //         context,
+                    //       ).dividerColor.withValues(alpha: .3),
+                    //       indent: 64,
+                    //     ),
+                    //     SettingItem(
+                    //       title: 'Rate App',
+                    //       subtitle: 'Share your feedback',
+                    //       trailing: Icon(
+                    //         Icons.chevron_right,
+                    //         color: Theme.of(context)
+                    //             .textTheme
+                    //             .bodyMedium!
+                    //             .color!
+                    //             .withValues(alpha: .5),
+                    //       ),
+                    //       onTap: () {
+                    //         // Open app store for rating
+                    //       },
+                    //       leadingIcon: Icons.star,
+                    //     ),
+                    //   ],
+                    // ),
                     const SizedBox(height: 32),
                   ],
                 ),
