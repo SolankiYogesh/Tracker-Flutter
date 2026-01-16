@@ -7,20 +7,26 @@ import 'package:tracker/services/notification.dart';
 import 'package:tracker/constants/app_constants.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:tracker/utils/app_logger.dart';
+import 'package:tracker/network/api_queries.dart';
+import 'package:tracker/main.dart' show queryCache;
 
 class EntityProvider extends ChangeNotifier {
   final EntityRepository _repo = EntityRepository();
   final DatabaseHelper _db = DatabaseHelper();
 
   List<Entity> _nearbyEntities = [];
-  UserExperience? _userExperience;
-  UserCollectionsResponse? _userCollections;
   bool _isLoading = false;
   DateTime _lastCollectionCheck = DateTime.now(); // Track last check time
 
   List<Entity> get nearbyEntities => _nearbyEntities;
-  UserExperience? get userExperience => _userExperience;
-  UserCollectionsResponse? get userCollections => _userCollections;
+
+  UserExperience? get userExperience => queryCache
+      .getQueryData<UserExperience, Exception>([ApiQueries.userExperienceKey]);
+  UserCollectionsResponse? get userCollections =>
+      queryCache.getQueryData<UserCollectionsResponse, Exception>([
+        ApiQueries.userCollectionsKey,
+      ]);
+
   bool get isLoading => _isLoading;
 
   Timer? _fetchTimer;
@@ -106,7 +112,10 @@ class EntityProvider extends ChangeNotifier {
 
   Future<void> fetchUserExperience(String userId) async {
     try {
-      _userExperience = await _repo.getUserExperience(userId);
+      // Invalidate will trigger a refetch if any listener is active,
+      // or we can just use the QueryBuilder to handle initial fetch.
+      // For background updates, invalidate is standard.
+      queryCache.invalidateQueries([ApiQueries.userExperienceKey, userId]);
       notifyListeners();
     } catch (e) {
       AppLogger.log('Error fetching XP: $e');
@@ -117,7 +126,7 @@ class EntityProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _userCollections = await _repo.getUserCollections(userId);
+      queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
     } catch (e) {
       AppLogger.log('Error fetching collections: $e');
     } finally {
@@ -183,6 +192,10 @@ class EntityProvider extends ChangeNotifier {
             'Entity Collected!',
             "You found a ${entity.entityType?.name ?? 'Item'}! +${entity.xpValue} XP",
           );
+
+          // Invalidate queries to refresh UI
+          queryCache.invalidateQueries([ApiQueries.userExperienceKey, userId]);
+          queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
         } catch (e) {
           AppLogger.log('Error collecting entity in foreground: $e');
         }
@@ -223,7 +236,10 @@ class EntityProvider extends ChangeNotifier {
           );
 
           await _loadLocalEntities();
-          await fetchUserExperience(userId);
+
+          // Invalidate queries to refresh UI
+          queryCache.invalidateQueries([ApiQueries.userExperienceKey, userId]);
+          queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
         }
       }
     } catch (e) {
@@ -231,22 +247,18 @@ class EntityProvider extends ChangeNotifier {
     }
   }
 
-  // Leaderboard State
-  LeaderboardResponse? _leaderboard;
-  LeaderboardResponse? get leaderboard => _leaderboard;
+  // Leaderboard is now handled by fquery in the UI, but if needed here:
+  LeaderboardResponse? get leaderboard =>
+      queryCache.getQueryData<LeaderboardResponse, Exception>([
+        ApiQueries.leaderboardKey,
+      ]);
 
   Future<void> fetchLeaderboard() async {
-    _isLoading = true;
-    notifyListeners();
     try {
-      _leaderboard = await _repo.fetchLeaderboard(
-        limit: AppConstants.leaderboardLimit,
-      );
+      queryCache.invalidateQueries([ApiQueries.leaderboardKey]);
+      notifyListeners();
     } catch (e) {
       AppLogger.log('Error fetching leaderboard: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 }

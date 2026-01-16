@@ -1,31 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tracker/models/entity_model.dart';
-import 'package:tracker/providers/entity_provider.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
+import 'package:fquery/fquery.dart';
+import 'package:tracker/network/api_queries.dart';
+import 'package:tracker/main.dart' show queryCache;
+import 'package:fquery_core/fquery_core.dart';
 
-class LeaderboardScreen extends StatefulWidget {
+class LeaderboardScreen extends StatelessWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
-}
-
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EntityProvider>().fetchLeaderboard();
-    });
-  }
-
-  Future<void> _refresh() async {
-    await context.read<EntityProvider>().fetchLeaderboard();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final currentUserId = context.watch<AuthServiceProvider>().userId;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Leaderboard'),
@@ -33,18 +22,26 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
+            onPressed: () =>
+                queryCache.invalidateQueries([ApiQueries.leaderboardKey]),
           ),
         ],
       ),
-      body: Consumer<EntityProvider>(
-        builder: (context, provider, child) {
-          final leaderboard = provider.leaderboard;
-          final currentUserId = context.watch<AuthServiceProvider>().userId;
-
-          if (leaderboard == null && provider.isLoading) {
+      body: QueryBuilder<LeaderboardResponse, Exception>(
+        options: QueryOptions(
+          queryKey: QueryKey([ApiQueries.leaderboardKey]),
+          queryFn: ApiQueries.fetchLeaderboard,
+        ),
+        builder: (context, query) {
+          if (query.isLoading && query.data == null) {
             return const Center(child: CircularProgressIndicator());
           }
+
+          if (query.isError) {
+            return Center(child: Text('Error: ${query.error}'));
+          }
+
+          final leaderboard = query.data;
 
           if (leaderboard == null || leaderboard.leaderboard.isEmpty) {
             return const Center(child: Text('No data available yet.'));
@@ -55,16 +52,24 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           final rest = entries.skip(3).toList();
 
           return RefreshIndicator(
-            onRefresh: _refresh,
+            onRefresh: () async {
+              queryCache.invalidateQueries([ApiQueries.leaderboardKey]);
+            },
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 if (topThree.isNotEmpty) _buildTopThree(topThree),
                 const SizedBox(height: 20),
-                if (rest.isNotEmpty) 
+                if (rest.isNotEmpty)
                   const Padding(
-                      padding: EdgeInsets.only(bottom: 10),
-                      child: Text('Runners Up', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      'Runners Up',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ...rest.map((e) => _buildRankItem(e, currentUserId)),
               ],
@@ -80,7 +85,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     // But list is sorted by rank 1, 2, 3.
     // So 0 is 1st, 1 is 2nd, 2 is 3rd.
     // Display order: Silver (1), Gold (0), Bronze (2)
-    
+
     LeaderboardEntry? first = entries.isNotEmpty ? entries[0] : null;
     LeaderboardEntry? second = entries.length > 1 ? entries[1] : null;
     LeaderboardEntry? third = entries.length > 2 ? entries[2] : null;
@@ -89,14 +94,28 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (second != null) Expanded(child: _buildPodiumItem(second, 2, Colors.grey.shade300, 100)),
-        if (first != null) Expanded(child: _buildPodiumItem(first, 1, Colors.amber.shade300, 130)),
-        if (third != null) Expanded(child: _buildPodiumItem(third, 3, Colors.brown.shade300, 80)),
+        if (second != null)
+          Expanded(
+            child: _buildPodiumItem(second, 2, Colors.grey.shade300, 100),
+          ),
+        if (first != null)
+          Expanded(
+            child: _buildPodiumItem(first, 1, Colors.amber.shade300, 130),
+          ),
+        if (third != null)
+          Expanded(
+            child: _buildPodiumItem(third, 3, Colors.brown.shade300, 80),
+          ),
       ],
     );
   }
 
-  Widget _buildPodiumItem(LeaderboardEntry entry, int place, Color color, double height) {
+  Widget _buildPodiumItem(
+    LeaderboardEntry entry,
+    int place,
+    Color color,
+    double height,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -104,14 +123,23 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           radius: place == 1 ? 35 : 28,
           backgroundColor: color,
           child: CircleAvatar(
-             radius: place == 1 ? 32 : 25,
-             backgroundImage: entry.picture != null ? NetworkImage(entry.picture!) : null,
-             child: entry.picture == null ? const Icon(Icons.person) : null,
+            radius: place == 1 ? 32 : 25,
+            backgroundImage: entry.picture != null
+                ? CachedNetworkImageProvider(entry.picture!)
+                : null,
+            child: entry.picture == null ? const Icon(Icons.person) : null,
           ),
         ),
         const SizedBox(height: 8),
-        Text(entry.name ?? 'User', overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold),),
-        Text('${entry.totalXp} XP', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(
+          entry.name ?? 'User',
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '${entry.totalXp} XP',
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         const SizedBox(height: 8),
         Container(
           height: height,
@@ -124,14 +152,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-               Text(
-                 '$place', 
-                 style: TextStyle(
-                     fontSize: 32, 
-                     fontWeight: FontWeight.bold, 
-                     color: color.withValues(alpha: 1.0), // Stronger color for number
-                 ),
-               ),
+              Text(
+                '$place',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: color.withValues(
+                    alpha: 1.0,
+                  ), // Stronger color for number
+                ),
+              ),
             ],
           ),
         ),
@@ -147,15 +177,28 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-            backgroundColor: Colors.transparent,
-            child: Text('#${entry.rank}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          backgroundColor: Colors.transparent,
+          child: Text(
+            '#${entry.rank}',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
         title: Text(
-            entry.name ?? 'Unknown',
-            style: TextStyle(fontWeight: isMe ? FontWeight.bold : FontWeight.normal),
+          entry.name ?? 'Unknown',
+          style: TextStyle(
+            fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
-        subtitle: Text('Level ${entry.currentLevel} • ${entry.entitiesCollected} Items'),
-        trailing: Text('${entry.totalXp} XP', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+        subtitle: Text(
+          'Level ${entry.currentLevel} • ${entry.entitiesCollected} Items',
+        ),
+        trailing: Text(
+          '${entry.totalXp} XP',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
+        ),
       ),
     );
   }

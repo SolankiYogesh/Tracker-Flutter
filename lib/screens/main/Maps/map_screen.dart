@@ -4,16 +4,19 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tracker/services/database_helper.dart';
+import 'package:fquery_core/fquery_core.dart';
 
 import 'package:tracker/models/nearby_user.dart';
-import 'package:tracker/network/repositories/location_repository.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/providers/entity_provider.dart';
 import 'package:tracker/models/entity_model.dart' as model;
 
 import 'package:tracker/constants/app_constants.dart';
 import 'package:tracker/utils/app_logger.dart';
+import 'package:fquery/fquery.dart';
+import 'package:tracker/network/api_queries.dart';
 import 'collection_animation_overlay.dart';
 
 class MapScreen extends StatefulWidget {
@@ -25,12 +28,9 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
-  final LocationRepository _locationRepo = LocationRepository();
   List<List<LatLng>> _polylines = [];
-  List<NearbyUser> _nearbyUsers = [];
   LatLng? _currentLocation;
   Timer? _timer;
-  Timer? _nearbyTimer;
   bool _hasInitiallyCentered = false;
   bool _shouldFollowUser = true;
   model.Collection? _currentCollection;
@@ -42,18 +42,11 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _refreshLocations();
-    _fetchNearbyUsers();
 
     // Refresh local path every 5 seconds
     _timer = Timer.periodic(
       AppConstants.mapRefreshInterval,
       (_) => _refreshLocations(),
-    );
-
-    // Refresh nearby users every 30 seconds
-    _nearbyTimer = Timer.periodic(
-      AppConstants.nearbyUsersRefreshInterval,
-      (_) => _fetchNearbyUsers(),
     );
 
     // Listen for collection events from Provider (Foreground)
@@ -90,26 +83,9 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    _nearbyTimer?.cancel();
     _collectionSubscription?.cancel();
     _mapController.dispose();
     super.dispose();
-  }
-
-  Future<void> _fetchNearbyUsers() async {
-    final user = await DatabaseHelper().getCurrentUser();
-    if (user == null) return;
-
-    try {
-      final users = await _locationRepo.getNearbyUsers(user.id);
-      if (mounted) {
-        setState(() {
-          _nearbyUsers = users;
-        });
-      }
-    } catch (e) {
-      AppLogger.log('Error fetching nearby users: $e');
-    }
   }
 
   Future<void> _refreshLocations() async {
@@ -263,10 +239,12 @@ class _MapScreenState extends State<MapScreen> {
             const SizedBox(height: 24),
             CircleAvatar(
               radius: 45,
-              backgroundImage:
-                  user.picture != null ? NetworkImage(user.picture!) : null,
-              child:
-                  user.picture == null ? const Icon(Icons.person, size: 45) : null,
+              backgroundImage: user.picture != null
+                  ? CachedNetworkImageProvider(user.picture!)
+                  : null,
+              child: user.picture == null
+                  ? const Icon(Icons.person, size: 45)
+                  : null,
             ),
             const SizedBox(height: 16),
             Text(
@@ -282,8 +260,10 @@ class _MapScreenState extends State<MapScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -304,8 +284,10 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -392,7 +374,7 @@ class _MapScreenState extends State<MapScreen> {
               radius: 45,
               backgroundColor: Colors.transparent,
               backgroundImage: entity.entityType?.iconUrl != null
-                  ? NetworkImage(entity.entityType!.iconUrl!)
+                  ? CachedNetworkImageProvider(entity.entityType!.iconUrl!)
                   : null,
               child: entity.entityType?.iconUrl == null
                   ? const Icon(Icons.extension, size: 45)
@@ -516,6 +498,14 @@ class _MapScreenState extends State<MapScreen> {
             options: MapOptions(
               initialCenter: const LatLng(0, 0),
               initialZoom: AppConstants.defaultMapZoom,
+              minZoom: AppConstants.minMapZoom,
+              maxZoom: AppConstants.maxMapZoom,
+              cameraConstraint: CameraConstraint.contain(
+                bounds: LatLngBounds(
+                  const LatLng(-90, -180),
+                  const LatLng(90, 180),
+                ),
+              ),
               onPositionChanged: (position, hasGesture) {
                 if (hasGesture) {
                   setState(() {
@@ -559,11 +549,11 @@ class _MapScreenState extends State<MapScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               entity.entityType?.iconUrl != null
-                                  ? Image.network(
-                                      entity.entityType!.iconUrl!,
+                                  ? CachedNetworkImage(
+                                      imageUrl: entity.entityType!.iconUrl!,
                                       width: 50,
                                       height: 50,
-                                      errorBuilder: (c, e, s) => const Icon(
+                                      errorWidget: (c, e, s) => const Icon(
                                         Icons.extension,
                                         color: Colors.purple,
                                         size: 40,
@@ -599,40 +589,63 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
               // Nearby Users Markers
-              MarkerLayer(
-                markers: _nearbyUsers
-                    .map(
-                      (user) => Marker(
-                        point: LatLng(user.latitude, user.longitude),
-                        width: 40,
-                        height: 40,
-                        child: GestureDetector(
-                          onTap: () => _showUserInfo(user),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 4,
+              if (context.watch<AuthServiceProvider>().userId != null)
+                QueryBuilder<List<NearbyUser>, Exception>(
+                  options: QueryOptions(
+                    queryKey: QueryKey([
+                      ApiQueries.nearbyUsersKey,
+                      context.watch<AuthServiceProvider>().userId,
+                    ]),
+                    queryFn: () => ApiQueries.fetchNearbyUsers(
+                      context.read<AuthServiceProvider>().userId!,
+                    ),
+                    refetchInterval: AppConstants.nearbyUsersRefreshInterval,
+                  ),
+                  builder: (context, query) {
+                    final nearbyUsers = query.data ?? [];
+                    return MarkerLayer(
+                      markers: nearbyUsers
+                          .map(
+                            (user) => Marker(
+                              point: LatLng(user.latitude, user.longitude),
+                              width: 40,
+                              height: 40,
+                              child: GestureDetector(
+                                onTap: () => _showUserInfo(user),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: CircleAvatar(
+                                    backgroundImage: user.picture != null
+                                        ? CachedNetworkImageProvider(
+                                            user.picture!,
+                                          )
+                                        : null,
+                                    child: user.picture == null
+                                        ? const Icon(Icons.person, size: 24)
+                                        : null,
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
-                            child: CircleAvatar(
-                              backgroundImage: user.picture != null
-                                  ? NetworkImage(user.picture!)
-                                  : null,
-                              child: user.picture == null
-                                  ? const Icon(Icons.person, size: 24)
-                                  : null,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
+                          )
+                          .toList(),
+                    );
+                  },
+                ),
             ],
           ),
           Positioned(

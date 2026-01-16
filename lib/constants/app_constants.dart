@@ -30,6 +30,12 @@ class AppConstants {
   /// zoom in closer; lower values (e.g., 10) show a wider area.
   static const double defaultMapZoom = 15.0;
 
+  /// Minimum zoom level to prevent showing multiple world maps when zooming out.
+  static const double minMapZoom = 3.0;
+
+  /// Maximum zoom level to prevent zooming in too far.
+  static const double maxMapZoom = 18.0;
+
   /// Interval for refreshing the local path (polylines) and foreground entities on the map.
   ///
   /// Usage: Used in `MapScreen.initState`.

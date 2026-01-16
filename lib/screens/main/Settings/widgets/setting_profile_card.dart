@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tracker/models/user_response.dart';
 import 'package:tracker/theme/app_colors.dart';
 
@@ -64,7 +65,7 @@ class SettingProfileCard extends StatelessWidget {
               ),
               image: user.picture != null
                   ? DecorationImage(
-                      image: NetworkImage(user.picture!),
+                      image: CachedNetworkImageProvider(user.picture!),
                       fit: BoxFit.cover,
                     )
                   : null,

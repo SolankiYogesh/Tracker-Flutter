@@ -1,103 +1,144 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tracker/models/entity_model.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
-import 'package:tracker/providers/entity_provider.dart';
+import 'package:fquery/fquery.dart';
+import 'package:tracker/network/api_queries.dart';
+import 'package:tracker/main.dart' show queryCache;
+import 'package:fquery_core/fquery_core.dart';
 
-class AchievementsScreen extends StatefulWidget {
+class AchievementsScreen extends StatelessWidget {
   const AchievementsScreen({super.key});
 
   @override
-  State<AchievementsScreen> createState() => _AchievementsScreenState();
-}
-
-class _AchievementsScreenState extends State<AchievementsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshData();
-    });
-  }
-
-  void _refreshData() {
-    final userId = context.read<AuthServiceProvider>().userId;
-    if (userId != null) {
-      context.read<EntityProvider>().fetchUserExperience(userId);
-      context.read<EntityProvider>().fetchUserCollections(userId);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final userId = context.watch<AuthServiceProvider>().userId;
+
+    if (userId == null) {
+      return const Scaffold(body: Center(child: Text('Please log in')));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Achievements'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _refreshData,
+            onPressed: () {
+              queryCache.invalidateQueries([
+                ApiQueries.userExperienceKey,
+                userId,
+              ]);
+              queryCache.invalidateQueries([
+                ApiQueries.userCollectionsKey,
+                userId,
+              ]);
+            },
           ),
         ],
       ),
-      body: Consumer<EntityProvider>(
-        builder: (context, provider, child) {
-          final xp = provider.userExperience;
-          final collections = provider.userCollections;
+      body: QueryBuilder<UserExperience, Exception>(
+        options: QueryOptions(
+          queryKey: QueryKey([ApiQueries.userExperienceKey, userId]),
+          queryFn: () => ApiQueries.fetchUserExperience(userId),
+        ),
+        builder: (context, xpQuery) {
+          return QueryBuilder<UserCollectionsResponse, Exception>(
+            options: QueryOptions(
+              queryKey: QueryKey([ApiQueries.userCollectionsKey, userId]),
+              queryFn: () => ApiQueries.fetchUserCollections(userId),
+            ),
+            builder: (context, collectionsQuery) {
+              final xp = xpQuery.data;
+              final collections = collectionsQuery.data;
 
-          if (xp == null && provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+              if ((xpQuery.isLoading && xp == null) ||
+                  (collectionsQuery.isLoading && collections == null)) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          return RefreshIndicator(
-            onRefresh: () async => _refreshData(),
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                if (xp != null) _buildLevelCard(xp.currentLevel, xp.totalXp, xp.entitiesCollected),
-                const SizedBox(height: 24),
-                const Text(
-                  'Collection History',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                if (collections != null && collections.collections.isNotEmpty)
-                  ...collections.collections.map((collection) {
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          backgroundImage: collection.entityType?.iconUrl != null
-                              ? NetworkImage(collection.entityType!.iconUrl!)
-                              : null,
-                          child: collection.entityType?.iconUrl == null
-                              ? const Icon(Icons.stars)
-                              : null,
+              return RefreshIndicator(
+                onRefresh: () async {
+                  queryCache.invalidateQueries([
+                    ApiQueries.userExperienceKey,
+                    userId,
+                  ]);
+                  queryCache.invalidateQueries([
+                    ApiQueries.userCollectionsKey,
+                    userId,
+                  ]);
+                },
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    if (xp != null)
+                      _buildLevelCard(
+                        xp.currentLevel,
+                        xp.totalXp,
+                        xp.entitiesCollected,
+                      ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Collection History',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (collections != null &&
+                        collections.collections.isNotEmpty)
+                      ...collections.collections.map((collection) {
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.transparent,
+                              backgroundImage:
+                                  collection.entityType?.iconUrl != null
+                                  ? CachedNetworkImageProvider(
+                                      collection.entityType!.iconUrl!,
+                                    )
+                                  : null,
+                              child: collection.entityType?.iconUrl == null
+                                  ? const Icon(Icons.stars)
+                                  : null,
+                            ),
+                            title: Text(
+                              collection.entityType?.name ?? 'Unknown Item',
+                            ),
+                            subtitle: Text(
+                              'Collected: ${_formatDate(collection.collectedAt)}',
+                            ),
+                            trailing: Text(
+                              '+${collection.xpEarned} XP',
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                    else if (collectionsQuery.isLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: CircularProgressIndicator(),
                         ),
-                        title: Text(collection.entityType?.name ?? 'Unknown Item'),
-                        subtitle: Text('Collected: ${_formatDate(collection.collectedAt)}'),
-                        trailing: Text(
-                          '+${collection.xpEarned} XP',
-                          style: const TextStyle(
-                              color: Colors.green, fontWeight: FontWeight.bold),
+                      )
+                    else
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(40.0),
+                          child: Text('No collections yet. Go explore!'),
                         ),
                       ),
-                    );
-                  })
-                else if (provider.isLoading)
-                  const Center(child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: CircularProgressIndicator(),
-                  ))
-                else
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(40.0),
-                      child: Text('No collections yet. Go explore!'),
-                    ),
-                  ),
-              ],
-            ),
+                  ],
+                ),
+              );
+            },
           );
         },
       ),
@@ -150,7 +191,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.emoji_events, color: Colors.white, size: 32),
+                child: const Icon(
+                  Icons.emoji_events,
+                  color: Colors.white,
+                  size: 32,
+                ),
               ),
             ],
           ),

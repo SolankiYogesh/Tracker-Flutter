@@ -16,6 +16,15 @@ import 'package:tracker/utils/talker.dart';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tracker/router/app_router.dart';
+import 'package:fquery/fquery.dart';
+import 'package:fquery_core/fquery_core.dart';
+
+final queryCache = QueryCache(
+  defaultQueryOptions: DefaultQueryOptions(
+    cacheDuration: const Duration(minutes: 5),
+    staleDuration: const Duration(seconds: 30),
+  ),
+);
 
 final repo = Repo();
 
@@ -59,26 +68,30 @@ Future<void> main() async {
   );
   final isDarkTheme = await DatabaseHelper().getIsDarkTheme();
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AuthServiceProvider>(
-          create: (_) => AuthServiceProvider(
-            auth: AuthRepository(),
-            userRepo: UserRepository(),
+    CacheProvider(
+      cache: queryCache,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthServiceProvider>(
+            create: (_) => AuthServiceProvider(
+              auth: AuthRepository(),
+              userRepo: UserRepository(),
+            ),
           ),
-        ),
-        ChangeNotifierProvider<ThemeProvider>(
-          create: (_) => ThemeProvider(initialIsDark: isDarkTheme),
-        ),
-        ChangeNotifierProvider<EntityProvider>(create: (_) => EntityProvider()),
-      ],
-      child: TrackerApp(isDarkTheme: isDarkTheme),
+          ChangeNotifierProvider<ThemeProvider>(
+            create: (_) => ThemeProvider(initialIsDark: isDarkTheme),
+          ),
+          ChangeNotifierProvider<EntityProvider>(
+            create: (_) => EntityProvider(),
+          ),
+        ],
+        child: TrackerApp(isDarkTheme: isDarkTheme),
+      ),
     ),
   );
 }
 
 class TrackerApp extends StatelessWidget {
-
   const TrackerApp({super.key, required this.isDarkTheme});
   final bool isDarkTheme;
 

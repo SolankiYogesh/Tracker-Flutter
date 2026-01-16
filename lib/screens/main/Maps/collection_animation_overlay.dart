@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:tracker/models/entity_model.dart' as model; // Prefix if conflict
 
@@ -90,8 +91,8 @@ class _CollectionAnimationOverlayState extends State<CollectionAnimationOverlay>
                           ]
                         ),
                         child: widget.collection.entityType?.iconUrl != null
-                          ? Image.network(
-                              widget.collection.entityType!.iconUrl!,
+                          ? CachedNetworkImage(
+                              imageUrl: widget.collection.entityType!.iconUrl!,
                               width: 80,
                               height: 80,
                             )
