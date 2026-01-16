@@ -6,7 +6,7 @@ import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 import 'package:tracker/screens/main/settings/widgets/setting_profile_card.dart';
 import 'package:tracker/screens/main/settings/widgets/setting_section.dart';
 import 'package:tracker/theme/app_colors.dart';
-// import 'package:tracker/router/app_router.dart';
+import 'package:tracker/router/app_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,10 +27,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> logOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to log out?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Logout',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    if (!context.mounted) return;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       await context.read<AuthServiceProvider>().logout();
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRouter.root,
+          (route) => false,
+        );
+      }
     } catch (e) {
+      if (!context.mounted) return;
       scaffoldMessenger.showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }

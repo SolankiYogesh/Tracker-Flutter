@@ -5,19 +5,17 @@ import 'package:tracker/models/user_response.dart';
 import 'package:tracker/network/repositories/auth_repository.dart';
 import 'package:tracker/network/repositories/user_repository.dart';
 import 'package:tracker/services/database_helper.dart';
+import 'package:background_location_tracker/background_location_tracker.dart';
 
 class AuthServiceProvider extends ChangeNotifier {
   AuthServiceProvider({required this.auth, required this.userRepo}) {
     auth.authStateChanges.listen((user) async {
-      firebaseUser = FirebaseAuth.instance.currentUser;
-      if (firebaseUser != null) {
-        syncUserWithBE(firebaseUser!);
-      }
       firebaseUser = user;
       if (user != null) {
         await syncUserWithBE(user);
       } else {
         appUser = null;
+        notifyListeners();
       }
     });
   }
@@ -40,6 +38,9 @@ class AuthServiceProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    try {
+      await BackgroundLocationTrackerManager.stopTracking();
+    } catch (_) {}
     await auth.signOut();
     firebaseUser = null;
     appUser = null;
