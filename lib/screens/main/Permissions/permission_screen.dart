@@ -128,6 +128,9 @@ class _PermissionScreenState extends State<PermissionScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.height < 600;
+
     const backgroundColor = Color(0xFF141416);
     const cardColor = Color(0xFF2C2C2E);
     const accentColor = Color(0xFF9FA8DA);
@@ -139,126 +142,132 @@ class _PermissionScreenState extends State<PermissionScreen>
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 16.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: size.width * 0.06,
+                      vertical: 16.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: size.height * 0.05),
 
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: accentColor.withValues(alpha: 0.2),
+                        Center(
+                          child: Container(
+                            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: accentColor.withValues(alpha: 0.2),
+                            ),
+                            child: Icon(
+                              Icons.location_on,
+                              size: isSmallScreen ? 48 : 64,
+                              color: accentColor,
+                            ),
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.location_on,
-                          size: 64,
-                          color: accentColor,
+                        SizedBox(height: size.height * 0.04),
+
+                        Text(
+                          'Location Permissions\nRequired',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 24 : 28,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
+                        const SizedBox(height: 16),
 
-                    const Text(
-                      'Location Permissions\nRequired',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                        Text(
+                          'Tracktor needs location permissions to track\nyour movement and draw your path on the map.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 13 : 14,
+                            color: subTextColor,
+                            height: 1.5,
+                          ),
+                        ),
+                        SizedBox(height: size.height * 0.05),
 
-                    const Text(
-                      'Tracktor needs location permissions to track\nyour movement and draw your path on the map.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: subTextColor,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
+                        PermissionCard(
+                          icon: Icons.gps_fixed,
+                          title: 'Location Services',
+                          subtitle:
+                              'Enable GPS on your device for accurate tracking',
+                          status: PermissionStatus.granted,
+                          isDone: _isLocationServiceEnabled,
+                          onGrant: () => Geolocator.openLocationSettings(),
+                          cardColor: cardColor,
+                          accentColor: accentColor,
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                        const SizedBox(height: 12),
 
-                    PermissionCard(
-                      icon: Icons.gps_fixed,
-                      title: 'Location Services',
-                      subtitle:
-                          'Enable GPS on your device for accurate tracking',
-                      status: PermissionStatus
-                          .granted, // Ignored if isDone is provided
-                      isDone: _isLocationServiceEnabled,
-                      onGrant: () => Geolocator.openLocationSettings(),
-                      cardColor: cardColor,
-                      accentColor: accentColor,
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    const SizedBox(height: 16),
+                        PermissionCard(
+                          icon: Icons.location_on_outlined,
+                          title: 'Location Access',
+                          subtitle: 'Required to track your GPS position',
+                          status: _locationStatus,
+                          onGrant: () =>
+                              _requestPermission(Permission.location),
+                          cardColor: cardColor,
+                          accentColor: accentColor,
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                        const SizedBox(height: 12),
 
-                    PermissionCard(
-                      icon: Icons.location_on_outlined,
-                      title: 'Location Access',
-                      subtitle: 'Required to track your GPS position',
-                      status: _locationStatus,
-                      onGrant: () => _requestPermission(Permission.location),
-                      cardColor: cardColor,
-                      accentColor: accentColor,
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    const SizedBox(height: 16),
+                        PermissionCard(
+                          icon: Icons.location_searching,
+                          title: 'Background Location',
+                          subtitle:
+                              'Required to track when app is in\nbackground',
+                          status: _backgroundLocationStatus,
+                          onGrant: () =>
+                              _requestPermission(Permission.locationAlways),
+                          cardColor: cardColor,
+                          accentColor: accentColor,
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                        const SizedBox(height: 12),
 
-                    PermissionCard(
-                      icon: Icons.location_searching,
-                      title: 'Background Location',
-                      subtitle: 'Required to track when app is in\nbackground',
-                      status: _backgroundLocationStatus,
-                      onGrant: () =>
-                          _requestPermission(Permission.locationAlways),
-                      cardColor: cardColor,
-                      accentColor: accentColor,
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    const SizedBox(height: 16),
+                        PermissionCard(
+                          icon: Icons.directions_walk,
+                          title: 'Physical Activity',
+                          subtitle:
+                              'Required to count steps and detect\nactivity',
+                          status: _activityStatus,
+                          onGrant: () => _requestPermission(
+                              Permission.activityRecognition),
+                          cardColor: cardColor,
+                          accentColor: accentColor,
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                        const SizedBox(height: 12),
 
-                    PermissionCard(
-                      icon: Icons.directions_walk,
-                      title: 'Physical Activity',
-                      subtitle: 'Required to count steps and detect\nactivity',
-                      status: _activityStatus,
-                      onGrant: () =>
-                          _requestPermission(Permission.activityRecognition),
-                      cardColor: cardColor,
-                      accentColor: accentColor,
-                      textColor: textColor,
-                      subTextColor: subTextColor,
+                        PermissionCard(
+                          icon: Icons.notifications_active_outlined,
+                          title: 'Notifications',
+                          subtitle: 'Required to show tracking status',
+                          status: _notificationStatus,
+                          onGrant: () =>
+                              _requestPermission(Permission.notification),
+                          cardColor: cardColor,
+                          accentColor: accentColor,
+                          textColor: textColor,
+                          subTextColor: subTextColor,
+                        ),
+                        SizedBox(height: size.height * 0.05),
+                      ],
                     ),
-
-                    const SizedBox(height: 16),
-
-                    PermissionCard(
-                      icon: Icons.notifications_active_outlined,
-                      title: 'Notifications',
-                      subtitle: 'Required to show tracking status',
-                      status: _notificationStatus,
-                      onGrant: () =>
-                          _requestPermission(Permission.notification),
-                      cardColor: cardColor,
-                      accentColor: accentColor,
-                      textColor: textColor,
-                      subTextColor: subTextColor,
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
               ),
       ),

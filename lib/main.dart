@@ -18,6 +18,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tracker/router/app_router.dart';
 import 'package:fquery/fquery.dart';
 import 'package:fquery_core/fquery_core.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 final queryCache = QueryCache(
   defaultQueryOptions: DefaultQueryOptions(
@@ -45,7 +46,8 @@ void backgroundCallback() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await FMTCObjectBoxBackend().initialise();
+  await FMTCStore('mapStore').manage.create();
   await dotenv.load();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initNotifications();

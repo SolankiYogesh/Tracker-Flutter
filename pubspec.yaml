@@ -61,6 +61,7 @@ dependencies:
   fquery: ^3.0.2+1
   fquery_core: ^3.0.2
   cached_network_image: ^3.4.1
+  flutter_map_tile_caching: ^10.1.1
 
 dev_dependencies:
   flutter_test:

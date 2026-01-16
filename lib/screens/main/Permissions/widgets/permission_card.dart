@@ -28,17 +28,20 @@ class PermissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 360;
     final isGranted = isDone ?? (status.isGranted || status.isLimited);
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isCompact ? 12 : 16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, color: subTextColor, size: 28),
-          const SizedBox(width: 16),
+          Icon(icon, color: subTextColor, size: isCompact ? 24 : 28),
+          SizedBox(width: isCompact ? 12 : 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,37 +49,53 @@ class PermissionCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isCompact ? 14 : 16,
                     fontWeight: FontWeight.bold,
                     color: textColor,
+                    height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 12, color: subTextColor),
+                  style: TextStyle(
+                    fontSize: isCompact ? 11 : 12,
+                    color: subTextColor,
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isCompact ? 8 : 12),
           isGranted
-              ? const Icon(Icons.check_circle, color: Colors.green, size: 28)
+              ? Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: isCompact ? 24 : 28,
+                )
               : ElevatedButton(
                   onPressed: onGrant,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accentColor,
-                    foregroundColor: Colors.black, // Text color on button
+                    foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 12 : 20,
+                      vertical: isCompact ? 8 : 10,
                     ),
+                    minimumSize: Size(isCompact ? 60 : 80, 0),
                     elevation: 0,
                   ),
-                  child: const Text('Grant'),
+                  child: Text(
+                    'Grant',
+                    style: TextStyle(
+                      fontSize: isCompact ? 12 : 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
         ],
       ),

@@ -18,6 +18,7 @@ import 'package:tracker/utils/app_logger.dart';
 import 'package:fquery/fquery.dart';
 import 'package:tracker/network/api_queries.dart';
 import 'collection_animation_overlay.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -27,6 +28,9 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final _tileProvider = FMTCTileProvider(
+    stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
+  );
   final MapController _mapController = MapController();
   List<List<LatLng>> _polylines = [];
   LatLng? _currentLocation;
@@ -516,6 +520,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
             children: [
               TileLayer(
+                tileProvider: _tileProvider,
                 urlTemplate: Theme.of(context).brightness == Brightness.dark
                     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
                     : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
