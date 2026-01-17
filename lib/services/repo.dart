@@ -66,7 +66,7 @@ class Repo {
       _startSyncTimer();
       // Overwrite the default plugin notification (ID 879848645) with our custom one
       // that includes the "Stop" button. We only need to do this once.
-      sendNotification('Tracker is running');
+      sendNotification('GeoPulsify is running');
     }
   }
 

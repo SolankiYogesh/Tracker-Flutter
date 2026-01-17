@@ -1,10 +1,10 @@
-# 📍 Tracker - Intelligent Location & Activity App
+# 📍 GeoPulsify - Intelligent Location & Activity App
 
 [![Flutter](https://img.shields.io/badge/Flutter-SDK%20%5E3.10.4-blue.svg)](https://flutter.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth-orange.svg)](https://firebase.google.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-Offline--First-green.svg)](https://sqlite.org/)
 
-**Tracker** is a high-performance Flutter application designed for precise location tracking, activity monitoring, and interactive map experiences. Whether you're tracking your daily routes or collecting virtual entities, Tracker provides a seamless, offline-first experience.
+**GeoPulsify** is a high-performance Flutter application designed for precise location tracking, activity monitoring, and interactive map experiences. Whether you're tracking your daily routes or collecting virtual entities, GeoPulsify provides a seamless, offline-first experience.
 
 ## ✨ Key Features
 
@@ -27,6 +27,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Flutter SDK (^3.10.4)
 - A Firebase Project (for Auth)
 - A `.env` file for API configuration
@@ -34,6 +35,7 @@
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/SolankiYogesh/Tracker-Flutter.git
    cd tracker
@@ -41,11 +43,13 @@
 
 2. **Setup environment variables**:
    Create a `.env` file in the root and add your configuration:
+
    ```env
    BASE_URL=https://api.example.com
    ```
 
 3. **Install dependencies**:
+
    ```bash
    flutter pub get
    ```
@@ -65,6 +69,7 @@ For a deep dive into the project's logic, directory structure, and technical imp
 ## ⚙️ Configuration
 
 Core settings can be tweaked in `lib/constants/app_constants.dart`:
+
 - `locationSyncInterval`: Speed of cloud syncing.
 - `gpsMinAccuracyThreshold`: Filtering threshold for GPS noise.
 - `mapRefreshInterval`: Smoothness of UI updates.
@@ -74,4 +79,5 @@ Core settings can be tweaked in `lib/constants/app_constants.dart`:
 We welcome contributions! Please feel free to submit a Pull Request.
 
 ---
+
 Developed by **Yogesh Solanki**

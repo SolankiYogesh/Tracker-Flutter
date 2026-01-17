@@ -32,18 +32,17 @@ class AboutAppCard extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           const Text(
-            'Tracker App',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            'GeoPulsify App',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             'Version 1.0.0 (Build 124)',
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),
@@ -52,7 +51,9 @@ class AboutAppCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
-              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
               height: 1.5,
             ),
           ),

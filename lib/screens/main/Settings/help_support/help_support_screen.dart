@@ -39,7 +39,7 @@ class HelpSupportScreen extends StatelessWidget {
             const FaqItem(
               question: 'The app is not tracking in background.',
               answer:
-                  'Please ensure you have granted "Always" location permission in your device settings. Also check if battery optimization is disabled for Tracker.',
+                  'Please ensure you have granted "Always" location permission in your device settings. Also check if battery optimization is disabled for GeoPulsify.',
             ),
           ],
         ),

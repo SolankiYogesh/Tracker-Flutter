@@ -8,10 +8,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('About'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -21,10 +18,12 @@ class AboutScreen extends StatelessWidget {
             _buildLinksSection(context),
             const SizedBox(height: 40),
             Text(
-              '© 2026 Tracker Inc.',
+              '© 2026 GeoPulsify Inc.',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 8),
@@ -32,7 +31,9 @@ class AboutScreen extends StatelessWidget {
               'Made with ❤️ for modern travelers',
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.4),
               ),
             ),
           ],

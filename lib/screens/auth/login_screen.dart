@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen>
             top: MediaQuery.of(context).size.height * 0.4,
             left: MediaQuery.of(context).size.width * 0.8,
             child: _GlowOrb(
-              color: colorScheme.tertiary.withOpacity(0.5),
+              color: colorScheme.tertiary.withValues(alpha: 0.5),
               size: 150,
             ),
           ),
@@ -143,7 +143,10 @@ class _LoginScreenState extends State<LoginScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 24.0,
+                ),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 450),
@@ -152,115 +155,126 @@ class _LoginScreenState extends State<LoginScreen>
                       child: SlideTransition(
                         position: _slideAnimation,
                         child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Icon Container
-                        Center(
-                          child: Container(
-                            height: 100,
-                            width: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  colorScheme.primary.withOpacity(0.8),
-                                  colorScheme.primary,
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colorScheme.primary.withOpacity(0.3),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 12),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.pin_drop_rounded,
-                              size: 48,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-
-                        // Glass Card
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: (isDark ? Colors.black : Colors.white)
-                                    .withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: (isDark ? Colors.white : Colors.black)
-                                      .withOpacity(0.1),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Welcome Back',
-                                    style: theme.textTheme.headlineMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: colorScheme.onSurface,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Login to access your tracker',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurface.withOpacity(
-                                        0.6,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Icon Container
+                            Center(
+                              child: Container(
+                                height: 100,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      colorScheme.primary.withValues(
+                                        alpha: 0.8,
                                       ),
+                                      colorScheme.primary,
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: colorScheme.primary.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      blurRadius: 24,
+                                      offset: const Offset(0, 12),
+                                    ),
+                                  ],
+                                ),
+                                child: Image.asset(
+                                  'assets/image/splash_transparent.png',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+
+                            // Glass Card
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(
+                                  sigmaX: 10,
+                                  sigmaY: 10,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (isDark ? Colors.black : Colors.white)
+                                            .withValues(alpha: 0.6),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color:
+                                          (isDark ? Colors.white : Colors.black)
+                                              .withValues(alpha: 0.1),
+                                      width: 1.5,
                                     ),
                                   ),
-                                  const SizedBox(height: 32),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Welcome Back',
+                                        style: theme.textTheme.headlineMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.onSurface,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Login to access your tracker',
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: colorScheme.onSurface
+                                                  .withValues(alpha: 0.6),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 32),
 
-                                  // Buttons
-                                  _SocialLoginButton(
-                                    text: 'Sign in with Google',
-                                    buttonType: ButtonType.google,
-                                    onPressed: () => _loginWithGoogle(context),
+                                      // Buttons
+                                      _SocialLoginButton(
+                                        text: 'Sign in with Google',
+                                        buttonType: ButtonType.google,
+                                        onPressed: () =>
+                                            _loginWithGoogle(context),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _SocialLoginButton(
+                                        text: 'Sign in with Apple',
+                                        buttonType: ButtonType.apple,
+                                        onPressed: () =>
+                                            _loginWithApple(context),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 16),
-                                  _SocialLoginButton(
-                                    text: 'Sign in with Apple',
-                                    buttonType: ButtonType.apple,
-                                    onPressed: () => _loginWithApple(context),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
-                        ),
 
-                        const SizedBox(height: 32),
-                        Text(
-                          'Version 1.0.0',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.4),
-                          ),
+                            const SizedBox(height: 32),
+                            Text(
+                              'Version 1.0.0',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
         ],
       ),
     );
@@ -314,7 +328,9 @@ class _SocialLoginButton extends StatelessWidget {
             btnText: text,
             buttonSize: ButtonSize.large,
             elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             onPressed: onPressed,
           ),
         ),

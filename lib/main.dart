@@ -108,7 +108,7 @@ class TrackerApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
-      title: 'Tracker',
+      title: 'GeoPulsify',
       initialRoute: AppRouter.root,
       onGenerateRoute: AppRouter.onGenerateRoute,
     );
