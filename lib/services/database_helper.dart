@@ -9,6 +9,7 @@ const userTable = 'app_user';
 
 const entityTable = 'entities';
 const userStatsTable = 'user_stats';
+const travelActivityTable = 'travel_activities';
 
 class DatabaseHelper {
   factory DatabaseHelper() {
@@ -30,7 +31,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -77,10 +78,11 @@ class DatabaseHelper {
       updated_at INTEGER
     )
   ''');
-    
+
     await _createEntityTable(db);
     await _createUserStatsTable(db);
-    
+    await _createTravelActivityTable(db);
+
     await db.insert(settingTable, {'id': 1, 'isDark': 1});
   }
 
@@ -90,6 +92,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 3) {
       await _createUserStatsTable(db);
+    }
+    if (oldVersion < 4) {
+      await _createTravelActivityTable(db);
     }
   }
 
@@ -106,8 +111,8 @@ class DatabaseHelper {
     await db.insert(userStatsTable, {
       'id': 1,
       'total_steps': 0,
-       'last_boot_step_count': 0,
-      'last_updated_at': DateTime.now().millisecondsSinceEpoch
+      'last_boot_step_count': 0,
+      'last_updated_at': DateTime.now().millisecondsSinceEpoch,
     });
   }
 
@@ -125,6 +130,23 @@ class DatabaseHelper {
         type_icon_url TEXT,
         type_rarity TEXT
       )
+    ''');
+  }
+
+  Future<void> _createTravelActivityTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $travelActivityTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        start_time INTEGER NOT NULL,
+        end_time INTEGER NOT NULL,
+        distance REAL NOT NULL,
+        user_id TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_travel_user_time ON $travelActivityTable(user_id, start_time)
     ''');
   }
 
@@ -209,7 +231,8 @@ class DatabaseHelper {
         batch.update(
           locationTable,
           {'is_synced': 1},
-          where: 'recorded_at = ?', // Using recorded_at as unique identifier since we don't have ID in model
+          where:
+              'recorded_at = ?', // Using recorded_at as unique identifier since we don't have ID in model
           whereArgs: [id],
         );
       }
@@ -273,7 +296,7 @@ class DatabaseHelper {
       }
     });
   }
-  
+
   Future<List<Map<String, dynamic>>> getUncollectedEntities() async {
     final db = await database;
     return await db.query(
@@ -297,7 +320,7 @@ class DatabaseHelper {
       whereArgs: [0, minLat, maxLat, minLon, maxLon],
     );
   }
-  
+
   Future<void> markEntityAsCollected(String id) async {
     final db = await database;
     await db.update(
@@ -307,7 +330,7 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-  
+
   Future<void> clearEntities() async {
     final db = await database;
     await db.delete(entityTable);
@@ -327,11 +350,11 @@ class DatabaseHelper {
   Future<void> updateUserSteps(int currentSensorSteps) async {
     final db = await database;
     final stats = await getUserStats();
-    
+
     int totalSteps = stats['total_steps'] as int? ?? 0;
     int lastBootSteps = stats['last_boot_step_count'] as int? ?? 0;
-    
-    // If the sensor steps are LESS than the last boot steps, 
+
+    // If the sensor steps are LESS than the last boot steps,
     // it implies a device reboot happened (sensor reset to 0).
     if (currentSensorSteps < lastBootSteps) {
       lastBootSteps = 0;
@@ -339,8 +362,8 @@ class DatabaseHelper {
 
     // Calculate the difference since the last check
     int diff = currentSensorSteps - lastBootSteps;
-    
-    // We expect diff to be positive as steps increase. 
+
+    // We expect diff to be positive as steps increase.
     // If it's negative (and not caught by the reboot check above, though unlikely given logic), ignore or handle.
     if (diff < 0) diff = 0;
 
@@ -351,10 +374,44 @@ class DatabaseHelper {
       {
         'total_steps': totalSteps,
         'last_boot_step_count': currentSensorSteps,
-        'last_updated_at': DateTime.now().millisecondsSinceEpoch
+        'last_updated_at': DateTime.now().millisecondsSinceEpoch,
       },
       where: 'id = ?',
       whereArgs: [1],
+    );
+  }
+
+  // --- Travel Activity Methods ---
+
+  Future<int> insertTravelActivity(Map<String, dynamic> activity) async {
+    final db = await database;
+    return await db.insert(travelActivityTable, activity);
+  }
+
+  Future<List<Map<String, dynamic>>> getTravelActivities({
+    required String userId,
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    final db = await database;
+    String? whereClause = 'user_id = ?';
+    List<dynamic> whereArgs = [userId];
+
+    if (from != null) {
+      whereClause += ' AND start_time >= ?';
+      whereArgs.add(from.millisecondsSinceEpoch);
+    }
+
+    if (to != null) {
+      whereClause += ' AND end_time <= ?';
+      whereArgs.add(to.millisecondsSinceEpoch);
+    }
+
+    return await db.query(
+      travelActivityTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+      orderBy: 'start_time DESC',
     );
   }
 }

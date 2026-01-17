@@ -3,6 +3,7 @@ import 'package:tracker/screens/main/settings/help_support/help_support_screen.d
 import 'package:tracker/screens/main/settings/about/about_screen.dart';
 import 'package:tracker/screens/main/settings/data_storage/data_storage_screen.dart';
 import 'package:tracker/screens/main/settings/privacy_security/privacy_security_screen.dart';
+import 'package:tracker/screens/main/settings/travel_history/travel_history_screen.dart';
 import 'package:tracker/services/auth/auth_gate.dart';
 import 'package:tracker/screens/main/permissions/permission_screen.dart';
 import 'package:tracker/router/main_navigation_screen.dart';
@@ -15,6 +16,7 @@ class AppRouter {
   static const String about = '/about';
   static const String dataStorage = '/data-storage';
   static const String privacySecurity = '/privacy-security';
+  static const String travelHistory = '/travel-history';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -32,6 +34,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DataStorageScreen());
       case privacySecurity:
         return MaterialPageRoute(builder: (_) => const PrivacySecurityScreen());
+      case travelHistory:
+        return MaterialPageRoute(builder: (_) => const TravelHistoryScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
