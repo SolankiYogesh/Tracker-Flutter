@@ -1,57 +1,50 @@
 {
   "project_info": {
-    "project_number": "5299793812",
-    "project_id": "tracktor-firebase",
-    "storage_bucket": "tracktor-firebase.firebasestorage.app"
+    "project_number": "458272593186",
+    "project_id": "tracker-with-flutter",
+    "storage_bucket": "tracker-with-flutter.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:5299793812:android:7bf2b0eb91a2479334a981",
+        "mobilesdk_app_id": "1:458272593186:android:ea41b3a1611898cc9f017b",
         "android_client_info": {
-          "package_name": "com.baazinfotech.tracktor"
+          "package_name": "in.timetrix.geopulsify"
         }
       },
       "oauth_client": [
         {
-          "client_id": "5299793812-8akh7c9mhmp9t1fjer0t7nh9i42efvv5.apps.googleusercontent.com",
+          "client_id": "458272593186-d0tj5e30a7jfeevu3i89u80v6f172a85.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.baazinfotech.tracktor",
+            "package_name": "in.timetrix.geopulsify",
             "certificate_hash": "7c834bfcf05d3d50a894a0a66b49f0d9dc707ba1"
           }
         },
         {
-          "client_id": "5299793812-8kp00q39lgth4rj1vm39gd83rsn08rk4.apps.googleusercontent.com",
+          "client_id": "458272593186-pb6d0sqls1cpu7lkj409u3arqltr2crm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.baazinfotech.tracktor",
+            "package_name": "in.timetrix.geopulsify",
             "certificate_hash": "f05133d62d04258185cdbece2149d6692bc7cc7b"
           }
         },
         {
-          "client_id": "5299793812-gilhk7gkjb0rn0ra5e4cma3l9iaes81m.apps.googleusercontent.com",
+          "client_id": "458272593186-k050d8lh7rj2c6tds70nctm373gqs244.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBsLwO-inGMw3dw-OsuNkpNNlFcpJW2b3A"
+          "current_key": "AIzaSyBT8rUfUGzGbnyCl9doGXwLjEhe8S8PWrc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "5299793812-gilhk7gkjb0rn0ra5e4cma3l9iaes81m.apps.googleusercontent.com",
+              "client_id": "458272593186-7cgs727nmvptinc2lssbogmisosh3b5k.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.baazinfotech.tracktor"
-              }
             }
           ]
         }

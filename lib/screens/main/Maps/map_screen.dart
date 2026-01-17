@@ -527,7 +527,7 @@ class _MapScreenState extends State<MapScreen> {
                 subdomains: Theme.of(context).brightness == Brightness.dark
                     ? const ['a', 'b', 'c', 'd']
                     : const ['a', 'b', 'c'],
-                userAgentPackageName: 'com.baazinfotech.tracktor',
+                userAgentPackageName: 'in.timetrix.geopulsify',
               ),
               PolylineLayer(
                 polylines: _polylines

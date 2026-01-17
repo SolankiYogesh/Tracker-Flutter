@@ -50,21 +50,22 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBsLwO-inGMw3dw-OsuNkpNNlFcpJW2b3A',
-    appId: '1:5299793812:android:7bf2b0eb91a2479334a981',
-    messagingSenderId: '5299793812',
-    projectId: 'tracktor-firebase',
-    storageBucket: 'tracktor-firebase.firebasestorage.app',
+    apiKey: 'AIzaSyBT8rUfUGzGbnyCl9doGXwLjEhe8S8PWrc',
+    appId: '1:458272593186:android:ea41b3a1611898cc9f017b',
+    messagingSenderId: '458272593186',
+    projectId: 'tracker-with-flutter',
+    storageBucket: 'tracker-with-flutter.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCsbHPhl9a3pTeeIUzUElrTUNTDdChnqQI',
-    appId: '1:5299793812:ios:63dd7a5a23ae700e34a981',
-    messagingSenderId: '5299793812',
-    projectId: 'tracktor-firebase',
-    storageBucket: 'tracktor-firebase.firebasestorage.app',
-    androidClientId: '5299793812-m5ur7q2t6rolo2b3v7erdb9vpdgeq0jc.apps.googleusercontent.com',
-    iosClientId: '5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah.apps.googleusercontent.com',
-    iosBundleId: 'com.baazinfotech.tracktor',
+    apiKey: 'AIzaSyBJMfV5_-elhHy3kasHfPHXp3dXl_WPcyQ',
+    appId: '1:458272593186:ios:e59706504036d00a9f017b',
+    messagingSenderId: '458272593186',
+    projectId: 'tracker-with-flutter',
+    storageBucket: 'tracker-with-flutter.firebasestorage.app',
+    androidClientId: '458272593186-d0tj5e30a7jfeevu3i89u80v6f172a85.apps.googleusercontent.com',
+    iosClientId: '458272593186-fkmr8njv7c9768r7f7ni9ddvk8n7g4cp.apps.googleusercontent.com',
+    iosBundleId: 'in.timetrix.geopulsify',
   );
+
 }

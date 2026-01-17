@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah.apps.googleusercontent.com</string>
+	<string>458272593186-fkmr8njv7c9768r7f7ni9ddvk8n7g4cp.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.5299793812-2ejv76ebjapqveo4qcabldggbtlsb4ah</string>
+	<string>com.googleusercontent.apps.458272593186-fkmr8njv7c9768r7f7ni9ddvk8n7g4cp</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>5299793812-m5ur7q2t6rolo2b3v7erdb9vpdgeq0jc.apps.googleusercontent.com</string>
+	<string>458272593186-d0tj5e30a7jfeevu3i89u80v6f172a85.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCsbHPhl9a3pTeeIUzUElrTUNTDdChnqQI</string>
+	<string>AIzaSyBJMfV5_-elhHy3kasHfPHXp3dXl_WPcyQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>5299793812</string>
+	<string>458272593186</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.baazinfotech.tracktor</string>
+	<string>in.timetrix.geopulsify</string>
 	<key>PROJECT_ID</key>
-	<string>tracktor-firebase</string>
+	<string>tracker-with-flutter</string>
 	<key>STORAGE_BUCKET</key>
-	<string>tracktor-firebase.firebasestorage.app</string>
+	<string>tracker-with-flutter.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:5299793812:ios:63dd7a5a23ae700e34a981</string>
+	<string>1:458272593186:ios:e59706504036d00a9f017b</string>
 </dict>
 </plist>

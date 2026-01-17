@@ -37,6 +37,15 @@ class AuthServiceProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> signInWithApple() async {
+    final userCredential = await auth.signInWithApple();
+    firebaseUser = userCredential.user;
+    if (firebaseUser != null) {
+      await syncUserWithBE(firebaseUser!);
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     try {
       await BackgroundLocationTrackerManager.stopTracking();
