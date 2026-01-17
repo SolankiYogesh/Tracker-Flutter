@@ -48,7 +48,7 @@ void backgroundCallback() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FMTCObjectBoxBackend().initialise();
-  await FMTCStore('mapStore').manage.create();
+  await const FMTCStore('mapStore').manage.create();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

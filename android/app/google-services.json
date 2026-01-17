@@ -45,6 +45,13 @@
             {
               "client_id": "458272593186-7cgs727nmvptinc2lssbogmisosh3b5k.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "458272593186-fkmr8njv7c9768r7f7ni9ddvk8n7g4cp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "in.timetrix.geopulsify"
+              }
             }
           ]
         }
