@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:sign_button/sign_button.dart';
 import 'package:tracker/providers/auth_service_provider.dart';
 import 'package:tracker/utils/app_logger.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -116,7 +117,6 @@ class _LoginScreenState extends State<LoginScreen>
     final isDark = theme.brightness == Brightness.dark;
 
     // Calculate relative positions for the orbital animation
-    // We use the same controller but different math functions to create independent movement patterns
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -134,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen>
           ),
 
           // 2. Animated Flowing Mesh Gradient
-          // We use varying alignment and scale to create a "liquid" feel
           AnimatedBuilder(
             animation: _backgroundController,
             builder: (context, child) {
@@ -148,19 +147,17 @@ class _LoginScreenState extends State<LoginScreen>
                       math.cos(t * 2 * math.pi) * 0.7,
                       math.sin(t * 2 * math.pi) * 0.5,
                     ),
-                    radius: 400,
+                    radius: context.w(400),
                   ),
 
                   // Orb 2: Secondary Color - Moving crosswise
                   _AnimatedOrb(
                     color: colorScheme.secondary,
                     alignment: Alignment(
-                      // Moves side to side in a sine wave, offset by PI
                       math.sin((t * 2 * math.pi) + math.pi),
-                      // Moves up and down twice as fast
                       math.cos(t * 4 * math.pi) * 0.8,
                     ),
-                    radius: 350,
+                    radius: context.w(350),
                   ),
 
                   // Orb 3: Tertiary Color - Random-ish floating
@@ -170,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen>
                       math.cos((t * 2 * math.pi) + math.pi / 2) * 0.9,
                       math.sin((t * 3 * math.pi)) * 0.6,
                     ),
-                    radius: 300,
+                    radius: context.w(300),
                   ),
 
                   // Orb 4: Subtle Highlight - Counter Rotation
@@ -180,14 +177,14 @@ class _LoginScreenState extends State<LoginScreen>
                       math.sin(-(t * 2 * math.pi)) * 0.4,
                       math.cos(-(t * 2 * math.pi)) * 0.4,
                     ),
-                    radius: 200,
+                    radius: context.w(200),
                   ),
                 ],
               );
             },
           ),
 
-          // 3. Blur Mesh Overlay (Blends the orbs into a gradient)
+          // 3. Blur Mesh Overlay
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
             child: Container(color: Colors.transparent),
@@ -197,13 +194,13 @@ class _LoginScreenState extends State<LoginScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 24.0,
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.w(24.0),
+                  vertical: context.h(24.0),
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 450),
+                    constraints: BoxConstraints(maxWidth: context.w(450)),
                     child: FadeTransition(
                       opacity: _fadeAnimation,
                       child: SlideTransition(
@@ -212,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen>
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Icon with Pulse (synced to background loop)
+                            // Icon with Pulse
                             AnimatedBuilder(
                               animation: _backgroundController,
                               builder: (context, child) {
@@ -223,12 +220,12 @@ class _LoginScreenState extends State<LoginScreen>
                                               math.pi,
                                         ) +
                                         1) /
-                                    2; // 0 to 1 oscillating
+                                    2;
                                 return Transform.scale(
                                   scale: 1.0 + (pulse * 0.05),
                                   child: Container(
-                                    height: 100,
-                                    width: 100,
+                                    height: context.w(100),
+                                    width: context.w(100),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: LinearGradient(
@@ -248,8 +245,9 @@ class _LoginScreenState extends State<LoginScreen>
                                           color: colorScheme.primary.withValues(
                                             alpha: 0.4,
                                           ),
-                                          blurRadius: 20 + (pulse * 10),
-                                          offset: const Offset(0, 10),
+                                          blurRadius:
+                                              context.w(20) + (pulse * 10),
+                                          offset: Offset(0, context.h(10)),
                                         ),
                                       ],
                                     ),
@@ -261,23 +259,27 @@ class _LoginScreenState extends State<LoginScreen>
                               },
                             ),
 
-                            const SizedBox(height: 48),
+                            SizedBox(height: context.h(48)),
 
                             // Glass Card
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(
+                                context.w(24),
+                              ),
                               child: BackdropFilter(
                                 filter: ImageFilter.blur(
                                   sigmaX: 10,
                                   sigmaY: 10,
                                 ),
                                 child: Container(
-                                  padding: const EdgeInsets.all(32),
+                                  padding: EdgeInsets.all(context.w(32)),
                                   decoration: BoxDecoration(
                                     color:
                                         (isDark ? Colors.black : Colors.white)
                                             .withValues(alpha: 0.4),
-                                    borderRadius: BorderRadius.circular(24),
+                                    borderRadius: BorderRadius.circular(
+                                      context.w(24),
+                                    ),
                                     border: Border.all(
                                       color: Colors.white.withValues(
                                         alpha: 0.2,
@@ -300,22 +302,24 @@ class _LoginScreenState extends State<LoginScreen>
                                         'Welcome Back',
                                         style: theme.textTheme.headlineSmall
                                             ?.copyWith(
-                                              fontWeight: FontWeight.bold,
+                                              fontSize: context.sp(22),
+                                              fontWeight: FontWeight.w800,
                                               color: colorScheme.onSurface,
-                                              letterSpacing: 0.5,
+                                              letterSpacing: -0.2,
                                             ),
                                       ),
-                                      const SizedBox(height: 8),
+                                      SizedBox(height: context.h(8)),
                                       Text(
                                         'Sign in to continue your journey',
                                         textAlign: TextAlign.center,
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
+                                              fontSize: context.sp(15),
                                               color: colorScheme.onSurface
                                                   .withValues(alpha: 0.6),
                                             ),
                                       ),
-                                      const SizedBox(height: 40),
+                                      SizedBox(height: context.h(40)),
 
                                       // Login Buttons
                                       _SocialLoginButton(
@@ -325,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen>
                                             _loginWithGoogle(context),
                                       ),
                                       if (Platform.isIOS) ...[
-                                        const SizedBox(height: 16),
+                                        SizedBox(height: context.h(16)),
                                         _SocialLoginButton(
                                           text: 'Sign in with Apple',
                                           buttonType: ButtonType.apple,
@@ -351,13 +355,14 @@ class _LoginScreenState extends State<LoginScreen>
           Positioned(
             left: 0,
             right: 0,
-            bottom: 24,
+            bottom: context.h(24),
             child: SafeArea(
               top: false,
               child: Text(
                 'Version $_version',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: context.sp(11),
                   color: colorScheme.onSurface.withValues(alpha: 0.4),
                   letterSpacing: 1.0,
                 ),
@@ -411,18 +416,17 @@ class _SocialLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 54, // Slightly taller
+      height: context.h(54),
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: UnconstrainedBox(
-          constrainedAxis: Axis.vertical,
           child: SignInButton(
             buttonType: buttonType,
             btnText: text,
             buttonSize: ButtonSize.large,
-            elevation: 0, // Flat elegant look
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18), // Softer corners
+              borderRadius: BorderRadius.circular(context.w(18)),
               side: BorderSide(
                 color: Colors.black.withValues(alpha: 0.05),
                 width: 1,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tracker/screens/main/settings/help_support/widgets/faq_item.dart';
 import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
@@ -10,17 +11,20 @@ class HelpSupportScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Help & Support'), centerTitle: true),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(context.w(20)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildContactSection(context),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: context.h(32)),
+            Text(
               'Frequently Asked Questions',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: context.sp(18),
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.h(16)),
             const FaqItem(
               question: 'How do I start tracking my location?',
               answer:
@@ -51,24 +55,27 @@ class HelpSupportScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Contact Us',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: context.sp(18),
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: context.h(16)),
         SettingItem(
           title: 'Email Support',
           subtitle: 'support@tracker.app',
           leadingIcon: Icons.email_outlined,
-          trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+          trailing: Icon(Icons.arrow_forward_ios, size: context.w(14)),
           onTap: () {},
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: context.h(12)),
         SettingItem(
           title: 'Live Chat',
           subtitle: 'Available 24/7',
           leadingIcon: Icons.chat_bubble_outline,
-          trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+          trailing: Icon(Icons.arrow_forward_ios, size: context.w(14)),
           onTap: () {},
         ),
       ],

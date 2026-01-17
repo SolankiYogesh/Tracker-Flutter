@@ -7,6 +7,7 @@ import 'package:fquery/fquery.dart';
 import 'package:tracker/network/api_queries.dart';
 import 'package:tracker/main.dart' show queryCache;
 import 'package:fquery_core/fquery_core.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class LeaderboardScreen extends StatelessWidget {
   const LeaderboardScreen({super.key});
@@ -56,22 +57,22 @@ class LeaderboardScreen extends StatelessWidget {
               queryCache.invalidateQueries([ApiQueries.leaderboardKey]);
             },
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(context.w(16)),
               children: [
-                if (topThree.isNotEmpty) _buildTopThree(topThree),
-                const SizedBox(height: 20),
+                if (topThree.isNotEmpty) _buildTopThree(context, topThree),
+                SizedBox(height: context.h(20)),
                 if (rest.isNotEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 10),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: context.h(10)),
                     child: Text(
                       'Runners Up',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: context.sp(18),
                       ),
                     ),
                   ),
-                ...rest.map((e) => _buildRankItem(e, currentUserId)),
+                ...rest.map((e) => _buildRankItem(context, e, currentUserId)),
               ],
             ),
           );
@@ -80,12 +81,7 @@ class LeaderboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopThree(List<LeaderboardEntry> entries) {
-    // Expected order in standard podium: 2nd, 1st, 3rd
-    // But list is sorted by rank 1, 2, 3.
-    // So 0 is 1st, 1 is 2nd, 2 is 3rd.
-    // Display order: Silver (1), Gold (0), Bronze (2)
-
+  Widget _buildTopThree(BuildContext context, List<LeaderboardEntry> entries) {
     LeaderboardEntry? first = entries.isNotEmpty ? entries[0] : null;
     LeaderboardEntry? second = entries.length > 1 ? entries[1] : null;
     LeaderboardEntry? third = entries.length > 2 ? entries[2] : null;
@@ -96,21 +92,40 @@ class LeaderboardScreen extends StatelessWidget {
       children: [
         if (second != null)
           Expanded(
-            child: _buildPodiumItem(second, 2, Colors.grey.shade300, 100),
+            child: _buildPodiumItem(
+              context,
+              second,
+              2,
+              Colors.grey.shade300,
+              context.h(100),
+            ),
           ),
         if (first != null)
           Expanded(
-            child: _buildPodiumItem(first, 1, Colors.amber.shade300, 130),
+            child: _buildPodiumItem(
+              context,
+              first,
+              1,
+              Colors.amber.shade300,
+              context.h(130),
+            ),
           ),
         if (third != null)
           Expanded(
-            child: _buildPodiumItem(third, 3, Colors.brown.shade300, 80),
+            child: _buildPodiumItem(
+              context,
+              third,
+              3,
+              Colors.brown.shade300,
+              context.h(80),
+            ),
           ),
       ],
     );
   }
 
   Widget _buildPodiumItem(
+    BuildContext context,
     LeaderboardEntry entry,
     int place,
     Color color,
@@ -120,33 +135,38 @@ class LeaderboardScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         CircleAvatar(
-          radius: place == 1 ? 35 : 28,
+          radius: context.w(place == 1 ? 35 : 28),
           backgroundColor: color,
           child: CircleAvatar(
-            radius: place == 1 ? 32 : 25,
+            radius: context.w(place == 1 ? 32 : 25),
             backgroundImage: entry.picture != null
                 ? CachedNetworkImageProvider(entry.picture!)
                 : null,
             child: entry.picture == null ? const Icon(Icons.person) : null,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.h(8)),
         Text(
           entry.name ?? 'User',
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: context.sp(14),
+          ),
         ),
         Text(
           '${entry.totalXp} XP',
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          style: TextStyle(fontSize: context.sp(12), color: Colors.grey),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.h(8)),
         Container(
           height: height,
           width: double.infinity,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.4),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(context.w(8)),
+            ),
             border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
           ),
           child: Column(
@@ -155,11 +175,9 @@ class LeaderboardScreen extends StatelessWidget {
               Text(
                 '$place',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: context.sp(32),
                   fontWeight: FontWeight.bold,
-                  color: color.withValues(
-                    alpha: 1.0,
-                  ), // Stronger color for number
+                  color: color,
                 ),
               ),
             ],
@@ -169,34 +187,44 @@ class LeaderboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRankItem(LeaderboardEntry entry, String? currentUserId) {
+  Widget _buildRankItem(
+    BuildContext context,
+    LeaderboardEntry entry,
+    String? currentUserId,
+  ) {
     final isMe = entry.userId == currentUserId;
     return Card(
       elevation: isMe ? 4 : 1,
       color: isMe ? Colors.blue.withValues(alpha: 0.1) : null,
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: context.h(8)),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Colors.transparent,
           child: Text(
             '#${entry.rank}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: context.sp(16),
+            ),
           ),
         ),
         title: Text(
           entry.name ?? 'Unknown',
           style: TextStyle(
             fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
+            fontSize: context.sp(16),
           ),
         ),
         subtitle: Text(
           'Level ${entry.currentLevel} • ${entry.entitiesCollected} Items',
+          style: TextStyle(fontSize: context.sp(14)),
         ),
         trailing: Text(
           '${entry.totalXp} XP',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.blue,
+            fontSize: context.sp(14),
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracker/theme/app_colors.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class SettingItem extends StatelessWidget {
   const SettingItem({
@@ -22,22 +23,29 @@ class SettingItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.w(12)),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: context.w(16),
+            vertical: context.h(14),
+          ),
           child: Row(
             children: [
               if (leadingIcon != null) ...[
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: context.w(36),
+                  height: context.w(36),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(context.w(10)),
                   ),
-                  child: Icon(leadingIcon, size: 20, color: AppColors.primary),
+                  child: Icon(
+                    leadingIcon,
+                    size: context.w(20),
+                    color: AppColors.primary,
+                  ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: context.w(12)),
               ],
               Expanded(
                 child: Column(
@@ -46,15 +54,15 @@ class SettingItem extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontSize: 15,
+                        fontSize: context.sp(15),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: context.h(2)),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontSize: 12,
+                        fontSize: context.sp(13),
                         color: Theme.of(
                           context,
                         ).textTheme.bodyMedium!.color!.withValues(alpha: 0.6),

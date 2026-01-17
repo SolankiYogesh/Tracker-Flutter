@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:tracker/router/app_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tracker/screens/main/permissions/widgets/permission_card.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -128,9 +129,6 @@ class _PermissionScreenState extends State<PermissionScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isSmallScreen = size.height < 600;
-
     const backgroundColor = Color(0xFF141416);
     const cardColor = Color(0xFF2C2C2E);
     const accentColor = Color(0xFF9FA8DA);
@@ -144,54 +142,55 @@ class _PermissionScreenState extends State<PermissionScreen>
             ? const Center(child: CircularProgressIndicator())
             : Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
+                  constraints: BoxConstraints(maxWidth: context.w(500)),
                   child: SingleChildScrollView(
                     padding: EdgeInsets.symmetric(
-                      horizontal: size.width * 0.06,
-                      vertical: 16.0,
+                      horizontal: context.w(24),
+                      vertical: context.h(16),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: size.height * 0.05),
+                        SizedBox(height: context.h(40)),
 
                         Center(
                           child: Container(
-                            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                            padding: EdgeInsets.all(context.w(16)),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: accentColor.withValues(alpha: 0.2),
                             ),
                             child: Icon(
                               Icons.location_on,
-                              size: isSmallScreen ? 48 : 64,
+                              size: context.w(64),
                               color: accentColor,
                             ),
                           ),
                         ),
-                        SizedBox(height: size.height * 0.04),
+                        SizedBox(height: context.h(32)),
 
                         Text(
                           'Location Permissions\nRequired',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 24 : 28,
-                            fontWeight: FontWeight.bold,
+                            fontSize: context.sp(26),
+                            fontWeight: FontWeight.w800,
                             color: textColor,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: context.h(16)),
 
                         Text(
                           'Tracktor needs location permissions to track\nyour movement and draw your path on the map.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: isSmallScreen ? 13 : 14,
+                            fontSize: context.sp(15),
                             color: subTextColor,
                             height: 1.5,
                           ),
                         ),
-                        SizedBox(height: size.height * 0.05),
+                        SizedBox(height: context.h(40)),
 
                         PermissionCard(
                           icon: Icons.gps_fixed,
@@ -206,7 +205,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: context.h(12)),
 
                         PermissionCard(
                           icon: Icons.location_on_outlined,
@@ -220,7 +219,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: context.h(12)),
 
                         PermissionCard(
                           icon: Icons.location_searching,
@@ -235,7 +234,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: context.h(12)),
 
                         PermissionCard(
                           icon: Icons.directions_walk,
@@ -244,13 +243,14 @@ class _PermissionScreenState extends State<PermissionScreen>
                               'Required to count steps and detect\nactivity',
                           status: _activityStatus,
                           onGrant: () => _requestPermission(
-                              Permission.activityRecognition),
+                            Permission.activityRecognition,
+                          ),
                           cardColor: cardColor,
                           accentColor: accentColor,
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: context.h(12)),
 
                         PermissionCard(
                           icon: Icons.notifications_active_outlined,
@@ -264,7 +264,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                           textColor: textColor,
                           subTextColor: subTextColor,
                         ),
-                        SizedBox(height: size.height * 0.05),
+                        SizedBox(height: context.h(40)),
                       ],
                     ),
                   ),

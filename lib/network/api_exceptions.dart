@@ -1,23 +1,6 @@
 import 'package:dio/dio.dart';
 
 class ApiException implements Exception {
-  final String message;
-
-  // Response info
-  final int? statusCode;
-  final dynamic responseData;
-  final Map<String, dynamic>? responseHeaders;
-
-  // Request info
-  final String? url;
-  final String? method;
-  final Map<String, dynamic>? requestHeaders;
-  final dynamic requestBody;
-  final Map<String, dynamic>? queryParameters;
-
-  // Dio specific
-  final DioExceptionType? type;
-
   ApiException({
     required this.message,
     this.statusCode,
@@ -48,6 +31,22 @@ class ApiException implements Exception {
       type: e.type,
     );
   }
+  final String message;
+
+  // Response info
+  final int? statusCode;
+  final dynamic responseData;
+  final Map<String, dynamic>? responseHeaders;
+
+  // Request info
+  final String? url;
+  final String? method;
+  final Map<String, dynamic>? requestHeaders;
+  final dynamic requestBody;
+  final Map<String, dynamic>? queryParameters;
+
+  // Dio specific
+  final DioExceptionType? type;
 
   static String _extractMessage(DioException e) {
     final data = e.response?.data;

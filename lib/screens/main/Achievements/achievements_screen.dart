@@ -7,6 +7,7 @@ import 'package:fquery/fquery.dart';
 import 'package:tracker/network/api_queries.dart';
 import 'package:tracker/main.dart' show queryCache;
 import 'package:fquery_core/fquery_core.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class AchievementsScreen extends StatelessWidget {
   const AchievementsScreen({super.key});
@@ -70,28 +71,30 @@ class AchievementsScreen extends StatelessWidget {
                   ]);
                 },
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(context.w(16)),
                   children: [
                     if (xp != null)
                       _buildLevelCard(
+                        context,
                         xp.currentLevel,
                         xp.totalXp,
                         xp.entitiesCollected,
                       ),
-                    const SizedBox(height: 24),
-                    const Text(
+                    SizedBox(height: context.h(24)),
+                    Text(
                       'Collection History',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: context.sp(18),
                         fontWeight: FontWeight.bold,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.h(16)),
                     if (collections != null &&
                         collections.collections.isNotEmpty)
                       ...collections.collections.map((collection) {
                         return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: EdgeInsets.only(bottom: context.h(12)),
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor: Colors.transparent,
@@ -145,11 +148,16 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLevelCard(int level, int totalXp, int count) {
+  Widget _buildLevelCard(
+    BuildContext context,
+    int level,
+    int totalXp,
+    int count,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(context.w(24)),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(context.w(20)),
         gradient: LinearGradient(
           colors: [Colors.blue.shade800, Colors.blue.shade400],
           begin: Alignment.topLeft,
@@ -158,8 +166,8 @@ class AchievementsScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.blue.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            blurRadius: context.w(10),
+            offset: Offset(0, context.h(5)),
           ),
         ],
       ),
@@ -171,45 +179,58 @@ class AchievementsScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Level',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: context.sp(14),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   Text(
                     '$level',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
+                      fontSize: context.sp(44),
+                      fontWeight: FontWeight.w900,
+                      height: 1.0,
                     ),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(context.w(12)),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.emoji_events,
                   color: Colors.white,
-                  size: 32,
+                  size: context.w(32),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: context.h(20)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '$totalXp Total XP',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: context.sp(15),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               Text(
                 '$count Items',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: context.sp(15),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),

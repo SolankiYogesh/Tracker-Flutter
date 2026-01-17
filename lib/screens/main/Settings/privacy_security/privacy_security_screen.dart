@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tracker/screens/main/settings/privacy_security/widgets/security_status_badge.dart';
 import 'package:tracker/screens/main/settings/widgets/setting_item.dart';
 import 'package:tracker/theme/app_colors.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -23,20 +24,20 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(context.w(20)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SecurityStatusBadge(),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: context.h(32)),
+            Text(
               'Security Settings',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: context.sp(18),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.h(16)),
             SettingItem(
               title: 'App Lock',
               subtitle: 'Require Face ID / Fingerprint to open',
@@ -56,23 +57,23 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 });
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: context.h(12)),
             SettingItem(
               title: 'Change Password',
               subtitle: 'Last changed 3 months ago',
               leadingIcon: Icons.lock_outline,
-              trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+              trailing: Icon(Icons.arrow_forward_ios, size: context.w(14)),
               onTap: () {},
             ),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: context.h(32)),
+            Text(
               'Privacy Controls',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: context.sp(18),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.h(16)),
             SettingItem(
               title: 'Incognito Tracking',
               subtitle: 'Do not save location logs to history',
@@ -92,7 +93,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 });
               },
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: context.h(12)),
             SettingItem(
               title: 'Share Usage Analytics',
               subtitle: 'Help us improve the app experience',
@@ -112,28 +113,28 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
                 });
               },
             ),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: context.h(32)),
+            Text(
               'Device Permissions',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: context.sp(18),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.h(16)),
             SettingItem(
               title: 'Location Permissions',
               subtitle: 'Managed in system settings',
               leadingIcon: Icons.location_on_outlined,
-              trailing: const Icon(Icons.open_in_new, size: 14),
+              trailing: Icon(Icons.open_in_new, size: context.w(14)),
               onTap: () {},
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: context.h(12)),
             SettingItem(
               title: 'Notification Settings',
               subtitle: 'Managed in system settings',
               leadingIcon: Icons.notifications_none,
-              trailing: const Icon(Icons.open_in_new, size: 14),
+              trailing: Icon(Icons.open_in_new, size: context.w(14)),
               onTap: () {},
             ),
           ],

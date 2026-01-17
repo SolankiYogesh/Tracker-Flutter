@@ -34,7 +34,7 @@ class AuthRepository {
       nonce: nonce,
     );
 
-    final OAuthCredential credential = OAuthProvider("apple.com").credential(
+    final OAuthCredential credential = OAuthProvider('apple.com').credential(
       idToken: appleCredential.identityToken,
       accessToken: appleCredential.authorizationCode,
       rawNonce: rawNonce,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:tracker/utils/app_logger.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 import 'package:latlong2/latlong.dart';
 import 'package:pedometer/pedometer.dart';
@@ -41,7 +42,7 @@ class _StatsScreenState extends State<StatsScreen> {
     await _calculateDistance();
     await _loadSteps();
   }
-  
+
   Future<void> _loadSteps() async {
     final stats = await DatabaseHelper().getUserStats();
     if (mounted) {
@@ -64,39 +65,42 @@ class _StatsScreenState extends State<StatsScreen> {
 
     double totalDistance = 0.0;
     const distanceCalculator = Distance();
-    
+
     // Minimum accuracy required to consider a point (in meters).
     // If accuracy is worse (higher number) than this, we skip it.
-    const double minAccuracyThreshold = AppConstants.gpsMinAccuracyThreshold; 
-    
+    const double minAccuracyThreshold = AppConstants.gpsMinAccuracyThreshold;
+
     // Max reasonable speed in m/s (approx 100 km/h) to filter out jumps.
-    const double maxSpeedMps = AppConstants.gpsMaxSpeedMps; 
+    const double maxSpeedMps = AppConstants.gpsMaxSpeedMps;
 
     for (int i = 0; i < points.length - 1; i++) {
-        final p1 = points[i];
-        final p2 = points[i + 1];
+      final p1 = points[i];
+      final p2 = points[i + 1];
 
-        // 1. Filter by Accuracy (if available)
-        if (p1.accuracy != null && p1.accuracy! > minAccuracyThreshold) continue;
-        if (p2.accuracy != null && p2.accuracy! > minAccuracyThreshold) continue;
+      // 1. Filter by Accuracy (if available)
+      if (p1.accuracy != null && p1.accuracy! > minAccuracyThreshold) continue;
+      if (p2.accuracy != null && p2.accuracy! > minAccuracyThreshold) continue;
 
-        final dist = distanceCalculator.as(LengthUnit.Meter, 
-            LatLng(p1.latitude, p1.longitude), 
-            LatLng(p2.latitude, p2.longitude));
+      final dist = distanceCalculator.as(
+        LengthUnit.Meter,
+        LatLng(p1.latitude, p1.longitude),
+        LatLng(p2.latitude, p2.longitude),
+      );
 
-        // 2. Filter by plausible speed (teleportation check)
-        final timeDiffSeconds = p2.recordedAt.difference(p1.recordedAt).inSeconds;
-        
-        // If points are extremely close in time but far in distance, it's likely a jump.
-        // Allow for some gap: if timeDiff is 0 (same second), we skip unless distance is negligible.
-        if (timeDiffSeconds <= 0) {
-            if (dist > AppConstants.gpsMaxInstantJump) continue; // Skip if > 5m movement in 0 seconds
-        } else {
-            final calculatedSpeed = dist / timeDiffSeconds;
-            if (calculatedSpeed > maxSpeedMps) continue;
-        }
+      // 2. Filter by plausible speed (teleportation check)
+      final timeDiffSeconds = p2.recordedAt.difference(p1.recordedAt).inSeconds;
 
-        totalDistance += dist;
+      // If points are extremely close in time but far in distance, it's likely a jump.
+      // Allow for some gap: if timeDiff is 0 (same second), we skip unless distance is negligible.
+      if (timeDiffSeconds <= 0) {
+        if (dist > AppConstants.gpsMaxInstantJump)
+          continue; // Skip if > 5m movement in 0 seconds
+      } else {
+        final calculatedSpeed = dist / timeDiffSeconds;
+        if (calculatedSpeed > maxSpeedMps) continue;
+      }
+
+      totalDistance += dist;
     }
 
     if (mounted) {
@@ -115,7 +119,7 @@ class _StatsScreenState extends State<StatsScreen> {
 
   void onStepCountError(dynamic error) {
     AppLogger.error('onStepCountError', error);
-    // We don't necessarily need to show an error on screen, 
+    // We don't necessarily need to show an error on screen,
     // just fail gracefully and keep showing stored steps.
   }
 
@@ -133,12 +137,44 @@ class _StatsScreenState extends State<StatsScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Total Steps', style: TextStyle(fontSize: 30)),
-            Text(_steps, style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
-            const Text('Total Distance', style: TextStyle(fontSize: 30)),
-            Text('$_km km', style: const TextStyle(fontSize: 60, fontWeight: FontWeight.bold)),
+          children: [
+            Text(
+              'Total Steps',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: context.sp(20),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              ),
+            ),
+            SizedBox(height: context.h(4)),
+            Text(
+              _steps,
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                fontSize: context.sp(56),
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            SizedBox(height: context.h(48)),
+            Text(
+              'Total Distance',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontSize: context.sp(20),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              ),
+            ),
+            SizedBox(height: context.h(4)),
+            Text(
+              '$_km km',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                fontSize: context.sp(56),
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
           ],
         ),
       ),

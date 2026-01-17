@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class PermissionCard extends StatelessWidget {
   const PermissionCard({
@@ -28,20 +29,18 @@ class PermissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isCompact = screenWidth < 360;
     final isGranted = isDone ?? (status.isGranted || status.isLimited);
 
     return Container(
-      padding: EdgeInsets.all(isCompact ? 12 : 16),
+      padding: EdgeInsets.all(context.w(16)),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.w(16)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: subTextColor, size: isCompact ? 24 : 28),
-          SizedBox(width: isCompact ? 12 : 16),
+          Icon(icon, color: subTextColor, size: context.w(28)),
+          SizedBox(width: context.w(16)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,17 +48,17 @@ class PermissionCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: isCompact ? 14 : 16,
+                    fontSize: context.sp(16),
                     fontWeight: FontWeight.bold,
                     color: textColor,
                     height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: context.h(4)),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    fontSize: isCompact ? 11 : 12,
+                    fontSize: context.sp(13),
                     color: subTextColor,
                     height: 1.3,
                   ),
@@ -67,12 +66,12 @@ class PermissionCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: isCompact ? 8 : 12),
+          SizedBox(width: context.w(12)),
           isGranted
               ? Icon(
                   Icons.check_circle,
                   color: Colors.green,
-                  size: isCompact ? 24 : 28,
+                  size: context.w(28),
                 )
               : ElevatedButton(
                   onPressed: onGrant,
@@ -80,19 +79,19 @@ class PermissionCard extends StatelessWidget {
                     backgroundColor: accentColor,
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(context.w(20)),
                     ),
                     padding: EdgeInsets.symmetric(
-                      horizontal: isCompact ? 12 : 20,
-                      vertical: isCompact ? 8 : 10,
+                      horizontal: context.w(20),
+                      vertical: context.h(10),
                     ),
-                    minimumSize: Size(isCompact ? 60 : 80, 0),
+                    minimumSize: Size(context.w(80), 0),
                     elevation: 0,
                   ),
                   child: Text(
                     'Grant',
                     style: TextStyle(
-                      fontSize: isCompact ? 12 : 14,
+                      fontSize: context.sp(14),
                       fontWeight: FontWeight.bold,
                     ),
                   ),

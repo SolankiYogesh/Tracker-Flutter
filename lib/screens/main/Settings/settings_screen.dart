@@ -7,6 +7,7 @@ import 'package:tracker/screens/main/settings/widgets/setting_profile_card.dart'
 import 'package:tracker/screens/main/settings/widgets/setting_section.dart';
 import 'package:tracker/theme/app_colors.dart';
 import 'package:tracker/router/app_router.dart';
+import 'package:tracker/utils/responsive_utils.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -16,8 +17,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsEnabled = true;
-  bool _locationTracking = true;
+  // bool _notificationsEnabled = true;
+  // bool _locationTracking = true;
   // bool _autoSync = true;
   // bool _privacyMode = false;
 
@@ -32,7 +33,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to log out?'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(context.w(16)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -66,10 +69,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await context.read<AuthServiceProvider>().logout();
       if (context.mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppRouter.root,
-          (route) => false,
-        );
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRouter.root, (route) => false);
       }
     } catch (e) {
       if (!context.mounted) return;
@@ -107,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
+                    SizedBox(height: context.h(8)),
                     if (user != null) SettingProfileCard(user: user),
 
                     // Preferences Section
@@ -126,60 +128,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onTap: () => changeTheme(context),
                           leadingIcon: Icons.dark_mode,
                         ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'Notifications',
-                          subtitle: 'Receive app notifications',
-                          trailing: Switch(
-                            value: _notificationsEnabled,
-                            onChanged: (value) {
-                              setState(() {
-                                _notificationsEnabled = value;
-                              });
-                            },
-                            activeThumbColor: AppColors.primary,
-                          ),
-                          onTap: () {
-                            setState(() {
-                              _notificationsEnabled = !_notificationsEnabled;
-                            });
-                          },
-                          leadingIcon: Icons.notifications,
-                        ),
-                        Divider(
-                          height: 1,
-                          thickness: 0.5,
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: .3),
-                          indent: 64,
-                        ),
-                        SettingItem(
-                          title: 'Location Tracking',
-                          subtitle: 'Track location in background',
-                          trailing: Switch(
-                            value: _locationTracking,
-                            onChanged: (value) {
-                              setState(() {
-                                _locationTracking = value;
-                              });
-                            },
-                            activeThumbColor: AppColors.primary,
-                          ),
-                          onTap: () {
-                            setState(() {
-                              _locationTracking = !_locationTracking;
-                            });
-                          },
-                          leadingIcon: Icons.location_on,
-                        ),
+                        // Divider(
+                        //   height: 1,
+                        //   thickness: 0.5,
+                        //   color: Theme.of(
+                        //     context,
+                        //   ).dividerColor.withValues(alpha: .3),
+                        //   indent: context.w(64),
+                        // ),
+                        // SettingItem(
+                        //   title: 'Notifications',
+                        //   subtitle: 'Receive app notifications',
+                        //   trailing: Switch(
+                        //     value: _notificationsEnabled,
+                        //     onChanged: (value) {
+                        //       setState(() {
+                        //         _notificationsEnabled = value;
+                        //       });
+                        //     },
+                        //     activeThumbColor: AppColors.primary,
+                        //   ),
+                        //   onTap: () {
+                        //     setState(() {
+                        //       _notificationsEnabled = !_notificationsEnabled;
+                        //     });
+                        //   },
+                        //   leadingIcon: Icons.notifications,
+                        // ),
+                        //   Divider(
+                        //     height: 1,
+                        //     thickness: 0.5,
+                        //     color: Theme.of(
+                        //       context,
+                        //     ).dividerColor.withValues(alpha: .3),
+                        //     indent: context.w(64),
+                        //   ),
+                        //   SettingItem(
+                        //     title: 'Location Tracking',
+                        //     subtitle: 'Track location in background',
+                        //     trailing: Switch(
+                        //       value: _locationTracking,
+                        //       onChanged: (value) {
+                        //         setState(() {
+                        //           _locationTracking = value;
+                        //         });
+                        //       },
+                        //       activeThumbColor: AppColors.primary,
+                        //     ),
+                        //     onTap: () {
+                        //       setState(() {
+                        //         _locationTracking = !_locationTracking;
+                        //       });
+                        //     },
+                        //     leadingIcon: Icons.location_on,
+                        //   ),
                       ],
                     ),
 
@@ -358,7 +360,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     //     ),
                     //   ],
                     // ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: context.h(32)),
                   ],
                 ),
               ),
@@ -366,7 +368,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Logout Button
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: context.w(16),
+                vertical: context.h(12),
+              ),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 border: Border(
@@ -378,15 +383,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: ElevatedButton.icon(
                 onPressed: () => logOut(context),
-                icon: const Icon(Icons.logout, size: 20),
-                label: const Text(
+                icon: Icon(Icons.logout, size: context.w(20)),
+                label: Text(
                   'Logout',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: context.sp(15),
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize: Size.fromHeight(context.h(52)),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(context.w(14)),
                   ),
                   elevation: 0,
                   backgroundColor: AppColors.error.withValues(alpha: .1),
