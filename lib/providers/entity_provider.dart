@@ -194,8 +194,12 @@ class EntityProvider extends ChangeNotifier {
           );
 
           // Invalidate queries to refresh UI
+          // Invalidate queries to refresh UI
           queryCache.invalidateQueries([ApiQueries.userExperienceKey, userId]);
           queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
+          
+          // Update last check time so polling doesn't pick this up as "new"
+          _lastCollectionCheck = DateTime.now();
         } catch (e) {
           AppLogger.log('Error collecting entity in foreground: $e');
         }
@@ -227,13 +231,10 @@ class EntityProvider extends ChangeNotifier {
           // Trigger UI
           _collectionCompleteController.add(latest);
 
-          // Also ensure local notification if not already shown?
-          // Ideally background service shows it. But user said no notification.
-          // Let's show it here to be safe (might duplicate if BG works, but better than none)
-          sendCollectionNotification(
-            'Entity Collected!',
-            "You found a ${latest.entityType?.name ?? 'Item'}! +${latest.xpEarned} XP",
-          );
+
+
+          // NOTE: Notification is already handled by Repo (for BG) or checkProximityAndCollect (for FG).
+          // Removed redundant sendCollectionNotification here.
 
           await _loadLocalEntities();
 
