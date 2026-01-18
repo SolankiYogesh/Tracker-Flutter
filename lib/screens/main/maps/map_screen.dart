@@ -337,7 +337,7 @@ class _MapScreenState extends State<MapScreen> {
                 });
                 // Show snackbar after animation
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Collected $collectedName!")),
+                  SnackBar(content: Text('Collected $collectedName!')),
                 );
               },
             ),

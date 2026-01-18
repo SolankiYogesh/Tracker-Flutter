@@ -96,8 +96,8 @@ class _UserLocationMarkerState extends State<UserLocationMarker>
 }
 
 class _DirectionBeamPainter extends CustomPainter {
-  final BuildContext context;
   _DirectionBeamPainter({required this.context});
+  final BuildContext context;
 
   @override
   void paint(Canvas canvas, Size size) {

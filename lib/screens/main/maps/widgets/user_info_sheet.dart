@@ -4,9 +4,6 @@ import 'package:tracker/models/nearby_user.dart';
 import 'package:tracker/utils/responsive_utils.dart';
 
 class UserInfoSheet extends StatelessWidget {
-  final NearbyUser user;
-  final void Function(double lat, double lng) onDirectionTap;
-  final String Function(DateTime d) timeAgoFormatter;
 
   const UserInfoSheet({
     super.key,
@@ -14,6 +11,9 @@ class UserInfoSheet extends StatelessWidget {
     required this.onDirectionTap,
     required this.timeAgoFormatter,
   });
+  final NearbyUser user;
+  final void Function(double lat, double lng) onDirectionTap;
+  final String Function(DateTime d) timeAgoFormatter;
 
   @override
   Widget build(BuildContext context) {

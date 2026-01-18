@@ -4,14 +4,14 @@ import 'package:tracker/models/entity_model.dart' as model;
 import 'package:tracker/utils/responsive_utils.dart';
 
 class EntityInfoSheet extends StatelessWidget {
-  final model.Entity entity;
-  final void Function(double lat, double lng) onDirectionTap;
 
   const EntityInfoSheet({
     super.key,
     required this.entity,
     required this.onDirectionTap,
   });
+  final model.Entity entity;
+  final void Function(double lat, double lng) onDirectionTap;
 
   @override
   Widget build(BuildContext context) {

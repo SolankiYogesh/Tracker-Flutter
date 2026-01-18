@@ -93,8 +93,9 @@ class _StatsScreenState extends State<StatsScreen> {
       // If points are extremely close in time but far in distance, it's likely a jump.
       // Allow for some gap: if timeDiff is 0 (same second), we skip unless distance is negligible.
       if (timeDiffSeconds <= 0) {
-        if (dist > AppConstants.gpsMaxInstantJump)
+        if (dist > AppConstants.gpsMaxInstantJump) {
           continue; // Skip if > 5m movement in 0 seconds
+        }
       } else {
         final calculatedSpeed = dist / timeDiffSeconds;
         if (calculatedSpeed > maxSpeedMps) continue;

@@ -4,10 +4,10 @@ import 'package:tracker/models/nearby_user.dart';
 import 'package:tracker/utils/responsive_utils.dart';
 
 class NearbyUserMarker extends StatelessWidget {
-  final NearbyUser user;
-  final VoidCallback onTap;
 
   const NearbyUserMarker({super.key, required this.user, required this.onTap});
+  final NearbyUser user;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

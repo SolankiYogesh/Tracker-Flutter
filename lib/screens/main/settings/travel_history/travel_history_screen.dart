@@ -156,9 +156,9 @@ class _TravelHistoryScreenState extends State<TravelHistoryScreen> {
     double stillTime = 0; // minutes
 
     for (var a in _activities) {
-      if (a.type == 'walking')
+      if (a.type == 'walking') {
         walkingDist += a.distance;
-      else if (a.type == 'vehicle')
+      } else if (a.type == 'vehicle')
         vehicleDist += a.distance;
       else
         stillTime += a.durationMinutes;

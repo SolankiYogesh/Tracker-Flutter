@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tracker/utils/responsive_utils.dart';
 
 class MapControls extends StatelessWidget {
-  final VoidCallback onRecenter;
 
   const MapControls({super.key, required this.onRecenter});
+  final VoidCallback onRecenter;
 
   @override
   Widget build(BuildContext context) {

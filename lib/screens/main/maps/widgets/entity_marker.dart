@@ -4,10 +4,10 @@ import 'package:tracker/models/entity_model.dart' as model;
 import 'package:tracker/utils/responsive_utils.dart';
 
 class EntityMarker extends StatelessWidget {
-  final model.Entity entity;
-  final VoidCallback onTap;
 
   const EntityMarker({super.key, required this.entity, required this.onTap});
+  final model.Entity entity;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
