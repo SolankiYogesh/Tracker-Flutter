@@ -24,6 +24,7 @@ class Repo {
   bool _isSyncing = false;
   Timer? _syncTimer;
   BackgroundLocationUpdateData? lastUpdateRecord;
+  LocationPoint? _lastSavedLocation;
 
   final _collectionController = StreamController<Collection>.broadcast();
   Stream<Collection> get onCollection => _collectionController.stream;
@@ -41,6 +42,12 @@ class Repo {
     // Check for nearby entities to collect
     _checkEntityCollection(data, user.id);
 
+    // --- FILTER LOGIC START ---
+    if (!_shouldSaveLocation(data)) {
+      return;
+    }
+    // --- FILTER LOGIC END ---
+
     final locationPoint = LocationPoint(
       latitude: data.lat,
       longitude: data.lon,
@@ -54,6 +61,9 @@ class Repo {
 
     // 1. Save to Local DB (isSynced = false by default)
     await DatabaseHelper().insertLocation(locationPoint);
+
+    // Update last saved location
+    _lastSavedLocation = locationPoint;
 
     if (kDebugMode) {
       AppLogger.log(
@@ -161,20 +171,6 @@ class Repo {
         return;
       }
 
-      //   if (lastUpdateRecord != null) {
-      //     final lastSyncItem = unsyncedLocations.last;
-      //     final distance = Distance().as(
-      //       LengthUnit.Meter,
-      //       LatLng(lastUpdateRecord!.lat, lastUpdateRecord!.lon),
-      //       LatLng(lastSyncItem.latitude, lastSyncItem.longitude),
-      //     );
-      // AppLogger.log('Distance: $distance');
-      //     if (distance < 7) {
-      //       _isSyncing = false;
-      //       return;
-      //     }
-      //   }
-
       if (kDebugMode) {
         AppLogger.log('Syncing ${unsyncedLocations.length} locations...');
       }
@@ -202,6 +198,89 @@ class Repo {
     } finally {
       _isSyncing = false;
     }
+  }
+
+  bool _shouldSaveLocation(BackgroundLocationUpdateData newData) {
+    // 1. Accuracy Check
+    // If accuracy is too low (radius is too big), we reject it to avoid "jumping"
+    if (newData.horizontalAccuracy > AppConstants.minLocationAccuracy) {
+      if (kDebugMode) {
+        AppLogger.log(
+          'FILTER REJECT: Low accuracy (${newData.horizontalAccuracy.toStringAsFixed(1)}m > ${AppConstants.minLocationAccuracy}m)',
+        );
+      }
+      return false;
+    }
+
+    // If we haven't saved any location yet, always save the first one (provided it's accurate enough)
+    if (_lastSavedLocation == null) {
+      if (kDebugMode) AppLogger.log('FILTER ACCEPT: First location point');
+      return true;
+    }
+
+    // Calculate distance from last saved point
+    const distanceCalc = Distance();
+    final dist = distanceCalc.as(
+      LengthUnit.Meter,
+      LatLng(_lastSavedLocation!.latitude, _lastSavedLocation!.longitude),
+      LatLng(newData.lat, newData.lon),
+    );
+
+    // Calculate time delta
+    final timeDelta = DateTime.now().difference(_lastSavedLocation!.recordedAt).inSeconds;
+    final speed = newData.speed < 0 ? 0 : newData.speed;
+
+    // 2. Stationary Check
+    // If speed is very low, we assume user is stationary.
+    // In this state, we require a larger distance change to filter out "stationary jitter".
+    if (speed < AppConstants.minStationarySpeed) {
+      if (dist < AppConstants.minStationaryDistance) {
+        if (kDebugMode) {
+          AppLogger.log(
+            'FILTER REJECT: Stationary jitter (Speed: ${speed.toStringAsFixed(1)}m/s, Dist: ${dist.toStringAsFixed(1)}m)',
+          );
+        }
+        return false;
+      } else {
+        if (kDebugMode) {
+          AppLogger.log(
+            'FILTER ACCEPT: Stationary but moved significantly (Dist: ${dist.toStringAsFixed(1)}m)',
+          );
+        }
+        return true;
+      }
+    }
+
+    // 3. Moving Check
+    // A) Significant Distance: If moved enough distance, accept regardless of time.
+    if (dist > AppConstants.minMovingDistance) {
+      if (kDebugMode) {
+        AppLogger.log(
+          'FILTER ACCEPT: Significant distance (Dist: ${dist.toStringAsFixed(1)}m)',
+        );
+      }
+      return true;
+    }
+
+    // B) Time & Distance (Slow steady movement):
+    // If moved a smaller distance but enough time has passed, accept it.
+    if (dist > AppConstants.minSignificantDistance &&
+        timeDelta > AppConstants.minSignificantTime) {
+      if (kDebugMode) {
+        AppLogger.log(
+          'FILTER ACCEPT: Time & Distance (Dist: ${dist.toStringAsFixed(1)}m, Time: ${timeDelta}s)',
+        );
+      }
+      return true;
+    }
+
+    // Otherwise, reject as insignificant
+    if (kDebugMode) {
+      AppLogger.log(
+        'FILTER REJECT: Insignificant (Dist: ${dist.toStringAsFixed(1)}m, Time: ${timeDelta}s)',
+      );
+    }
+    return false;
   }
 }
 

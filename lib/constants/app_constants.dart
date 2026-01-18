@@ -139,4 +139,51 @@ class AppConstants {
   /// Effect: If two points have the exact same timestamp but are further apart than this,
   /// it's considered an error/jump and ignored.
   static const double gpsMaxInstantJump = 5.0;
+
+  // ===========================================================================
+  // LOCATION FILTERING CONFIGURATION
+  // ===========================================================================
+
+  /// Minimum accuracy (in meters) required to accept a location update.
+  ///
+  /// Usage: Used in `Repo._shouldSaveLocation`.
+  /// Effect: Any location update with a horizontal accuracy radius larger than this
+  /// will be immediately rejected as "too noisy". This prevents large jumps due to
+  /// poor GPS signal (e.g., inside buildings).
+  static const double minLocationAccuracy = 25.0;
+
+  /// Speed threshold (in meters/second) below which the user is considered stationary.
+  ///
+  /// Usage: Used in `Repo._shouldSaveLocation` to switch to stricter distance checks.
+  /// Effect: 0.5 m/s is approx 1.8 km/h. If speed is below this, we assume the user
+  /// is not effectively moving, so we apply `minStationaryDistance` to filter out stationary jitter.
+  static const double minStationarySpeed = 0.5;
+
+  /// Minimum distance (in meters) required to trigger a save when the user is stationary.
+  ///
+  /// Usage: Used in `Repo._shouldSaveLocation` when speed < `minStationarySpeed`.
+  /// Effect: When standing still, GPS can "wander" a few meters. We ignore these small
+  /// displacements (jitter). Only if the "wander" exceeds this threshold do we record it.
+  static const double minStationaryDistance = 20.0;
+
+  /// Minimum distance (in meters) required to trigger a save when the user is moving significantly.
+  ///
+  /// Usage: Used in `Repo._shouldSaveLocation`.
+  /// Effect: If the user has moved at least this much since the last saved point,
+  /// we accept the point regardless of time elapsed (fast movement).
+  static const double minMovingDistance = 20.0;
+
+  /// Lower distance threshold (in meters) to accept if enough time has passed.
+  ///
+  /// Usage: Used in `Repo._shouldSaveLocation` in conjunction with `minSignificantTime`.
+  /// Effect: Allows recording slower, steady movements. If the user moves only 10m
+  /// but it took 5 seconds, we record it to capture the path detail.
+  static const double minSignificantDistance = 10.0;
+
+  /// Time threshold (in seconds) to accept smaller distance updates.
+  ///
+  /// Usage: Used in `Repo._shouldSaveLocation` in conjunction with `minSignificantDistance`.
+  /// Effect: Ensures we don't record tiny movements too frequently, but allows
+  /// capturing detail (`minSignificantDistance`) if this much time has passed.
+  static const int minSignificantTime = 5;
 }
