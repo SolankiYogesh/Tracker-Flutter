@@ -185,33 +185,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
 
-                    // Tracking Section
-                    SettingSection(
-                      title: 'Activity Tracking',
-                      icon: Icons.analytics_outlined,
-                      children: [
-                        SettingItem(
-                          title: 'Travel Insights',
-                          subtitle: 'Track your walking and vehicle trips',
-                          trailing: Icon(
-                            Icons.chevron_right,
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .color!
-                                .withValues(alpha: .5),
-                          ),
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRouter.travelHistory,
-                            );
-                          },
-                          leadingIcon: Icons.route_outlined,
-                        ),
-                      ],
-                    ),
-
                     // SettingSection(
                     //   title: 'Privacy & Security',
                     //   icon: Icons.security,

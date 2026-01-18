@@ -11,7 +11,6 @@ import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/services/notification.dart';
 import 'package:tracker/utils/app_logger.dart';
 import 'package:tracker/network/repositories/entity_repository.dart';
-import 'package:tracker/models/travel_activity.dart';
 
 class Repo {
   factory Repo() => _instance ??= Repo._();
@@ -25,12 +24,6 @@ class Repo {
   bool _isSyncing = false;
   Timer? _syncTimer;
   BackgroundLocationUpdateData? lastUpdateRecord;
-
-  // Travel tracking state
-  String? _currentActivityType;
-  DateTime? _activityStartTime;
-  double _totalActivityDistance = 0;
-  LatLng? _lastLocation;
 
   final _collectionController = StreamController<Collection>.broadcast();
   Stream<Collection> get onCollection => _collectionController.stream;
@@ -68,83 +61,13 @@ class Repo {
       );
     }
 
-    // 3. Track Travel Activity
-    await _trackTravelActivity(data, user.id);
-
-    // 4. Ensure sync timer is running (Lazy Start)
+    // 2. Ensure sync timer is running (Lazy Start)
     if (_syncTimer == null || !_syncTimer!.isActive) {
       _startSyncTimer();
       // Overwrite the default plugin notification (ID 879848645) with our custom one
       // that includes the "Stop" button. We only need to do this once.
       sendNotification('GeoPulsify is running');
     }
-  }
-
-  Future<void> _trackTravelActivity(
-    BackgroundLocationUpdateData data,
-    String userId,
-  ) async {
-    final double speed = data.speed < 0 ? 0 : data.speed;
-    final String newType = _classifyActivity(speed);
-    final DateTime now = DateTime.now();
-    final LatLng currentPos = LatLng(data.lat, data.lon);
-
-    if (_currentActivityType == null) {
-      // Initialize First Activity
-      _currentActivityType = newType;
-      _activityStartTime = now;
-      _totalActivityDistance = 0;
-      _lastLocation = currentPos;
-      return;
-    }
-
-    // Calculate distance since last point
-    if (_lastLocation != null) {
-      final distanceCalc = const Distance();
-      final dist = distanceCalc.as(
-        LengthUnit.Meter,
-        _lastLocation!,
-        currentPos,
-      );
-      _totalActivityDistance += dist;
-    }
-    _lastLocation = currentPos;
-
-    // Check if type changed OR if it's been too long (e.g. 30 mins) to prevent massive records
-    bool typeChanged = _currentActivityType != newType;
-    bool durationExceeded =
-        _activityStartTime != null &&
-        now.difference(_activityStartTime!).inMinutes >= 30;
-
-    if (typeChanged || durationExceeded) {
-      // Save Previous Activity
-      final activity = TravelActivity(
-        type: _currentActivityType!,
-        startTime: _activityStartTime!,
-        endTime: now,
-        distance: _totalActivityDistance,
-        userId: userId,
-      );
-
-      await DatabaseHelper().insertTravelActivity(activity.toMap());
-
-      if (kDebugMode) {
-        AppLogger.log(
-          'Saved TravelActivity: ${activity.type}, Duration: ${activity.durationMinutes.toStringAsFixed(1)}m, Distance: ${activity.distance.toStringAsFixed(1)}m',
-        );
-      }
-
-      // Start New Activity
-      _currentActivityType = newType;
-      _activityStartTime = now;
-      _totalActivityDistance = 0;
-    }
-  }
-
-  String _classifyActivity(double speed) {
-    if (speed < 0.5) return 'still';
-    if (speed < 5.0) return 'walking';
-    return 'vehicle';
   }
 
   Future<void> _checkEntityCollection(
