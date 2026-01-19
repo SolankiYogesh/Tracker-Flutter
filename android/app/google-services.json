@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "458272593186-db3p6jnl2134ji095g6en9h953mpvl8r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.timetrix.geopulsify",
+            "certificate_hash": "605464122e624121eb4c8d64afd1d5515751e043"
+          }
+        },
+        {
           "client_id": "458272593186-pb6d0sqls1cpu7lkj409u3arqltr2crm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

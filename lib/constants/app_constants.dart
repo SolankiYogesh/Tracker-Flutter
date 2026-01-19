@@ -150,7 +150,7 @@ class AppConstants {
   /// Effect: Any location update with a horizontal accuracy radius larger than this
   /// will be immediately rejected as "too noisy". This prevents large jumps due to
   /// poor GPS signal (e.g., inside buildings).
-  static const double minLocationAccuracy = 25.0;
+  static const double minLocationAccuracy = 15.0;
 
   /// Speed threshold (in meters/second) below which the user is considered stationary.
   ///
