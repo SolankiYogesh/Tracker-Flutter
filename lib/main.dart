@@ -20,6 +20,8 @@ import 'package:tracker/router/app_router.dart';
 import 'package:fquery/fquery.dart';
 import 'package:fquery_core/fquery_core.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:tracker/services/activity_service.dart';
+import 'package:tracker/utils/app_logger.dart';
 
 final queryCache = QueryCache(
   defaultQueryOptions: DefaultQueryOptions(
@@ -53,6 +55,13 @@ Future<void> main() async {
   await dotenv.load();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initNotifications();
+  
+  // Initialize and start Activity Service
+  final activityService = ActivityService();
+  await activityService.init();
+  final started = await activityService.startServiceIfPermitted();
+  AppLogger.log('ActivityService started: $started');
+
   await BackgroundLocationTrackerManager.initialize(
     backgroundCallback,
     config: const BackgroundLocationTrackerConfig(

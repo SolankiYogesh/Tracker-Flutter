@@ -45,6 +45,7 @@ class _MapScreenState extends State<MapScreen> {
   Timer? _timer;
   bool _hasInitiallyCentered = false;
   bool _shouldFollowUser = true;
+  String _currentActivity = 'UNKNOWN';
   model.Collection? _currentCollection;
   StreamSubscription<model.Collection>? _collectionSubscription;
 
@@ -101,7 +102,19 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _refreshLocations() async {
     final points = await DatabaseHelper().getLocations();
+    // Poll activity status
+    String activity = 'UNKNOWN';
+    try {
+      activity = await DatabaseHelper().getActivityStatus();
+    } catch (e) {
+      if (mounted) AppLogger.error('MapScreen: Failed to get activity', e);
+    }
+
     if (mounted) {
+      setState(() {
+        _currentActivity = activity;
+      });
+
       final provider = context.read<EntityProvider>();
       // 1. Refresh from DB (sync with background)
       await provider.refreshEntitiesFromDb();
@@ -317,7 +330,18 @@ class _MapScreenState extends State<MapScreen> {
                       point: _currentLocation!,
                       width: context.w(60),
                       height: context.w(60),
-                      child: UserLocationMarker(bearing: _currentBearing),
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Current Activity: $_currentActivity'),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: UserLocationMarker(bearing: _currentBearing),
+                      ),
                     ),
                   ],
                 ),

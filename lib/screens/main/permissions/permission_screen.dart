@@ -6,6 +6,7 @@ import 'package:tracker/router/app_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:tracker/screens/main/permissions/widgets/permission_card.dart';
 import 'package:tracker/utils/responsive_utils.dart';
+import 'package:tracker/services/activity_service.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -88,7 +89,7 @@ class _PermissionScreenState extends State<PermissionScreen>
     }
   }
 
-  void _checkAllGranted() {
+  Future<void> _checkAllGranted() async {
     bool allGranted =
         (_locationStatus.isGranted || _locationStatus.isLimited) &&
         (_backgroundLocationStatus.isGranted ||
@@ -100,7 +101,10 @@ class _PermissionScreenState extends State<PermissionScreen>
         _isLocationServiceEnabled;
 
     if (allGranted && mounted) {
-      Navigator.of(context).pushReplacementNamed(AppRouter.main);
+      await ActivityService().startServiceIfPermitted();
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(AppRouter.main);
+      }
     }
   }
 

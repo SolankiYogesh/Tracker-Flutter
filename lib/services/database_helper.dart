@@ -9,6 +9,7 @@ const userTable = 'app_user';
 
 const entityTable = 'entities';
 const userStatsTable = 'user_stats';
+const activityStatusTable = 'user_activity_status';
 
 class DatabaseHelper {
   factory DatabaseHelper() {
@@ -30,7 +31,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -80,6 +81,7 @@ class DatabaseHelper {
     
     await _createEntityTable(db);
     await _createUserStatsTable(db);
+    await _createActivityStatusTable(db);
     
     await db.insert(settingTable, {'id': 1, 'isDark': 1});
   }
@@ -90,6 +92,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 3) {
       await _createUserStatsTable(db);
+    }
+    if (oldVersion < 4) {
+      await _createActivityStatusTable(db);
     }
   }
 
@@ -107,6 +112,22 @@ class DatabaseHelper {
       'id': 1,
       'total_steps': 0,
        'last_boot_step_count': 0,
+      'last_updated_at': DateTime.now().millisecondsSinceEpoch
+    });
+  }
+
+  Future<void> _createActivityStatusTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $activityStatusTable (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        status TEXT NOT NULL,
+        last_updated_at INTEGER
+      )
+    ''');
+    // Initialize with default UNKNOWN
+    await db.insert(activityStatusTable, {
+      'id': 1,
+      'status': 'UNKNOWN',
       'last_updated_at': DateTime.now().millisecondsSinceEpoch
     });
   }
@@ -356,5 +377,29 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [1],
     );
+  }
+
+  // --- Activity Status Methods ---
+
+  Future<void> setActivityStatus(String status) async {
+    final db = await database;
+    await db.update(
+      activityStatusTable,
+      {
+        'status': status,
+        'last_updated_at': DateTime.now().millisecondsSinceEpoch
+      },
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+  }
+
+  Future<String> getActivityStatus() async {
+    final db = await database;
+    final res = await db.query(activityStatusTable, where: 'id = ?', whereArgs: [1]);
+    if (res.isNotEmpty) {
+      return res.first['status'] as String;
+    }
+    return 'UNKNOWN';
   }
 }

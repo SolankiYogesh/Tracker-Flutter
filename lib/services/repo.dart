@@ -43,7 +43,7 @@ class Repo {
     _checkEntityCollection(data, user.id);
 
     // --- FILTER LOGIC START ---
-    if (!_shouldSaveLocation(data)) {
+    if (!await _shouldSaveLocation(data)) {
       return;
     }
     // --- FILTER LOGIC END ---
@@ -200,7 +200,15 @@ class Repo {
     }
   }
 
-  bool _shouldSaveLocation(BackgroundLocationUpdateData newData) {
+  Future<bool> _shouldSaveLocation(BackgroundLocationUpdateData newData) async {
+    // 0. Activity Check (Hybrid Approach)
+    String activityStatus = 'UNKNOWN';
+    try {
+      activityStatus = await DatabaseHelper().getActivityStatus();
+    } catch (e) {
+      if (kDebugMode) AppLogger.error('Filter: Failed to get activity status', e);
+    }
+
     // 1. Accuracy Check
     // If accuracy is too low (radius is too big), we reject it to avoid "jumping"
     if (newData.horizontalAccuracy > AppConstants.minLocationAccuracy) {
@@ -229,22 +237,47 @@ class Repo {
     // Calculate time delta
     final timeDelta = DateTime.now().difference(_lastSavedLocation!.recordedAt).inSeconds;
     final speed = newData.speed < 0 ? 0 : newData.speed;
+    
+    // HYBRID FILTERING LOGIC
+    if (activityStatus == 'STILL') {
+       // STRICT MODE: User is physically still (according to accelerometer).
+       // Ignore ALL movement unless it is huge (GPS drift < 50m is ignored).
+       // We allow 50m just in case they hopped in a car and acc didn't catch it yet,
+       // but for walking speeds, this effectively kills all jitter.
+       const double strictDistance = 50.0;
+       
+       if (dist < strictDistance) {
+         if (kDebugMode) {
+           AppLogger.log(
+             'FILTER REJECT: Activity is STILL. Ignored movement of ${dist.toStringAsFixed(1)}m',
+           );
+         }
+         return false;
+       } else {
+         if (kDebugMode) {
+            AppLogger.log(
+             'FILTER ACCEPT: Activity is STILL but moved $dist meters (Possible vehicle/missed activity)',
+           );
+         }
+         return true;
+       }
+    }
 
-    // 2. Stationary Check
+    // 2. Standard Stationary Check (Speed-based fallback)
     // If speed is very low, we assume user is stationary.
     // In this state, we require a larger distance change to filter out "stationary jitter".
     if (speed < AppConstants.minStationarySpeed) {
       if (dist < AppConstants.minStationaryDistance) {
         if (kDebugMode) {
           AppLogger.log(
-            'FILTER REJECT: Stationary jitter (Speed: ${speed.toStringAsFixed(1)}m/s, Dist: ${dist.toStringAsFixed(1)}m)',
+            'FILTER REJECT: Stationary result [Speed: ${speed.toStringAsFixed(1)}] (Activity: $activityStatus, Dist: ${dist.toStringAsFixed(1)}m)',
           );
         }
         return false;
       } else {
         if (kDebugMode) {
           AppLogger.log(
-            'FILTER ACCEPT: Stationary but moved significantly (Dist: ${dist.toStringAsFixed(1)}m)',
+            'FILTER ACCEPT: Stationary speed but moved significantly (Dist: ${dist.toStringAsFixed(1)}m)',
           );
         }
         return true;
