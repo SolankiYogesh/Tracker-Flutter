@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'package:tracker/utils/responsive_utils.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
@@ -48,11 +50,26 @@ class _MapScreenState extends State<MapScreen> {
   model.Collection? _currentCollection;
   StreamSubscription<model.Collection>? _collectionSubscription;
 
+  // Mapbox Transition State
+  bool _showIntro = true;
+  double _introOpacity = 1.0;
+  mapbox.MapboxMap? _mapboxMap;
+  bool _hasFlownToUser = false;
+  String? _mapboxKey;
+
   bool _isInit = false;
 
   @override
   void initState() {
     super.initState();
+    _mapboxKey = dotenv.env['MAPBOX_KEY'];
+    // If no key, skip intro
+    if (_mapboxKey == null || _mapboxKey!.isEmpty) {
+      _showIntro = false;
+    } else {
+      mapbox.MapboxOptions.setAccessToken(_mapboxKey!);
+    }
+
     _refreshLocations();
 
     // Refresh local path every 5 seconds
@@ -164,6 +181,14 @@ class _MapScreenState extends State<MapScreen> {
           _mapController.move(_currentLocation!, AppConstants.defaultMapZoom);
           _hasInitiallyCentered = true;
         }
+
+        // Trigger FlyTo if we have location and haven't flown yet
+        if (_showIntro &&
+            !_hasFlownToUser &&
+            _currentLocation != null &&
+            _mapboxMap != null) {
+          _performFlyToUser();
+        }
       }
     });
   }
@@ -222,6 +247,17 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       body: Stack(
         children: [
+
+          // Actually, if we want to crossfade, Mapbox should be on TOP.
+          // Because OSM is the persistent layer.
+          // So we show Mapbox (Opacity 1) hiding OSM.
+          // Then Opacity 0 reveals OSM.
+          
+          // Wait, if I put Mapbox LAST in the stack, it's on TOP.
+          // If I put it FIRST, it's at BOTTOM.
+          // Stack paints children in order. First is bottom, last is top.
+          
+          // Layer 1: Persistent OSM (Bottom)
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -341,7 +377,105 @@ class _MapScreenState extends State<MapScreen> {
                 );
               },
             ),
+
+            // Mapbox Intro (Top Layer)
+            _buildMapboxLayer(),
         ],
+      ),
+    );
+  }
+
+  Future<void> _performFlyToUser() async {
+    if (_currentLocation == null || _mapboxMap == null) return;
+    _hasFlownToUser = true;
+
+    try {
+      
+      // Fly to user location
+      await _mapboxMap!.flyTo(
+        mapbox.CameraOptions(
+          center: mapbox.Point(
+            coordinates: mapbox.Position(
+              _currentLocation!.longitude,
+              _currentLocation!.latitude,
+            ),
+          ),
+          zoom: AppConstants.maxMapZoom, // Zoom in very close (18.0)
+          bearing: 0,
+          pitch: 0,
+        ),
+        mapbox.MapAnimationOptions(duration: 18000), // 12 seconds slow flight
+      );
+
+      // Force wait for height of animation to complete visibility
+      // The await flyTo might return early, so we enforce the timing.
+      await Future.delayed(const Duration(milliseconds: 18000));
+
+      // Wait a moment after landing
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      // Sync OSM buffer to the same high zoom level before revealing
+      if (mounted) {
+         _mapController.move(_currentLocation!, AppConstants.maxMapZoom);
+      }
+
+      if (mounted) {
+        setState(() {
+          _introOpacity = 0.0;
+        });
+
+        // Remove Mapbox from tree after fade out
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) {
+            setState(() {
+              _showIntro = false;
+            });
+          }
+        });
+      }
+    } catch (e) {
+      AppLogger.log('Mapbox flyTo error: $e');
+      // If error, fallback immediately
+      if (mounted) {
+          setState(() {
+            _showIntro = false;
+          });
+      }
+    }
+  }
+
+  Widget _buildMapboxLayer() {
+    if (!_showIntro || _mapboxKey == null) return const SizedBox.shrink();
+
+    return IgnorePointer(
+      ignoring: _introOpacity == 0.0, // Allow interaction with OSM when faded
+      child: AnimatedOpacity(
+        opacity: _introOpacity,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeOut,
+        child: mapbox.MapWidget(
+          key: const ValueKey('mapbox_map'),
+          // resourceOptions: mapbox.ResourceOptions(accessToken: _mapboxKey!), // Removed
+          styleUri: mapbox.MapboxStyles.SATELLITE_STREETS,
+          onMapCreated: (mapbox.MapboxMap map) {
+            _mapboxMap = map;
+            // Set projection to Globe
+            try {
+               _mapboxMap?.style?.setProjection(mapbox.StyleProjection(name: mapbox.StyleProjectionName.globe));
+            } catch (e) {
+              AppLogger.log("Error setting projection: $e");
+            }
+            
+            // Attempt fly if location already ready
+            if (_currentLocation != null && !_hasFlownToUser) {
+              _performFlyToUser();
+            }
+          },
+          cameraOptions: mapbox.CameraOptions(
+              zoom: 1.0, // Start in space
+              center: mapbox.Point(coordinates: mapbox.Position(0, 0))
+          ),
+        ),
       ),
     );
   }
