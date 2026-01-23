@@ -30,7 +30,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -91,6 +91,10 @@ class DatabaseHelper {
     if (oldVersion < 3) {
       await _createUserStatsTable(db);
     }
+    if (oldVersion < 4) {
+      // Add collected_at to entities
+      await db.execute('ALTER TABLE $entityTable ADD COLUMN collected_at INTEGER');
+    }
   }
 
   Future<void> _createUserStatsTable(Database db) async {
@@ -121,6 +125,7 @@ class DatabaseHelper {
         spawn_radius REAL NOT NULL,
         xp_value INTEGER NOT NULL,
         is_collected INTEGER DEFAULT 0,
+        collected_at INTEGER,
         type_name TEXT,
         type_icon_url TEXT,
         type_rarity TEXT
@@ -217,21 +222,32 @@ class DatabaseHelper {
     });
   }
 
-  Future<List<LocationPoint>> getLocations({String? userId}) async {
+  Future<List<LocationPoint>> getLocations({
+    String? userId,
+    DateTime? minTimestamp,
+  }) async {
     final db = await database;
 
-    String? whereClause;
-    List<dynamic>? whereArgs;
+    final List<String> whereClauses = [];
+    final List<dynamic> whereArgs = [];
 
     if (userId != null) {
-      whereClause = 'user_id = ?';
-      whereArgs = [userId];
+      whereClauses.add('user_id = ?');
+      whereArgs.add(userId);
     }
+
+    if (minTimestamp != null) {
+      whereClauses.add('recorded_at > ?');
+      whereArgs.add(minTimestamp.millisecondsSinceEpoch);
+    }
+
+    final String? whereClause =
+        whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null;
 
     final List<Map<String, dynamic>> maps = await db.query(
       locationTable,
       where: whereClause,
-      whereArgs: whereArgs,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
       orderBy: 'recorded_at ASC',
     );
 
@@ -298,19 +314,39 @@ class DatabaseHelper {
     );
   }
   
-  Future<void> markEntityAsCollected(String id) async {
+  Future<void> markEntityAsCollected(String id, int collectedAt) async {
     final db = await database;
     await db.update(
       entityTable,
-      {'is_collected': 1},
+      {
+        'is_collected': 1,
+        'collected_at': collectedAt,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
   }
-  
-  Future<void> clearEntities() async {
+
+  Future<List<Map<String, dynamic>>> getRecentCollectedEntities(int sinceTimestamp) async {
     final db = await database;
-    await db.delete(entityTable);
+    return await db.query(
+      entityTable,
+      where: 'is_collected = 1 AND collected_at > ?',
+      whereArgs: [sinceTimestamp],
+    );
+  }
+
+  // Utility to clear collected status (debug)
+  Future<void> resetCollectedEntities() async {
+    final db = await database;
+    await db.update(
+      entityTable,
+      {
+        'is_collected': 0,
+        'collected_at': null,
+      },
+      where: 'is_collected = 1',
+    );
   }
 
   // --- Stats Methods ---

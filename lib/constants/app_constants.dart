@@ -9,7 +9,7 @@ class AppConstants {
   /// Effect: Increasing this value reduces frequent network calls but delays
   /// data availability on the server. Decreasing it improves real-time sync
   /// but may consume more battery and data.
-  static const Duration locationSyncInterval = Duration(seconds: 30);
+  static const Duration locationSyncInterval = Duration(seconds: 45);
 
   /// Number of decimal places to use when storing or displaying latitude/longitude.
   ///
@@ -48,7 +48,7 @@ class AppConstants {
   ///
   /// Usage: Used in `MapScreen.initState` for the `_nearbyTimer`.
   /// Effect: Determines how often we check for other users.
-  static const Duration nearbyUsersRefreshInterval = Duration(seconds: 30);
+  static const Duration nearbyUsersRefreshInterval = Duration(seconds: 45);
 
   /// Maximum distance (in meters) between two points to consider them part of the same segment.
   ///
@@ -64,9 +64,25 @@ class AppConstants {
   /// of points the map has to render, potentially impacting performance.
   static const int splineSegmentSubdivisions = 10;
 
+  /// The time window (in hours) for displaying location history on the map.
+  ///
+  /// Usage: Used in `MapScreen._refreshLocations` to prune old points.
+  /// Effect: Only location points recorded within this many hours ago are shown.
+  /// Reducing this improves performance (less points to process/render); increasing
+  /// it shows more historical context but may cause UI lag if point density is high.
+  static const int mapHistoryWindowHours = 24;
+
   // ===========================================================================
   // NETWORK CONFIGURATION
   // ===========================================================================
+
+  /// Minimum distance (in meters) the user must move to trigger a new entity fetch.
+  ///
+  /// Usage: Used in `EntityProvider.fetchNearbyEntities` for smart invalidation.
+  /// Effect: If the user hasn't moved at least this far since the last fetch,
+  /// we skip the API call to save data/battery, as the nearby entities likely haven't changed.
+  /// This prevents redundant calls when standing still.
+  static const double entityFetchMinDistance = 100.0;
 
   /// Maximum time to wait for the server to establish a connection.
   ///
@@ -84,7 +100,7 @@ class AppConstants {
   ///
   /// Usage: Used in `EntityProvider.startPeriodicFetch`.
   /// Effect: Controls how often the app checks for new items around the user.
-  static const Duration entityFetchInterval = Duration(seconds: 50);
+  static const Duration entityFetchInterval = Duration(seconds: 45);
 
   /// Maximum number of users to fetch for the leaderboard.
   ///

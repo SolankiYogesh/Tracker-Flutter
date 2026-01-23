@@ -28,6 +28,9 @@ class Repo {
 
   final _collectionController = StreamController<Collection>.broadcast();
   Stream<Collection> get onCollection => _collectionController.stream;
+  
+  // Track in-progress collections to prevent double-firing if API is slow
+  final Set<String> _collectingEntityIds = {};
 
   Future<void> update(BackgroundLocationUpdateData data) async {
     lastUpdateRecord = data;
@@ -103,10 +106,14 @@ class Repo {
       final distanceCalc = const Distance();
 
       for (var entity in entities) {
+        // Skip if already being collected
+        if (_collectingEntityIds.contains(entity.id)) continue;
+        
         final entityPos = LatLng(entity.latitude, entity.longitude);
         final dist = distanceCalc.as(LengthUnit.Meter, currentPos, entityPos);
 
         if (dist <= entity.spawnRadius) {
+          _collectingEntityIds.add(entity.id);
           // Attempt collection
           try {
             if (kDebugMode) {
@@ -122,6 +129,12 @@ class Repo {
               userId,
             );
 
+            // Mark locally (Critical for Single Source of Truth)
+            await db.markEntityAsCollected(
+              entity.id,
+              DateTime.now().millisecondsSinceEpoch,
+            );
+
             // Notification
             final name =
                 collection.entityType?.name ??
@@ -133,16 +146,27 @@ class Repo {
             );
 
             _collectionController.add(collection);
-          } catch (e) {
+          } catch (e, stack) {
             AppLogger.error(
               'Failed to collect entity ${entity.id}',
-              e.toString(),
+              e, // Pass error object directly
+              stack,
             );
+            // If failed, remove from set so we can retry later
+             _collectingEntityIds.remove(entity.id);
+          } finally {
+             // If successful, we DON'T remove from set immediately to prevent double-trigger
+             // in the brief window before DB update reflects in next loop?
+             // Actually, we marked it collected in DB above. 
+             // So next loop won't pick it up.
+             // But if we want to be safe, we can leave it in the set for a bit or just remove it.
+             // Prudence: Remove it from set now that DB is updated.
+             _collectingEntityIds.remove(entity.id);
           }
         }
       }
-    } catch (e) {
-      AppLogger.error('Error checking entity collection', e);
+    } catch (e, stack) {
+      AppLogger.error('Error checking entity collection', e, stack);
     }
   }
 

@@ -75,7 +75,10 @@ class EntityRepository {
       );
       
       // Mark as collected locally immediately
-      await _db.markEntityAsCollected(entityId);
+      await _db.markEntityAsCollected(
+        entityId,
+        DateTime.now().millisecondsSinceEpoch,
+      );
       
       return Collection.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {

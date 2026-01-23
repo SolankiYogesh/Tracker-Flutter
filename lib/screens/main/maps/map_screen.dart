@@ -18,6 +18,7 @@ import 'package:tracker/utils/app_logger.dart';
 import 'package:tracker/utils/map_utils.dart';
 import 'package:tracker/utils/time_utils.dart';
 import 'package:tracker/network/api_queries.dart';
+import 'package:tracker/models/location_point.dart';
 
 import 'widgets/collection_animation_overlay.dart';
 import 'widgets/user_location_marker.dart';
@@ -47,6 +48,10 @@ class _MapScreenState extends State<MapScreen> {
   bool _shouldFollowUser = true;
   model.Collection? _currentCollection;
   StreamSubscription<model.Collection>? _collectionSubscription;
+  
+  // Optimization: Incremental updates
+  DateTime? _lastFetchTime;
+  List<LocationPoint> _allPoints = [];
 
   bool _isInit = false;
 
@@ -100,33 +105,59 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _refreshLocations() async {
-    final points = await DatabaseHelper().getLocations();
+    // 1. Fetch only new points since last fetch (or last 24h if first run)
+    final minTime =
+        _lastFetchTime ?? DateTime.now().subtract(const Duration(hours: AppConstants.mapHistoryWindowHours));
+        
+    final newPoints = await DatabaseHelper().getLocations(
+      minTimestamp: minTime,
+    );
+
     if (mounted) {
       final provider = context.read<EntityProvider>();
-      // 1. Refresh from DB (sync with background)
+      // 2. Refresh entities from DB (sync with background)
       await provider.refreshEntitiesFromDb();
 
-      // 2. Check for foreground collection if we have a location
       final user = await DatabaseHelper().getCurrentUser();
-      if (points.isNotEmpty && user != null) {
-        // 2. Check for foreground collection
-        await provider.checkProximityAndCollect(
-          points.last.latitude,
-          points.last.longitude,
-          user.id,
-        );
-        // 3. Poll for any collections (bg or fg) to trigger animation
-        await provider.checkForNewCollections(user.id);
+      if (user != null) {
+        // 3. Poll for any collections (bg only now) to trigger animation
+        // We removed foreground checkProximityAndCollect to avoid race conditions
+        // await provider.checkForNewCollections(user.id);  <-- REMOVED
+        // We now rely purely on the stream listener in EntityProvider
       }
     }
 
-    if (points.isEmpty) return;
+    if (newPoints.isEmpty && _allPoints.isEmpty) return;
+
+    if (newPoints.isNotEmpty) {
+      // Append new points
+      _allPoints.addAll(newPoints);
+      
+      // Update cursor
+      _lastFetchTime = newPoints.last.recordedAt;
+      
+      // Prune points older than 24h
+      final cutoff = DateTime.now().subtract(const Duration(hours: AppConstants.mapHistoryWindowHours));
+      _allPoints.removeWhere((p) => p.recordedAt.isBefore(cutoff));
+    }
+
+    // Force redraw if we have points, even if no *new* points (to handle pruning effects? 
+    // Actually if no new points and no pruning needed, we could skip, 
+    // but pruning removes from head, so we should rebuild segments).
+    // For simplicity, we rebuild segments if we have any data.
+
+    if (_allPoints.isEmpty) {
+       setState(() {
+         _polylines = [];
+       });
+       return;
+    }
 
     List<List<LatLng>> segments = [];
     List<LatLng> currentSegment = [];
 
-    for (int i = 0; i < points.length; i++) {
-      final p = LatLng(points[i].latitude, points[i].longitude);
+    for (int i = 0; i < _allPoints.length; i++) {
+      final p = LatLng(_allPoints[i].latitude, _allPoints[i].longitude);
 
       if (currentSegment.isEmpty) {
         currentSegment.add(p);
@@ -147,6 +178,9 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     // 2. Smooth segments
+    // We smooth the simplified segments. 
+    // Optimization: potentially cache smoothed segments too, but for now this is 
+    // significantly better than fetching full history from DB.
     List<List<LatLng>> smoothedSegments = [];
     for (var segment in segments) {
       smoothedSegments.add(MapUtils.makeSmooth(segment));
@@ -154,9 +188,9 @@ class _MapScreenState extends State<MapScreen> {
 
     setState(() {
       _polylines = smoothedSegments;
-      if (points.isNotEmpty) {
-        _currentLocation = LatLng(points.last.latitude, points.last.longitude);
-        _currentBearing = points.last.bearing;
+      if (_allPoints.isNotEmpty) {
+        _currentLocation = LatLng(_allPoints.last.latitude, _allPoints.last.longitude);
+        _currentBearing = _allPoints.last.bearing;
 
         if (_shouldFollowUser && _currentLocation != null) {
           _mapController.move(_currentLocation!, _mapController.camera.zoom);

@@ -3,7 +3,7 @@ import 'package:latlong2/latlong.dart';
 class EntityType {
 
   EntityType({
-    required this.id,
+    this.id,
     required this.name,
     this.description,
     this.iconUrl,
@@ -15,7 +15,7 @@ class EntityType {
 
   factory EntityType.fromJson(Map<String, dynamic> json) {
     return EntityType(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       name: json['name'] as String,
       description: json['description'] as String?,
       iconUrl: json['icon_url'] as String?,
@@ -25,7 +25,7 @@ class EntityType {
       isActive: (json['is_active'] as bool?) ?? true,
     );
   }
-  final String id;
+  final String? id;
   final String name;
   final String? description;
   final String? iconUrl;

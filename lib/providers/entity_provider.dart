@@ -10,14 +10,17 @@ import 'package:tracker/utils/app_logger.dart';
 import 'package:tracker/network/api_queries.dart';
 import 'package:tracker/main.dart' show queryCache;
 
+import 'package:tracker/services/repo.dart'; // Add this import
+
 class EntityProvider extends ChangeNotifier {
-  final EntityRepository _repo = EntityRepository();
+  final EntityRepository _entityRepository = EntityRepository();
   final DatabaseHelper _db = DatabaseHelper();
+  final Repo _serviceRepo = Repo(); // Use the centralized service
 
   List<Entity> _nearbyEntities = [];
   bool _isLoading = false;
-  DateTime _lastCollectionCheck = DateTime.now(); // Track last check time
-
+  DateTime _lastCollectionCheck = DateTime.now();
+  
   List<Entity> get nearbyEntities => _nearbyEntities;
 
   UserExperience? get userExperience => queryCache
@@ -30,6 +33,8 @@ class EntityProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Timer? _fetchTimer;
+  StreamSubscription? _repoSubscription;
+  LatLng? _lastFetchLocation;
 
   // Stream controller to notify UI of collection events (for animation)
   final _collectionCompleteController =
@@ -40,6 +45,7 @@ class EntityProvider extends ChangeNotifier {
   @override
   void dispose() {
     _fetchTimer?.cancel();
+    _repoSubscription?.cancel();
     _collectionCompleteController.close();
     super.dispose();
   }
@@ -49,6 +55,22 @@ class EntityProvider extends ChangeNotifier {
     await _loadLocalEntities();
     await fetchUserExperience(userId);
     startPeriodicFetch(userId);
+    
+    // Observer Pattern: Listen to Repo for any collections (BG or via other means)
+    _repoSubscription?.cancel();
+    _repoSubscription = _serviceRepo.onCollection.listen((collection) {
+      // 1. Update local list state
+      _nearbyEntities.removeWhere((e) => e.id == collection.entityId);
+      notifyListeners();
+      
+      // 2. Forward to UI for animation
+      _collectionCompleteController.add(collection);
+      
+      // 3. Refresh XP
+      fetchUserExperience(userId);
+      // Collections list query invalidation
+      queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
+    });
   }
 
   Future<void> _loadLocalEntities() async {
@@ -71,17 +93,6 @@ class EntityProvider extends ChangeNotifier {
     double? lat,
     double? lng,
   }) async {
-    // If lat/lng not provided, try to get last known?
-    // For now, we rely on the MapScreen to pass current location or we fetch from DB last location
-    // But since this is periodic, we need a way to get current location.
-    // Actually, simpler implementation: MapScreen calls fetchNearbyEntities periodically with actual location,
-    // OR we use the Repository/DB last location if available.
-    // Let's rely on MapScreen calling this, OR use the last known location from DatabaseHelper location table.
-
-    // Changing strategy: Provider exposes a method, MapScreen calls it inside its existing timer?
-    // The plan said "provider.startPeriodicFetch".
-    // Let's get the last location from DB to perform the fetch if not provided.
-
     if (lat == null || lng == null) {
       final locs = await _db.getLocations(userId: userId);
       if (locs.isNotEmpty) {
@@ -91,16 +102,34 @@ class EntityProvider extends ChangeNotifier {
         return; // No location known yet
       }
     }
+    
+    // Smart Invalidation: Check if moved enough since last fetch
+    if (_lastFetchLocation != null) {
+      const distance = Distance();
+      final dist = distance.as(
+        LengthUnit.Meter, 
+        LatLng(lat, lng), 
+        _lastFetchLocation!
+      );
+      
+      if (dist < AppConstants.entityFetchMinDistance) { // 100 meters threshold
+        AppLogger.log('EntityProvider: Skipping fetch - User moved only ${dist.toStringAsFixed(1)}m');
+        return;
+      }
+    }
 
     try {
       AppLogger.log(
         'EntityProvider: Fetching nearby entities... lat=$lat, lng=$lng, radius=1000',
       );
-      final entities = await _repo.fetchAndSaveNearbyEntities(
+      final entities = await _entityRepository.fetchAndSaveNearbyEntities(
         lat,
         lng,
         userId: userId,
       );
+      
+      _lastFetchLocation = LatLng(lat, lng);
+      
       AppLogger.log(
         'EntityProvider: Fetched and saved ${entities.length} entities from API.',
       );
@@ -144,109 +173,72 @@ class EntityProvider extends ChangeNotifier {
   // IMPROVEMENT: Poll local DB more frequently? Or just rely on MapScreen refresh?
   // MapScreen has a 5s timer calling `_refreshLocations`. We can hook into that to refresh entities from DB too.
 
+  // Tracking for DB polling
+  int _lastCollectionCheckTimestamp = DateTime.now().millisecondsSinceEpoch;
+  final Set<String> _animatedCollectionIds = {};
+
   Future<void> refreshEntitiesFromDb() async {
+    // 1. Check for recent collections (bridging the background isolate gap)
+    await _checkRecentCollections();
+    // 2. Refresh local list
     await _loadLocalEntities();
   }
+  
+  Future<void> _checkRecentCollections() async {
+    // Look for collections since last check
+    final recent = await _db.getRecentCollectedEntities(_lastCollectionCheckTimestamp);
+    
+    if (recent.isNotEmpty) {
+      // Update check time to now
+      _lastCollectionCheckTimestamp = DateTime.now().millisecondsSinceEpoch;
+      
+      for (var row in recent) {
+        final id = row['id'] as String;
+        // Skip if already animated (deduplication)
+        if (_animatedCollectionIds.contains(id)) continue;
+        
+        _animatedCollectionIds.add(id);
+        
+        // Construct a partial Collection object for animation
+        // Note: we might miss exact 'collectedAt' from API if we use 'now', 
+        // but row['collected_at'] is from local DB update time which is close enough.
+        final collectedAt = DateTime.fromMillisecondsSinceEpoch(row['collected_at'] as int);
+        
+        // Reconstruct EntityType info from row
+        final entityType = EntityType(
+          id: row['entity_type_id'] as String, // Partial
+          name: (row['type_name'] as String?) ?? 'Item',
+          iconUrl: row['type_icon_url'] as String?,
+          rarity: (row['type_rarity'] as String?) ?? 'common',
+          baseXpValue: row['xp_value'] as int,
+          isActive: true,
+        );
 
-  /// Check if user is close enough to any entity to collect it (Foreground logic)
-  Future<void> checkProximityAndCollect(
-    double userLat,
-    double userLng,
-    String userId,
-  ) async {
-    const Distance distance = Distance();
-    final List<Entity> collected = [];
-
-    for (var entity in _nearbyEntities) {
-      if (entity.isCollected) continue;
-
-      final dist = distance.as(
-        LengthUnit.Meter,
-        LatLng(userLat, userLng),
-        LatLng(entity.latitude, entity.longitude),
-      );
-
-      if (dist <= entity.spawnRadius) {
-        // Attempt collection
-        try {
-          final collectedEntity = await _repo.collectEntity(
-            entity.id,
-            userLat,
-            userLng,
-            userId,
-          );
-          // If execution continues here, it was successful (otherwise catch block)
-
-          // Mark locally
-          await _db.markEntityAsCollected(entity.id);
-
-          // Construct collection object for UI
-          // The repo now returns the actual Collection object from API, use it!
-          final collection = collectedEntity;
-
-          _collectionCompleteController.add(collection);
-          collected.add(entity);
-
-          // Send notification
-          sendCollectionNotification(
-            'Entity Collected!',
-            "You found a ${entity.entityType?.name ?? 'Item'}! +${entity.xpValue} XP",
-          );
-
-          // Invalidate queries to refresh UI
-          // Invalidate queries to refresh UI
-          queryCache.invalidateQueries([ApiQueries.userExperienceKey, userId]);
-          queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
-          
-          // Update last check time so polling doesn't pick this up as "new"
-          _lastCollectionCheck = DateTime.now();
-        } catch (e) {
-          AppLogger.log('Error collecting entity in foreground: $e');
-        }
+        final collection = Collection(
+          id: id, // Using Entity ID as Collection ID proxy for animation
+          entityId: id,
+          xpEarned: row['xp_value'] as int, // Using local value
+          collectedAt: collectedAt,
+          entityType: entityType,
+        );
+        
+        // Trigger Animation
+        _collectionCompleteController.add(collection);
+        
+        // Also refresh XP
+        // fetchUserExperience(userId); // We don't have userId handy here easily without passing it...
+        // But map_screen calls refreshEntitiesFromDb, maybe we can just let eventual sync handle it?
+        // Or better, let the UI refresh XP when it receives the collection event.
+        // Actually MapScreen receives it.
       }
-    }
-
-    if (collected.isNotEmpty) {
-      await _loadLocalEntities(); // Refresh list to remove collected items
-      await fetchUserExperience(userId); // Refresh stats
     }
   }
 
-  /// Poll for collections that happened recently (e.g. by background service)
-  /// This ensures UI animation plays even if background isolate did the work.
-  Future<void> checkForNewCollections(String userId) async {
-    try {
-      // Get collections after last check
-      final collections = await _repo.getUserCollections(
-        userId,
-        limit: 1,
-      ); // Get latest
-      if (collections.collections.isNotEmpty) {
-        final latest = collections.collections.first;
+  // Removed checkProximityAndCollect to avoid race conditions. 
+  // Logic is now centralized in Repo._checkEntityCollection
 
-        // If this is new to us (compare with small buffer for clock diffs)
-        if (latest.collectedAt.isAfter(_lastCollectionCheck)) {
-          _lastCollectionCheck = DateTime.now();
-
-          // Trigger UI
-          _collectionCompleteController.add(latest);
-
-
-
-          // NOTE: Notification is already handled by Repo (for BG) or checkProximityAndCollect (for FG).
-          // Removed redundant sendCollectionNotification here.
-
-          await _loadLocalEntities();
-
-          // Invalidate queries to refresh UI
-          queryCache.invalidateQueries([ApiQueries.userExperienceKey, userId]);
-          queryCache.invalidateQueries([ApiQueries.userCollectionsKey, userId]);
-        }
-      }
-    } catch (e) {
-      AppLogger.log('Error checking new collections: $e');
-    }
-  }
+  // checkForNewCollections removed. We now rely on _repoSubscription (Observer Pattern)
+  // to detect collections from background service.
 
   // Leaderboard is now handled by fquery in the UI, but if needed here:
   LeaderboardResponse? get leaderboard =>
