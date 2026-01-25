@@ -31,6 +31,7 @@
 We maintain detailed documentation for developers:
 
 -   [**📘 Project Documentation**](project_specifications/PROJECT_DOCUMENTATION.md): Deep dive into Architecture, Logic Flows, Directory Structure, and Database Schema.
+-   [**📏 Coding Standards**](project_specifications/CODING_STANDARDS.md): Strict guidelines on architecture, naming conventions, constants, and best practices.
 -   [**⏱️ Internal Process Timeline**](project_specifications/INTERVAL_TIMELINE.md): Detailed breakdown of all background intervals, timers, and periodic tasks (Sync, Refresh, Polling).
 
 ## 🚀 Getting Started
