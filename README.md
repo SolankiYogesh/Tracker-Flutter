@@ -8,71 +8,77 @@
 
 ## ✨ Key Features
 
-- **🚀 Background Tracking**: High-accuracy location tracking even when the app is in the background or the device is locked.
-- **🗺️ Interactive Map**: Real-time map visualization with smoothed path rendering (Catmull-Rom Splines) and intelligent segmenting.
-- **🎒 Entity Collection**: Discover and collect virtual items scattered across the map as you move.
-- **📊 Activity Stats**: Precise step counting (with reboot resilience) and GPS-denoised distance calculation.
-- **🌙 Dynamic Theming**: Beautiful Dark and Light modes with persistent user preferences.
-- **☁️ Cloud Sync**: Automatic background synchronization of local data to the server when internet is available.
-- **📶 Offline First**: Complete map tile caching and local SQLite persistence for zero-connectivity environments.
+-   **🚀 Background Tracking**: High-accuracy location tracking even when the app is in the background or the device is locked.
+-   **🗺️ Interactive Map**: Real-time map visualization with smoothed path rendering (Catmull-Rom Splines) and intelligent segmenting.
+-   **🎒 Entity Collection**: Discover and collect virtual items scattered across the map as you move.
+-   **📊 Activity Stats**: Precise step counting (with reboot resilience) and GPS-denoised distance calculation.
+-   **🌙 Dynamic Theming**: Beautiful Dark and Light modes with persistent user preferences.
+-   **☁️ Cloud Sync**: Automatic background synchronization of local data to the server when internet is available.
+-   **📶 Offline First**: Complete map tile caching and local SQLite persistence for zero-connectivity environments.
 
 ## 🛠️ Tech Stack
 
-- **UI**: Flutter with Custom Themes
-- **State**: Provider & fquery (Server State)
-- **Database**: SQLite (sqflite)
-- **Auth**: Firebase & Google Sign-In
-- **Networking**: Dio with Batch Sync Logic
+-   **Framework**: Flutter (Dart)
+-   **State Management**: `Provider` (Global State) & `fquery` (Server State/Polling)
+-   **Maps**: `flutter_map` with `flutter_map_tile_caching`
+-   **Database**: SQLite (`sqflite`) for local persistence
+-   **Auth**: Firebase (Google & Apple Sign-In)
+-   **Networking**: `dio` with remote API batch synchronization
+-   **Services**: `background_location_tracker`, `pedometer`, `flutter_local_notifications`
+
+## 📖 Documentation
+
+We maintain detailed documentation for developers:
+
+-   [**📘 Project Documentation**](project_specifications/PROJECT_DOCUMENTATION.md): Deep dive into Architecture, Logic Flows, Directory Structure, and Database Schema.
+-   [**⏱️ Internal Process Timeline**](project_specifications/INTERVAL_TIMELINE.md): Detailed breakdown of all background intervals, timers, and periodic tasks (Sync, Refresh, Polling).
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Flutter SDK (^3.10.4)
-- A Firebase Project (for Auth)
-- A `.env` file for API configuration
+-   Flutter SDK (^3.10.4)
+-   A Firebase Project (for Auth)
+-   A `.env` file for API configuration
 
 ### Installation
 
-1. **Clone the repository**:
+1.  **Clone the repository**:
 
-   ```bash
-   git clone https://github.com/SolankiYogesh/Tracker-Flutter.git
-   cd tracker
-   ```
+    ```bash
+    git clone https://github.com/SolankiYogesh/Tracker-Flutter.git
+    cd tracker
+    ```
 
-2. **Setup environment variables**:
-   Create a `.env` file in the root and add your configuration:
+2.  **Setup environment variables**:
+    Create a `.env` file in the root and add your configuration:
 
-   ```env
-   BASE_URL=https://api.example.com
-   ```
+    ```env
+    BASE_URL=https://api.example.com
+    ```
 
-3. **Install dependencies**:
+3.  **Install dependencies**:
 
-   ```bash
-   flutter pub get
-   ```
+    ```bash
+    flutter pub get
+    ```
 
-4. **Initialize Firebase**:
-   Ensure you have configured `google-services.json` (Android) and `GoogleService-Info.plist` (iOS).
+4.  **Initialize Firebase**:
+    Ensure you have configured `google-services.json` (Android) and `GoogleService-Info.plist` (iOS).
 
-5. **Run the app**:
-   ```bash
-   flutter run
-   ```
+5.  **Run the app**:
 
-## 📖 Architecture & Logic
-
-For a deep dive into the project's logic, directory structure, and technical implementation details, please refer to the [**Project Documentation**](PROJECT_DOCUMENTATION.md).
+    ```bash
+    flutter run
+    ```
 
 ## ⚙️ Configuration
 
 Core settings can be tweaked in `lib/constants/app_constants.dart`:
 
-- `locationSyncInterval`: Speed of cloud syncing.
-- `gpsMinAccuracyThreshold`: Filtering threshold for GPS noise.
-- `mapRefreshInterval`: Smoothness of UI updates.
+-   `locationSyncInterval`: Speed of cloud syncing.
+-   `gpsMinAccuracyThreshold`: Filtering threshold for GPS noise.
+-   `mapRefreshInterval`: Smoothness of UI updates.
 
 ## 🤝 Contributing
 
