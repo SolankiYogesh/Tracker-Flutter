@@ -29,13 +29,15 @@ import 'widgets/user_info_sheet.dart';
 import 'widgets/map_controls.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  const MapScreen({super.key, this.tabIndexNotifier});
+
+  final ValueNotifier<int>? tabIndexNotifier;
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   final _tileProvider = FMTCTileProvider(
     stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
   );
@@ -51,7 +53,7 @@ class _MapScreenState extends State<MapScreen> {
   
   // Optimization: Incremental updates
   DateTime? _lastFetchTime;
-  List<LocationPoint> _allPoints = [];
+  final List<LocationPoint> _allPoints = [];
 
   bool _isInit = false;
 
@@ -60,11 +62,14 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _refreshLocations();
 
-    // Refresh local path every 5 seconds
-    _timer = Timer.periodic(
-      AppConstants.mapRefreshInterval,
-      (_) => _refreshLocations(),
-    );
+    WidgetsBinding.instance.addObserver(this);
+    if (widget.tabIndexNotifier != null) {
+      widget.tabIndexNotifier!.addListener(_handleVisibilityChange);
+    }
+    
+    // Initial check
+    _handleVisibilityChange();
+
 
     // Listen for collection events from Provider (Foreground)
     _collectionSubscription = context
@@ -98,10 +103,58 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    widget.tabIndexNotifier?.removeListener(_handleVisibilityChange);
     _timer?.cancel();
     _collectionSubscription?.cancel();
     _mapController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _handleVisibilityChange();
+  }
+
+  void _handleVisibilityChange() {
+    bool isVisible = true;
+
+    // 1. Check App Lifecycle
+    if (WidgetsBinding.instance.lifecycleState != null &&
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      isVisible = false;
+    }
+
+    // 2. Check Tab Index (if provided)
+    // Map is at index 0
+    if (widget.tabIndexNotifier != null && widget.tabIndexNotifier!.value != 0) {
+      isVisible = false;
+    }
+
+    if (isVisible) {
+      _startTimer();
+    } else {
+      _stopTimer();
+    }
+  }
+
+  void _startTimer() {
+    if (_timer != null && _timer!.isActive) return;
+    
+    AppLogger.log('MapScreen: Resuming visibility (starting timer)');
+    // Run immediately since we might have missed updates
+    _refreshLocations();
+    _timer = Timer.periodic(
+      AppConstants.mapRefreshInterval,
+      (_) => _refreshLocations(),
+    );
+  }
+
+  void _stopTimer() {
+    if (_timer == null) return;
+    AppLogger.log('MapScreen: Pausing visibility (stopping timer)');
+    _timer?.cancel();
+    _timer = null;
   }
 
   Future<void> _refreshLocations() async {
@@ -207,7 +260,7 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _shouldFollowUser = true;
       });
-      _mapController.move(_currentLocation!, AppConstants.defaultMapZoom);
+      _mapController.move(_currentLocation!, _mapController.camera.zoom);
     }
   }
 

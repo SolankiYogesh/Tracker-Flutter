@@ -1,4 +1,5 @@
 import 'package:background_location_tracker/background_location_tracker.dart';
+import 'package:tracker/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
@@ -55,17 +56,17 @@ Future<void> main() async {
   await initNotifications();
   await BackgroundLocationTrackerManager.initialize(
     backgroundCallback,
-    config: const BackgroundLocationTrackerConfig(
+    config: BackgroundLocationTrackerConfig(
       loggingEnabled: true,
       androidConfig: AndroidConfig(
         notificationIcon: 'explore',
         notificationBody: 'Tracking your location in background',
-        trackingInterval: Duration(seconds: 5), // updateIntervalMs
-        distanceFilterMeters: 5, // smallestDisplacementMeters
+        trackingInterval: AppConstants.backgroundTrackingInterval,
+        distanceFilterMeters: AppConstants.backgroundDistanceFilter,
       ),
       iOSConfig: IOSConfig(
         activityType: ActivityType.FITNESS,
-        distanceFilterMeters: 5, // smallestDisplacementMeters
+        distanceFilterMeters: AppConstants.backgroundDistanceFilter.toInt(),
         restartAfterKill: true,
       ),
     ),

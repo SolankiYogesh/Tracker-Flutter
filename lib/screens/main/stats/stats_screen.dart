@@ -9,14 +9,17 @@ import 'package:tracker/services/database_helper.dart';
 import 'package:tracker/constants/app_constants.dart';
 
 class StatsScreen extends StatefulWidget {
-  const StatsScreen({super.key});
+  const StatsScreen({super.key, this.tabIndexNotifier});
+
+  final ValueNotifier<int>? tabIndexNotifier;
 
   @override
   State<StatsScreen> createState() => _StatsScreenState();
 }
 
-class _StatsScreenState extends State<StatsScreen> {
+class _StatsScreenState extends State<StatsScreen> with WidgetsBindingObserver {
   late Stream<StepCount> _stepCountStream;
+  StreamSubscription<StepCount>? _stepCountSubscription;
   String _steps = '0';
   String _km = '0.00';
   Timer? _refreshTimer;
@@ -26,15 +29,22 @@ class _StatsScreenState extends State<StatsScreen> {
     super.initState();
     initPlatformState();
     _refreshStats();
-    // Refresh stats periodically
-    _refreshTimer = Timer.periodic(AppConstants.statsRefreshInterval, (timer) {
-      _refreshStats();
-    });
+    
+    WidgetsBinding.instance.addObserver(this);
+    if (widget.tabIndexNotifier != null) {
+      widget.tabIndexNotifier!.addListener(_handleVisibilityChange);
+    }
+    
+    // Initial check
+    _handleVisibilityChange();
   }
 
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _stepCountSubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    widget.tabIndexNotifier?.removeListener(_handleVisibilityChange);
     super.dispose();
   }
 
@@ -126,9 +136,54 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Future<void> initPlatformState() async {
     _stepCountStream = Pedometer.stepCountStream;
-    _stepCountStream.listen(onStepCount).onError(onStepCountError);
+    _stepCountSubscription = _stepCountStream.listen(onStepCount);
+    _stepCountSubscription?.onError(onStepCountError);
 
     if (!mounted) return;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _handleVisibilityChange();
+  }
+
+  void _handleVisibilityChange() {
+    bool isVisible = true;
+
+    // 1. Check App Lifecycle
+    if (WidgetsBinding.instance.lifecycleState != null &&
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      isVisible = false;
+    }
+
+    // 2. Check Tab Index (if provided)
+    // Stats is at index 1
+    if (widget.tabIndexNotifier != null && widget.tabIndexNotifier!.value != 1) {
+      isVisible = false;
+    }
+
+    if (isVisible) {
+      _startTimer();
+    } else {
+      _stopTimer();
+    }
+  }
+
+  void _startTimer() {
+    if (_refreshTimer != null && _refreshTimer!.isActive) return;
+    
+    AppLogger.log('StatsScreen: Resuming visibility (starting timer)');
+    _refreshStats();
+    _refreshTimer = Timer.periodic(AppConstants.statsRefreshInterval, (timer) {
+      _refreshStats();
+    });
+  }
+
+  void _stopTimer() {
+    if (_refreshTimer == null) return;
+    AppLogger.log('StatsScreen: Pausing visibility (stopping timer)');
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
   }
 
   @override

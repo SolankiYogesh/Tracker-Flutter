@@ -30,7 +30,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -95,6 +95,13 @@ class DatabaseHelper {
       // Add collected_at to entities
       await db.execute('ALTER TABLE $entityTable ADD COLUMN collected_at INTEGER');
     }
+    if (oldVersion < 5) {
+      // Version 5: Add indexes for entities
+      await db.execute(
+          'CREATE INDEX idx_entities_location ON $entityTable(latitude, longitude)');
+      await db.execute(
+          'CREATE INDEX idx_entities_collected ON $entityTable(is_collected)');
+    }
   }
 
   Future<void> _createUserStatsTable(Database db) async {
@@ -130,6 +137,14 @@ class DatabaseHelper {
         type_icon_url TEXT,
         type_rarity TEXT
       )
+    ''');
+    
+    // Add indexes for performance (Spatial & Status)
+    await db.execute('''
+      CREATE INDEX idx_entities_location ON $entityTable(latitude, longitude)
+    ''');
+    await db.execute('''
+      CREATE INDEX idx_entities_collected ON $entityTable(is_collected)
     ''');
   }
 

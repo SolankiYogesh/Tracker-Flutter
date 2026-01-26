@@ -14,20 +14,27 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0;
+  final ValueNotifier<int> _tabIndexNotifier = ValueNotifier<int>(0);
 
-  final List<Widget> _screens = [
-    const MapScreen(),
-    const StatsScreen(),
-    const AchievementsScreen(),
-    const LeaderboardScreen(),
-    const SettingsScreen(),
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    _screens = [
+      MapScreen(tabIndexNotifier: _tabIndexNotifier),
+      StatsScreen(tabIndexNotifier: _tabIndexNotifier),
+      const AchievementsScreen(),
+      const LeaderboardScreen(),
+      const SettingsScreen(),
+    ];
     _startTracking();
+  }
+
+  @override
+  void dispose() {
+    _tabIndexNotifier.dispose();
+    super.dispose();
   }
 
   Future<void> _startTracking() async {
@@ -37,25 +44,40 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            _currentIndex = index;
-          });
+      body: ValueListenableBuilder<int>(
+        valueListenable: _tabIndexNotifier,
+        builder: (context, index, child) {
+          return IndexedStack(
+            index: index,
+            children: _screens,
+          );
         },
-        selectedIndex: _currentIndex,
-        destinations: const <Widget>[
-          NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
-          NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
-          NavigationDestination(
-            icon: Icon(Icons.emoji_events),
-            label: 'Awards',
-          ),
-          NavigationDestination(icon: Icon(Icons.leaderboard), label: 'Ranks'),
-          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
+      ),
+      bottomNavigationBar: ValueListenableBuilder<int>(
+        valueListenable: _tabIndexNotifier,
+        builder: (context, index, child) {
+          return NavigationBar(
+            onDestinationSelected: (int newIndex) {
+              _tabIndexNotifier.value = newIndex;
+            },
+            selectedIndex: index,
+            destinations: const <Widget>[
+              NavigationDestination(icon: Icon(Icons.map), label: 'Map'),
+              NavigationDestination(icon: Icon(Icons.bar_chart), label: 'Stats'),
+              NavigationDestination(
+                icon: Icon(Icons.emoji_events),
+                label: 'Awards',
+              ),
+              NavigationDestination(icon: Icon(Icons.leaderboard), label: 'Ranks'),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
+

@@ -9,7 +9,7 @@ class AppConstants {
   /// Effect: Increasing this value reduces frequent network calls but delays
   /// data availability on the server. Decreasing it improves real-time sync
   /// but may consume more battery and data.
-  static const Duration locationSyncInterval = Duration(seconds: 45);
+  static const Duration locationSyncInterval = Duration(seconds: 50);
 
   /// Number of decimal places to use when storing or displaying latitude/longitude.
   ///
@@ -42,13 +42,13 @@ class AppConstants {
   /// Effect: Controls how strictly the UI follows the database updates.
   /// A shorter duration makes the path appear more "live" but consumes more CPU
   /// for redrawing the map.
-  static const Duration mapRefreshInterval = Duration(seconds: 5);
+  static const Duration mapRefreshInterval = Duration(seconds: 10);
 
   /// Interval for fetching and refreshing "Nearby Users" on the map.
   ///
   /// Usage: Used in `MapScreen.initState` for the `_nearbyTimer`.
   /// Effect: Determines how often we check for other users.
-  static const Duration nearbyUsersRefreshInterval = Duration(seconds: 45);
+  static const Duration nearbyUsersRefreshInterval = Duration(seconds: 50);
 
   /// Maximum distance (in meters) between two points to consider them part of the same segment.
   ///
@@ -61,8 +61,8 @@ class AppConstants {
   ///
   /// Usage: Used in `MapScreen._makeSmooth` (Catmull-Rom spline calculation).
   /// Effect: Higher values result in smoother, curvier lines but increase the number
-  /// of points the map has to render, potentially impacting performance.
-  static const int splineSegmentSubdivisions = 10;
+  /// of points the map has to render. Reduced to 4 for battery optimization.
+  static const int splineSegmentSubdivisions = 4;
 
   /// The time window (in hours) for displaying location history on the map.
   ///
@@ -100,7 +100,7 @@ class AppConstants {
   ///
   /// Usage: Used in `EntityProvider.startPeriodicFetch`.
   /// Effect: Controls how often the app checks for new items around the user.
-  static const Duration entityFetchInterval = Duration(seconds: 45);
+  static const Duration entityFetchInterval = Duration(seconds: 50);
 
   /// Maximum number of users to fetch for the leaderboard.
   ///
@@ -209,4 +209,21 @@ class AppConstants {
   /// Effect: Ensures we don't record tiny movements too frequently, but allows
   /// capturing detail (`minSignificantDistance`) if this much time has passed.
   static const int minSignificantTime = 5;
+
+  // ===========================================================================
+  // BACKGROUND SERVICE CONFIGURATION
+  // ===========================================================================
+
+  /// The interval between location updates when the app is in the background.
+  ///
+  /// Usage: Used in `main.dart` (BackgroundLocationTrackerConfig).
+  /// Effect: Higher values save more battery but reduce path resolution.
+  /// 8s is a sweet spot for walking/running.
+  static const Duration backgroundTrackingInterval = Duration(seconds: 8);
+
+  /// The minimum distance the device must move to trigger a background update.
+  ///
+  /// Usage: Used in `main.dart` (BackgroundLocationTrackerConfig).
+  /// Effect: Prevents updates when stationary, saving battery.
+  static const double backgroundDistanceFilter = 8.0;
 }
