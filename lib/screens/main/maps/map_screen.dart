@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tracker/utils/responsive_utils.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:tracker/providers/theme_provider.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import 'package:provider/provider.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -352,17 +353,17 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                     : const ['a', 'b', 'c'],
                 userAgentPackageName: 'in.timetrix.geopulsify',
               ),
-              PolylineLayer(
-                polylines: _polylines
-                    .map(
-                      (points) => Polyline(
-                        points: points,
-                        strokeWidth: 4.0,
-                        color: Colors.lightBlue,
-                      ),
-                    )
-                    .toList(),
-              ),
+                  PolylineLayer(
+                    polylines: _polylines
+                        .map(
+                          (points) => Polyline(
+                            points: points,
+                            strokeWidth: 4.0,
+                            color: context.watch<ThemeProvider>().polylineColor,
+                          ),
+                        )
+                        .toList(),
+                  ),
               // Nearby Entities Markers
               MarkerLayer(
                 markers: entities

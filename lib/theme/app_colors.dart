@@ -40,4 +40,23 @@ class AppColors {
   // Glassmorphism Helpers
   static Color lightGlass(double opacity) => Colors.white.withValues(alpha: opacity);
   static Color darkGlass(double opacity) => const Color(0xFF0F172A).withValues(alpha: opacity);
+
+  // Polyline Colors Palette (15 Vibrant Options)
+  static const List<Color> polylineColors = [
+    Color(0xFF6366F1), // Indigo (Default)
+    Color(0xFFEF4444), // Red
+    Color(0xFFF97316), // Orange
+    Color(0xFFF59E0B), // Amber
+    Color(0xFFEAB308), // Yellow
+    Color(0xFF84CC16), // Lime
+    Color(0xFF10B981), // Emerald
+    Color(0xFF06B6D4), // Cyan
+    Color(0xFF0EA5E9), // Sky
+    Color(0xFF3B82F6), // Blue
+    Color(0xFF8B5CF6), // Violet
+    Color(0xFFA855F7), // Purple
+    Color(0xFFD946EF), // Fuchsia
+    Color(0xFFEC4899), // Pink
+    Color(0xFFF43F5E), // Rose
+  ];
 }

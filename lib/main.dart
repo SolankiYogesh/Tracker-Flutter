@@ -72,6 +72,7 @@ Future<void> main() async {
     ),
   );
   final isDarkTheme = await DatabaseHelper().getIsDarkTheme();
+  final polylineColor = await DatabaseHelper().getPolylineColor();
   runApp(
     CacheProvider(
       cache: queryCache,
@@ -84,7 +85,10 @@ Future<void> main() async {
             ),
           ),
           ChangeNotifierProvider<ThemeProvider>(
-            create: (_) => ThemeProvider(initialIsDark: isDarkTheme),
+            create: (_) => ThemeProvider(
+              initialIsDark: isDarkTheme,
+              initialPolylineColor: polylineColor,
+            ),
           ),
           ChangeNotifierProvider<EntityProvider>(
             create: (_) => EntityProvider(),

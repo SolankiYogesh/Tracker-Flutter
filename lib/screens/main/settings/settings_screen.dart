@@ -128,6 +128,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onTap: () => changeTheme(context),
                           leadingIcon: Icons.dark_mode,
                         ),
+                        Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: .3),
+                          indent: context.w(64),
+                        ),
+                        SettingItem(
+                          title: 'Route Color',
+                          subtitle: 'Customize map path color',
+                          trailing: Container(
+                            width: context.w(24),
+                            height: context.w(24),
+                            decoration: BoxDecoration(
+                              color: context.watch<ThemeProvider>().polylineColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Theme.of(context).dividerColor,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          onTap: () => _showColorPicker(context),
+                          leadingIcon: Icons.color_lens,
+                        ),
                         // Divider(
                         //   height: 1,
                         //   thickness: 0.5,
@@ -406,6 +432,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showColorPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(context.w(20)),
+          ),
+        ),
+        padding: EdgeInsets.all(context.w(20)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Route Color',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            SizedBox(height: context.h(20)),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                mainAxisSpacing: context.w(16),
+                crossAxisSpacing: context.w(16),
+              ),
+              itemCount: AppColors.polylineColors.length,
+              itemBuilder: (context, index) {
+                final color = AppColors.polylineColors[index];
+                final isSelected =
+                    context.watch<ThemeProvider>().polylineColor.value ==
+                        color.value;
+
+                return GestureDetector(
+                  onTap: () {
+                    context.read<ThemeProvider>().setPolylineColor(color);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? Theme.of(context).textTheme.bodyMedium!.color!
+                            : Colors.transparent,
+                        width: isSelected ? 3 : 0,
+                      ),
+                      boxShadow: [
+                        if (isSelected)
+                          BoxShadow(
+                            color: color.withValues(alpha: 0.4),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                      ],
+                    ),
+                    child: isSelected
+                        ? Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: context.w(20),
+                          )
+                        : null,
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: context.h(20)),
           ],
         ),
       ),

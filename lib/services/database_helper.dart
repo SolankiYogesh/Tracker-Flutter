@@ -30,7 +30,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -63,7 +63,8 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE $settingTable(
         id INTEGER PRIMARY KEY,
-        isDark INTEGER
+        isDark INTEGER,
+        polylineColor INTEGER DEFAULT 4284704497
       )
     ''');
 
@@ -81,7 +82,11 @@ class DatabaseHelper {
     await _createEntityTable(db);
     await _createUserStatsTable(db);
     
-    await db.insert(settingTable, {'id': 1, 'isDark': 1});
+    await db.insert(settingTable, {
+      'id': 1,
+      'isDark': 1,
+      'polylineColor': 0xFF6366F1, // Default Indigo
+    });
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -101,6 +106,11 @@ class DatabaseHelper {
           'CREATE INDEX idx_entities_location ON $entityTable(latitude, longitude)');
       await db.execute(
           'CREATE INDEX idx_entities_collected ON $entityTable(is_collected)');
+    }
+    if (oldVersion < 6) {
+      // Version 6: Add colored polyline support
+      await db.execute(
+          'ALTER TABLE $settingTable ADD COLUMN polylineColor INTEGER DEFAULT 4284704497'); // 0xFF6366F1
     }
   }
 
@@ -193,6 +203,31 @@ class DatabaseHelper {
       return result.first['isDark'] == 1;
     }
     return false;
+  }
+  
+  Future<int> getPolylineColor() async {
+    final db = await database;
+    final result = await db.query(
+      settingTable,
+      where: 'id = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty && result.first['polylineColor'] != null) {
+      return result.first['polylineColor'] as int;
+    }
+    return 0xFF6366F1; // Default
+  }
+
+  Future<void> setPolylineColor(int color) async {
+    final db = await database;
+    await db.update(
+      settingTable,
+      {'polylineColor': color},
+      where: 'id = ?',
+      whereArgs: [1],
+    );
   }
 
   Future<void> setIsDarkTheme(bool isDark) async {
