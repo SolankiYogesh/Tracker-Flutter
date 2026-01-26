@@ -250,8 +250,19 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final entities = context.watch<EntityProvider>().nearbyEntities;
+    final allEntities = context.watch<EntityProvider>().nearbyEntities;
     final userId = context.watch<AuthServiceProvider>().userId;
+
+    final entities = (_currentLocation == null)
+        ? <model.Entity>[]
+        : allEntities.where((e) {
+            final dist = const Distance().as(
+              LengthUnit.Meter,
+              _currentLocation!,
+              LatLng(e.latitude, e.longitude),
+            );
+            return dist <= AppConstants.entityVisibilityRadius;
+          }).toList();
 
     return Scaffold(
       body: Stack(

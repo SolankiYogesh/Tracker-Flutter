@@ -108,6 +108,13 @@ class AppConstants {
   /// Effect: Limits the size of the leaderboard list to manage UI performance and data usage.
   static const int leaderboardLimit = 50;
 
+  /// Radius (in meters) within which entities are visible on the map around the user.
+  ///
+  /// Usage: Used in `MapScreen` to filter entities.
+  /// Effect: Entities outside this radius will be hidden to prevent clutter
+  /// and improve performance.
+  static const double entityVisibilityRadius = 3000.0;
+
   // ===========================================================================
   // NOTIFICATION CONFIGURATION
   // ===========================================================================
