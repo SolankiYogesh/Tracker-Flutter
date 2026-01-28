@@ -11,6 +11,8 @@
 -   **🚀 Background Tracking**: High-accuracy location tracking even when the app is in the background or the device is locked.
 -   **🗺️ Interactive Map**: Real-time map visualization with smoothed path rendering (Catmull-Rom Splines) and intelligent segmenting.
 -   **🎒 Entity Collection**: Discover and collect virtual items scattered across the map as you move.
+-   **👤 Profile Management**: Edit your profile (Username, Bio, Socials) and view others' details on the map.
+-   **🔗 Social Integration**: Connect your social media accounts that near by users can see when they checkout your profile.
 -   **📊 Activity Stats**: Precise step counting (with reboot resilience) and GPS-denoised distance calculation.
 -   **🌙 Dynamic Theming**: Beautiful Dark and Light modes with persistent user preferences.
 -   **☁️ Cloud Sync**: Automatic background synchronization of local data to the server when internet is available.
@@ -24,7 +26,7 @@
 -   **Database**: SQLite (`sqflite`) for local persistence
 -   **Auth**: Firebase (Google & Apple Sign-In)
 -   **Networking**: `dio` with remote API batch synchronization
--   **Services**: `background_location_tracker`, `pedometer`, `flutter_local_notifications`
+-   **Services**: `background_location_tracker`, `pedometer`, `flutter_local_notifications`, `url_launcher`
 
 ## 📖 Documentation
 

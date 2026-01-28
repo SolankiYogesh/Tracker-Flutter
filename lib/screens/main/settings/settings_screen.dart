@@ -110,7 +110,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: context.h(8)),
-                    if (user != null) SettingProfileCard(user: user),
+                    if (user != null) 
+                      SettingProfileCard(
+                        user: user,
+                        onEdit: () => Navigator.pushNamed(context, AppRouter.editProfile),
+                      ),
 
                     // Preferences Section
                     SettingSection(

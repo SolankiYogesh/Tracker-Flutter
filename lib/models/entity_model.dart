@@ -212,6 +212,7 @@ class LeaderboardEntry {
   LeaderboardEntry({
     required this.userId,
     this.name,
+    this.username,
     this.picture,
     required this.totalXp,
     required this.currentLevel,
@@ -224,6 +225,7 @@ class LeaderboardEntry {
     return LeaderboardEntry(
       userId: json['user_id'] as String,
       name: json['name'] as String?,
+      username: json['username'] as String?,
       picture: json['picture'] as String?,
       totalXp: json['total_xp'] as int,
       currentLevel: json['current_level'] as int,
@@ -236,6 +238,7 @@ class LeaderboardEntry {
   }
   final String userId;
   final String? name;
+  final String? username;
   final String? picture;
   final int totalXp;
   final int currentLevel;

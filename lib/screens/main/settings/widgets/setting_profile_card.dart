@@ -26,8 +26,14 @@ String _formatDate(DateTime? date) {
 }
 
 class SettingProfileCard extends StatelessWidget {
-  const SettingProfileCard({super.key, required this.user});
+  const SettingProfileCard({
+    super.key,
+    required this.user,
+    this.onEdit,
+  });
+
   final UserResponse user;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +137,22 @@ class SettingProfileCard extends StatelessWidget {
               ],
             ),
           ),
-          // Icon(Icons.edit, color: AppColors.primary, size: context.w(20)),
+          if (onEdit != null)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onEdit,
+                borderRadius: BorderRadius.circular(context.w(20)),
+                child: Padding(
+                  padding: EdgeInsets.all(context.w(8)),
+                  child: Icon(
+                    Icons.edit, 
+                    color: AppColors.primary, 
+                    size: context.w(24)
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

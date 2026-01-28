@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tracker/models/user_create.dart';
 import 'package:tracker/models/user_response.dart';
+import 'package:tracker/models/user_update.dart';
 import 'package:tracker/network/repositories/auth_repository.dart';
 import 'package:tracker/network/repositories/user_repository.dart';
 import 'package:tracker/services/database_helper.dart';
@@ -68,5 +69,17 @@ class AuthServiceProvider extends ChangeNotifier {
     appUser = response;
     await DatabaseHelper().saveUser(response);
     notifyListeners();
+  }
+
+  Future<void> updateUserProfile(UserUpdate update) async {
+    if (appUser == null) return;
+    try {
+      final response = await userRepo.updateUser(appUser!.id, update);
+      appUser = response;
+      await DatabaseHelper().saveUser(response);
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

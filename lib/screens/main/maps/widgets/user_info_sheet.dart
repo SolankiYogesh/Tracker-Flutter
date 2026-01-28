@@ -2,8 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:tracker/models/nearby_user.dart';
 import 'package:tracker/utils/responsive_utils.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserInfoSheet extends StatelessWidget {
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+       // Silently fail or log if needed, user experience won't be broken by a crash
+       debugPrint('Could not launch $url');
+    }
+  }
+
+  Widget _buildSocialIcon(BuildContext context, IconData icon, Color color, String url) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: context.w(12)),
+      child: InkWell(
+        onTap: () => _launchUrl(url),
+        borderRadius: BorderRadius.circular(context.w(50)),
+        child: Container(
+          padding: EdgeInsets.all(context.w(10)),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: FaIcon(icon, size: context.w(24), color: color),
+        ),
+      ),
+    );
+  }
 
   const UserInfoSheet({
     super.key,
@@ -66,9 +94,16 @@ class UserInfoSheet extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontSize: context.sp(22),
               fontWeight: FontWeight.bold,
-              letterSpacing: -0.2,
             ),
           ),
+          if (user.username != null)
+            Text(
+              '@${user.username}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: context.sp(16),
+                color: Colors.grey,
+              ),
+            ),
           SizedBox(height: context.h(12)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -126,7 +161,46 @@ class UserInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: context.h(32)),
+
+          SizedBox(height: context.h(24)),
+          
+          if (user.socialMediaLinks != null && user.socialMediaLinks!.isNotEmpty) ...[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (user.socialMediaLinks!.containsKey('instagram'))
+                    _buildSocialIcon(
+                        context,
+                        FontAwesomeIcons.instagram,
+                        Colors.pink,
+                        user.socialMediaLinks!['instagram']!),
+                  if (user.socialMediaLinks!.containsKey('youtube'))
+                    _buildSocialIcon(
+                        context,
+                        FontAwesomeIcons.youtube,
+                        Colors.red,
+                        user.socialMediaLinks!['youtube']!),
+                  if (user.socialMediaLinks!.containsKey('facebook'))
+                    _buildSocialIcon(
+                        context,
+                        FontAwesomeIcons.facebook,
+                        Colors.blue.shade800,
+                        user.socialMediaLinks!['facebook']!),
+                  if (user.socialMediaLinks!.containsKey('snapchat'))
+                    _buildSocialIcon(
+                        context,
+                        FontAwesomeIcons.snapchat,
+                        Colors.yellow.shade800,
+                        user.socialMediaLinks!['snapchat']!),
+                ],
+              ),
+            ),
+             SizedBox(height: context.h(24)),
+          ],
+
+          SizedBox(height: context.h(8)),
           SizedBox(
             width: double.infinity,
             height: context.h(56),

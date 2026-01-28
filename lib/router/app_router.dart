@@ -7,6 +7,8 @@ import 'package:tracker/services/auth/auth_gate.dart';
 import 'package:tracker/screens/main/permissions/permission_screen.dart';
 import 'package:tracker/router/main_navigation_screen.dart';
 
+import 'package:tracker/screens/main/settings/edit_profile_screen.dart';
+
 class AppRouter {
   static const String root = '/';
   static const String permissions = '/permissions';
@@ -15,6 +17,7 @@ class AppRouter {
   static const String about = '/about';
   static const String dataStorage = '/data-storage';
   static const String privacySecurity = '/privacy-security';
+  static const String editProfile = '/edit-profile';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -32,6 +35,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const DataStorageScreen());
       case privacySecurity:
         return MaterialPageRoute(builder: (_) => const PrivacySecurityScreen());
+      case editProfile:
+        return MaterialPageRoute(builder: (_) => const EditProfileScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

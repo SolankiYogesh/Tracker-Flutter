@@ -79,6 +79,15 @@ lib/
     -   **Persistence**: User profile is cached in the `app_user` SQLite table for offline availability.
     -   **Guard**: `AuthGate` prevents access to main screens until authenticated *and* permissions are granted.
 
+### 2. User Profile & Settings
+-   **Edit Profile**:
+    -   Implemented in `EditProfileScreen`.
+    -   Allows updating `username`, `phone_number`, `gender`, `birthdate`, and `social_media_links`.
+    -   Includes validation for unique usernames (handled via 409 Conflict) and phone number formatting.
+-   **Social Integration**:
+    -   `UserInfoSheet` displays social icons (Instagram, YouTube, etc.) for nearby users.
+    -   Uses `url_launcher` to open external profile links.
+
 ### 2. Permissions System
 -   **Flow**: Regulated by `PermissionScreen`.
 -   **Requirements**: Location (When In Use), Location (Always), Activity Recognition (Android), Notifications.

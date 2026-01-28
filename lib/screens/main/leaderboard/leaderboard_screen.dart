@@ -154,6 +154,15 @@ class LeaderboardScreen extends StatelessWidget {
             fontSize: context.sp(14),
           ),
         ),
+        if (entry.username != null)
+          Text(
+            '@${entry.username}',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: context.sp(10),
+              color: Colors.grey,
+            ),
+          ),
         Text(
           '${entry.totalXp} XP',
           style: TextStyle(fontSize: context.sp(12), color: Colors.grey),
@@ -208,12 +217,26 @@ class LeaderboardScreen extends StatelessWidget {
             ),
           ),
         ),
-        title: Text(
-          entry.name ?? 'Unknown',
-          style: TextStyle(
-            fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
-            fontSize: context.sp(16),
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              entry.name ?? 'Unknown',
+              style: TextStyle(
+                fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
+                fontSize: context.sp(16),
+              ),
+            ),
+            if (entry.username != null)
+              Text(
+                '@${entry.username}',
+                style: TextStyle(
+                  fontSize: context.sp(12),
+                  color: Colors.grey,
+                ),
+              ),
+          ],
         ),
         subtitle: Text(
           'Level ${entry.currentLevel} • ${entry.entitiesCollected} Items',
