@@ -10,7 +10,7 @@
 
 -   **🚀 Background Tracking**: High-accuracy location tracking even when the app is in the background or the device is locked.
 -   **🗺️ Interactive Map**: Real-time map visualization with smoothed path rendering (Catmull-Rom Splines) and intelligent segmenting.
--   **🎒 Entity Collection**: Discover and collect virtual items scattered across the map as you move.
+-   **🎒 Entity Collection**: Discover and collect virtual items scattered across the map as you move, with unique visuals and sizes based on rarity.
 -   **👤 Profile Management**: Edit your profile (Username, Bio, Socials) and view others' details on the map.
 -   **🔗 Social Integration**: Connect your social media accounts that near by users can see when they checkout your profile.
 -   **📊 Activity Stats**: Precise step counting (with reboot resilience) and GPS-denoised distance calculation.

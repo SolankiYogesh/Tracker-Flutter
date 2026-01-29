@@ -13,26 +13,24 @@ class EntityMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          entity.entityType?.iconUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: entity.entityType!.iconUrl!,
-                  width: context.w(50),
-                  height: context.w(50),
-                  errorWidget: (c, e, s) => Icon(
-                    Icons.extension,
-                    color: Colors.purple,
-                    size: context.w(40),
-                  ),
-                )
-              : Icon(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: entity.entityType?.iconUrl != null
+            ? CachedNetworkImage(
+                imageUrl: entity.entityType!.iconUrl!,
+                width: 60, // Use a base reference size, FittedBox will scale it
+                height: 60,
+                errorWidget: (c, e, s) => const Icon(
                   Icons.extension,
                   color: Colors.purple,
-                  size: context.w(40),
+                  size: 50,
                 ),
-        ],
+              )
+            : const Icon(
+                Icons.extension,
+                color: Colors.purple,
+                size: 50,
+              ),
       ),
     );
   }

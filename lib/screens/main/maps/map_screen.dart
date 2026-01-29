@@ -370,8 +370,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                     .map(
                       (entity) => Marker(
                         point: LatLng(entity.latitude, entity.longitude),
-                        width: context.w(50),
-                        height: context.w(50),
+                        width: context.w(entity.entityType?.displaySize.toDouble() ?? 30.0),
+                        height: context.w(entity.entityType?.displaySize.toDouble() ?? 30.0),
                         child: EntityMarker(
                           entity: entity,
                           onTap: () => _showEntityInfo(entity),

@@ -211,6 +211,7 @@ class EntityProvider extends ChangeNotifier {
           iconUrl: row['type_icon_url'] as String?,
           rarity: (row['type_rarity'] as String?) ?? 'common',
           baseXpValue: row['xp_value'] as int,
+          displaySize: (row['type_display_size'] as int?) ?? 30,
           isActive: true,
         );
 

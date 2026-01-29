@@ -124,7 +124,7 @@ lib/
     -   **Segmentation**: Breaks lines if distance > 100m (gap detection).
 -   **Markers**:
     -   **User**: `UserLocationMarker` with bearing.
-    -   **Entities**: Interactive icons for collectibles.
+    -   **Entities**: Interactive icons for collectibles, sized dynamically based on rarity (Common: 30, Rare: 40, Epic: 50, Legendary: 60).
     -   **Nearby Users**: Polled every 30s via `ApiQueries.fetchNearbyUsers`, displaying other players on the map.
 
 ### 6. Gamification Screens
@@ -156,7 +156,7 @@ The `DatabaseHelper` manages `location_tracker.db` (Version 4).
 
 3.  **`entities`**
     -   Cache of game items around the user.
-    -   Columns: `id`, `entity_type_id`, `latitude`, `longitude`, `spawn_radius`, `xp_value`, `is_collected`, `collected_at`, `type_name`, `type_icon_url`, `type_rarity`.
+    -   Columns: `id`, `entity_type_id`, `latitude`, `longitude`, `spawn_radius`, `xp_value`, `is_collected`, `collected_at`, `type_name`, `type_icon_url`, `type_rarity`, `type_display_size`.
 
 4.  **`user_stats`**
     -   Persistent counter for steps preventing reset on app restart.

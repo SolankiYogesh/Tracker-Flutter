@@ -10,6 +10,7 @@ class EntityType {
     this.category,
     required this.baseXpValue,
     required this.rarity,
+    required this.displaySize,
     required this.isActive,
   });
 
@@ -22,6 +23,7 @@ class EntityType {
       category: json['category'] as String?,
       baseXpValue: json['base_xp_value'] as int,
       rarity: json['rarity'] as String,
+      displaySize: json['display_size'] != null ? json['display_size'] as int : 30,
       isActive: (json['is_active'] as bool?) ?? true,
     );
   }
@@ -32,6 +34,7 @@ class EntityType {
   final String? category;
   final int baseXpValue;
   final String rarity;
+  final int displaySize;
   final bool isActive;
 
   Map<String, dynamic> toJson() {
@@ -43,6 +46,7 @@ class EntityType {
       'category': category,
       'base_xp_value': baseXpValue,
       'rarity': rarity,
+      'display_size': displaySize,
       'is_active': isActive,
     };
   }
@@ -95,6 +99,7 @@ class Entity {
         name: (map['type_name'] as String?) ?? 'Unknown',
         iconUrl: map['type_icon_url'] as String?,
         rarity: (map['type_rarity'] as String?) ?? 'common',
+        displaySize: (map['type_display_size'] as int?) ?? 30,
         baseXpValue: map['xp_value'] as int, // Fallback
         isActive: true,
       ),
@@ -125,6 +130,7 @@ class Entity {
       'type_name': entityType?.name,
       'type_icon_url': entityType?.iconUrl,
       'type_rarity': entityType?.rarity,
+      'type_display_size': entityType?.displaySize,
     };
   }
 }

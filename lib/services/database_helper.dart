@@ -30,7 +30,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'location_tracker.db');
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -112,6 +112,11 @@ class DatabaseHelper {
       await db.execute(
           'ALTER TABLE $settingTable ADD COLUMN polylineColor INTEGER DEFAULT 4284704497'); // 0xFF6366F1
     }
+    if (oldVersion < 7) {
+      // Version 7: Add entity display size support
+      await db.execute(
+          'ALTER TABLE $entityTable ADD COLUMN type_display_size INTEGER DEFAULT 30');
+    }
   }
 
   Future<void> _createUserStatsTable(Database db) async {
@@ -145,7 +150,8 @@ class DatabaseHelper {
         collected_at INTEGER,
         type_name TEXT,
         type_icon_url TEXT,
-        type_rarity TEXT
+        type_rarity TEXT,
+        type_display_size INTEGER DEFAULT 30
       )
     ''');
     
