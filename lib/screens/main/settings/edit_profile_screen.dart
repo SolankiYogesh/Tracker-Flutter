@@ -80,6 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedBirthdate ?? DateTime.now(),
@@ -88,9 +89,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
-            ),
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: AppColors.primary,
+                    onPrimary: Colors.white,
+                    surface: AppColors.darkSurface,
+                    onSurface: AppColors.darkTextPrimary,
+                  )
+                : const ColorScheme.light(
+                    primary: AppColors.primary,
+                    onPrimary: Colors.white,
+                    surface: AppColors.lightSurface,
+                    onSurface: AppColors.lightTextPrimary,
+                  ),
+            dialogBackgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
           ),
           child: child!,
         );
@@ -254,6 +266,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: CountryCodePicker(
+                      textStyle: TextStyle(
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        fontSize: 16,
+                      ),
+                      dialogTextStyle: TextStyle(
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                        fontSize: 16,
+                      ),
+                      searchStyle: TextStyle(
+                         color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                         fontSize: 16,
+                      ),
+                      dialogBackgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                      barrierColor: Colors.black.withValues(alpha: 0.5),
+                      searchDecoration: _inputDecoration('Search country'),
+                      boxDecoration: BoxDecoration(
+                        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      closeIcon: Icon(
+                        Icons.close, 
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary
+                      ),
                       onChanged: (code) => _countryCode = code.dialCode ?? '+1',
                       initialSelection: _countryCode,
                       favorite: const ['US', 'IN', 'GB'],
